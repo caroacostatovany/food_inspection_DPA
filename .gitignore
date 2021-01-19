@@ -1,1 +1,5 @@
+notebooks/eda/.ipynb_checkpoints/
+.idea/
+data/Food_Inspections_january_15.csv
+venv/
 conf/local
