@@ -16,33 +16,33 @@ Los colaboradores en este proyecto somos:
 # Base de datos
 La base de datos que se analizará en este trabajo será la de [Chicago food inspection](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5)
 
-También se puede encontrar en nuestro [_Kaggle_](https://www.kaggle.com/carotovany/food-inspections), de acuerdo a la frecuencia de actualización del procuto de datos, que será semanal.
+También se puede encontrar en nuestro [_Kaggle_](https://www.kaggle.com/carotovany/food-inspections), de acuerdo a la frecuencia de actualización del producto de datos, que será semanal.
 
 ### Resumen
 
-- Al día 15 de enero contamos con 215,067 registros
+- Al día 15 de enero del 2021 contamos con 215,067 registros
 
 #### Columnas
 
-| Nombre de la columna | Tipo de variable | Registros únicos |
-|----------------------|------------------|------------------|
-|Inspection ID | numérico | 215,067 |
-|DBA Name| texto | 28,748|
-|AKA Name| texto | 27,356 |
-|License #| numérico | 39,103 |
-|Facility Type| categórico (texto) | 501 |
-|Risk| categórico (numérico-texto) | 5 |
-|Address| texto | 18,522 |
-|City| categórico(texto)? | 71 |
-|State| categórico(texto)? | 5 |
-|Zip| numérico | 112 |
-|Inspection Date| fecha | 2,796 |
-|Inspection Type| categórico (texto)| 111 |
-|Results* | categórico(texto) | 7 |
-|Violations| texto | 156,639 |
-|Latitude| numérico | 17,246  |
-|Longitude| numérico | 17,246 |
-|Location| vector numérico | 17,247 |
+| Nombre de la columna | Descripción | Tipo de variable | Registros únicos (15 enero) |
+|----------------------|--------------|-----------------|------------------|
+|Inspection ID | ID de la inspección realizada|texto | 215,067 |
+|DBA Name| Nombre del establecimiento |texto | 28,748|
+|AKA Name| (As known as) Nombre común del establecimiento |texto | 27,356 |
+|License #| Número de la licencia del inspector |texto | 39,103 |
+|Facility Type| Tipo de establecimiento |categórico (texto) | 501 |
+|Risk| Tipo de Riesgo |categórico (numérico-texto) | 5 |
+|Address| Dirección del establecimiento |texto | 18,522 |
+|City| Ciudad en la que se encuentra el establecimiento |categórico(texto) | 71 |
+|State| Estado en el que se encuentra el establecimiento |categrico(texto) | 5 |
+|Zip| Código Postal del establecimiento |categorico(numérico) | 112 |
+|Inspection Date| Fecha en la que se realizó la inspección |fecha | 2,796 |
+|Inspection Type| Tipo de inspección que se realizó |categórico (texto)| 111 |
+|Results* | Resultado de la inspección |categórico(texto) | 7 |
+|Violations| Violaciones que ha realizado el establecimiento |texto | 156,639 |
+|Latitude| Latitud |numérico | 17,246  |
+|Longitude| Longitud |numérico | 17,246 |
+|Location| Latitud y longitud |vector numérico | 17,247 |
 
 *Variable target. 
 
@@ -50,6 +50,8 @@ También se puede encontrar en nuestro [_Kaggle_](https://www.kaggle.com/carotov
 
 La frecuencia de actualización de los datos en la base de datos original es diaria, la del producto de datos para este proyecto será semanal.
 
-### Lenguaje de programación
+# Lenguaje de programación
 
 Python 3.7.4
+
+Se agregó un archivo `.python-version` que indica que nuestro ambiente virtual se llama `food-inspection`.
