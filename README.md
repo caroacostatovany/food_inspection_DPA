@@ -55,3 +55,12 @@ La frecuencia de actualización de los datos en la base de datos original es dia
 Python 3.7.4
 
 Se agregó un archivo `.python-version` que indica que nuestro ambiente virtual se llama `food-inspection`.
+
+# Ejecucion
+
+### De Notebook
+
+1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`
+2. En tu ambiente virtual, instala los `requirements.txt` : `pip install -r requirements.txt`
+3. En la terminal, posiciónate en la raíz del repositorio y ejecuta `export PYTHONPATH= $PWD`
+4. Y ahora ejecuta `jupyter notebook`

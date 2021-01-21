@@ -1,5 +1,6 @@
 notebooks/eda/.ipynb_checkpoints/
 .idea/
-data/Food_Inspections_january_15.csv
+data/*.csv
 venv/
 conf/local
+*.pyc
