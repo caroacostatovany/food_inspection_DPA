@@ -2,5 +2,5 @@ notebooks/eda/.ipynb_checkpoints/
 .idea/
 data/*.csv
 venv/
-conf/local
+conf/local/**
 *.pyc
