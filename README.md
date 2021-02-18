@@ -56,11 +56,22 @@ Python 3.7.4
 
 Se agregó un archivo `.python-version` que indica que nuestro ambiente virtual se llama `food-inspection`.
 
-# Ejecucion
+# EDA
+Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ruta:
 
-### De Notebook
++ `notebooks/eda/EDA_GEDA.ipynb`
+
+# Ejecución
+
+1. Crea un ambiente virtual llamado `food-inspection` , actívalo e instala los `requirements.txt` con el siguiente comando:
+> `pip install -r requirements.txt`
+
+2. En la terminal, posiciónate en la raíz del repositorio y ejecuta:
+>  `export PYTHONPATH=$PWD`
+
+### De Notebooks
 
 1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`
-2. En tu ambiente virtual, instala los `requirements.txt` : `pip install -r requirements.txt`
-3. En la terminal, posiciónate en la raíz del repositorio y ejecuta `export PYTHONPATH= $PWD`
-4. Y ahora ejecuta `jupyter notebook`
+2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
+> `jupyter notebook`
+
