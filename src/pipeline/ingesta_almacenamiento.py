@@ -20,7 +20,7 @@ def get_client():
 
     return cliente
 
-def ingesta_inicial(cliente,limite):
+def ingesta_inicial(cliente,limite=1000):
     """
     Obtener la lista de los elementos que la API generó por medio del cliente
     Inputs:
@@ -58,3 +58,19 @@ def guardar_ingesta(bucket_name, file_to_upload, data_pkl, credenciales):
     """
     s3 = get_s3_resource(credenciales)
     s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=data_pkl)
+
+def ingesta_consecutiva(cliente, fecha, limite):
+    """
+    Obtener los datos posteriores a la fecha indicada
+    Inputs:
+    cleinte(s3): cliente del servicio s3 para conectarse al bucket
+    fecha(string): fecha en formato 'Year-month-dayThora', ejemplo: '2021-01-19T00:00:00.000'
+    Outputs:
+    data_filter(json): datos filtrados por la fecha
+    """
+
+    data = ingesta_inicial(cliente, limite)
+
+    data_filter = [x for x in data if x['inspection_date'] >= fecha]
+
+    return data_filter
