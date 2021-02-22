@@ -31,7 +31,9 @@ def ingesta_inicial(cliente,limite=1000):
     """
 
     results = cliente.get("4ijn-s7e5", limit=limite)
-    return results
+    pickle_dump = pickle.dumps(results)
+    
+    return pickle_dump
 
 def get_s3_resource(credenciales):
     """
