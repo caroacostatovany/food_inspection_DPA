@@ -85,7 +85,7 @@ Si quieres acceder a diferentes buckets con otras credenciales se deberán cambi
     cliente=get_client()
     
     # Hacemos la ingesta inicial
-    ingesta_inicial(cliente) # El límite esta por default a 1000, en dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
+    ingesta_inicial(cliente) # El límite esta por default a 300,000, en dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
 
 #### Ejemplo de script para ingesta consecutiva:
 
