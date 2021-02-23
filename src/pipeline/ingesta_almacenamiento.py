@@ -4,10 +4,10 @@ Módulo de funciones para ingesta y almacenamiento
 import boto3
 import pickle
 
-from datetime import date
+from datetime import date, timedelta
 from sodapy import Socrata
 from src.utils.general import get_s3_credentials, logging
-from src.utils.constants import CREDENCIALES, BUCKET_NAME, FECHA_INGESTA_INICIAL
+from src.utils.constants import CREDENCIALES, BUCKET_NAME
 
 def get_client():
     """
@@ -106,14 +106,13 @@ def ingesta_consecutiva(cliente, fecha, limite=1000):
     logging.info("Obteniendo todos los resultados de Chicago food insepctions a partir de la fecha: {}".format(fecha))
     # Obtener los últimos "limite" registros en formato json
 
+    fecha_inicio = fecha - timedelta(days=7)
     # Obtener data entre fechas con límite
-    #data = cliente.get("4ijn-s7e5", limit=limite, inspection_date=str(fecha))
     data = cliente.get("4ijn-s7e5",
                        limit=limite,
-                       where="inspection_date between '{}' and '{}'".format(FECHA_INGESTA_INICIAL, str(fecha)))
-    logging.info(data)
+                       where="inspection_date between '{}' and '{}'".format(fecha_inicio, str(fecha)))
 
-    file_to_upload = "ingestion/consecutive/consecutive-inspections-{}.pkl".format(fecha)
+    file_to_upload = "ingestion/consecutive/consecutive-inspections-{}.pkl".format(date.today())
 
 
     logging.info("Guardando la ingesta consecutiva en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
