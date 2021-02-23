@@ -7,7 +7,7 @@ import pickle
 from datetime import date
 from sodapy import Socrata
 from src.utils.general import get_s3_credentials, logging
-from src.utils.constants import CREDENCIALES, BUCKET_NAME
+from src.utils.constants import CREDENCIALES, BUCKET_NAME, FECHA_INGESTA_INICIAL
 
 def get_client():
     """
@@ -104,15 +104,18 @@ def ingesta_consecutiva(cliente, fecha, limite=1000):
 
     logging.info("Obteniendo todos los resultados de Chicago food insepctions a partir de la fecha: {}".format(fecha))
     # Obtener los últimos "limite" registros en formato json
-    data = cliente.get("4ijn-s7e5", limit=limite)
 
-    # Filtrar por fecha
-    data_filter = [x for x in data if x['inspection_date'] >= str(fecha)]
+    # Obtener data entre fechas con límite
+    #data = cliente.get("4ijn-s7e5", limit=limite, inspection_date=str(fecha))
+    data = cliente.get("4ijn-s7e5",
+                       limit=limite,
+                       where="inspection_date between '{}' and '{}'".format(FECHA_INGESTA_INICIAL, str(fecha)))
+    logging.info(data)
 
     file_to_upload = "ingestion/consecutive/consecutive-inspections-{}.pkl".format(fecha)
 
 
     logging.info("Guardando la ingesta consecutiva en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
-    guardar_ingesta(BUCKET_NAME, file_to_upload, data_filter, CREDENCIALES)
+    guardar_ingesta(BUCKET_NAME, file_to_upload, data, CREDENCIALES)
 
     #return data_filter
