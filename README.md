@@ -69,9 +69,51 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 2. En la terminal, posiciónate en la raíz del repositorio y ejecuta:
 >  `export PYTHONPATH=$PWD`
 
+### De Funciones
+
+1. Una  vez creado el ambiente virtual y haber agregado el proyecto como variable de PYTHONPATH, puedes hacer uso de las funciones descritas en cada archivo.
+
+**Notas:** en `src/utils/constants.py` mantenemos las constantes de nuestro proyecto, donde tenemos referenciado el nombre de nuestro bucket: ` "data-product-architecture-equipo-3"`  y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
+Si quieres acceder a diferentes buckets con otras credenciales se deberán cambiar en el archivo de las constantes.
+
+#### Ejemplo de script para ingesta inicial:
+
+    from src.pipeline.ingesta_almacenamiento import ingesta_inicial, get_client
+    from datetime import date
+    
+    # Nos conectamos a data.cityofchicago.org a través de Socrata
+    cliente=get_client()
+    
+    # Hacemos la ingesta inicial
+    ingesta_inicial(cliente) # El límite esta por default a 1000, en dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
+
+#### Ejemplo de script para ingesta consecutiva:
+
+    from src.pipeline.ingesta_almacenamiento import ingesta_consecutiva, get_client
+    from datetime import date
+    
+    # Nos conectamos a data.cityofchicago.org a través de Socrata
+    cliente=get_client()
+
+    fecha=date.today()
+
+    # Hacemos la ingesta inicial
+    ingesta_consecutiva(cliente, fecha) # El límite esta por default a 1000, en dado caso que se quiera cambiar, debe ser ingesta_consecutiva(cliente, fecha, limite=<nuevo_limite>)
+
+
 ### De Notebooks
 
 1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`
 2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
 > `jupyter notebook`
+
+
+## FAQ
+### ¿Qué hace el proceso de ingestión inicial?
+**R:** La función de `ingesta_inicial` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1000. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/inital` bajo el nombre de `historic-inspections-{dia_de_hoy}.pkl`
+
+### ¿Qué hace el proceso de ingestión consecutiva?
+**R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1000 y desde la ingesta inicial (constante especificada en `constants.py`) hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha}.pkl`
+
+
 

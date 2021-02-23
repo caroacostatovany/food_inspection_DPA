@@ -1,8 +1,8 @@
+"""
+Módulo de funciones para ingesta y almacenamiento
+"""
 import boto3
 import pickle
-#import logging
-
-#logging.basicConfig(level=logging.INFO)
 
 from datetime import date
 from sodapy import Socrata
@@ -27,6 +27,7 @@ def get_client():
 
 
     return cliente
+
 
 def ingesta_inicial(cliente, limite=1000):
     """
