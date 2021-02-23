@@ -1,8 +1,13 @@
-#!/usr/bin/env python
-from sodapy import Socrata
 import boto3
 import pickle
-from ..utils.general import *
+#import logging
+
+#logging.basicConfig(level=logging.INFO)
+
+from datetime import date
+from sodapy import Socrata
+from src.utils.general import get_s3_credentials, logging
+from src.utils.constants import CREDENCIALES, BUCKET_NAME
 
 def get_client():
     """
@@ -13,15 +18,17 @@ def get_client():
     client: cliente que tiene acceso con la cuenta creada previamente
     """
 
-    # Conecatarse por medio del token y usuario generado previamente
+    logging.info("Obteniendo cliente desde Socrata..")
+    # Conectarse por medio del token y usuario generado previamente
     cliente = Socrata("data.cityofchicago.org",
                       app_token="Ys0XWLepNDhEDms7HrqECMBZe",
                       username="emoreno@itam.mx",
                       password="DPA_food3.")
 
+
     return cliente
 
-def ingesta_inicial(cliente,limite=1000):
+def ingesta_inicial(cliente, limite=1000):
     """
     Obtener la lista de los elementos que la API generó por medio del cliente
     Inputs:
@@ -32,9 +39,16 @@ def ingesta_inicial(cliente,limite=1000):
     """
 
     # Obtener los ultimos "limite" datos
+    logging.info("Obteniendo todos los resultados de Chicago food insepctions... ")
     results = cliente.get("4ijn-s7e5", limit=limite)
+    logging.info("Listo!")
 
-    return results
+    file_to_upload = "ingestion/initial/historic-inspections-{}.pkl".format(date.today())
+
+    logging.info("Guardando la ingesta inicial en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
+    guardar_ingesta(BUCKET_NAME, file_to_upload, results, CREDENCIALES)
+
+    #return results
 
 def get_s3_resource(credenciales):
     """
@@ -47,6 +61,7 @@ def get_s3_resource(credenciales):
     s3_creds = get_s3_credentials(credenciales)
 
     # Conectarse al bucket
+    logging.info("Abriendo sesión s3")
     session = boto3.Session(aws_access_key_id=s3_creds['aws_access_key_id'],
                             aws_secret_access_key=s3_creds['aws_secret_access_key'])
 
@@ -74,9 +89,10 @@ def guardar_ingesta(bucket_name, file_to_upload, data, credenciales):
 
     # Guardar los datos (pickle) en el bucket y ruta específica
     s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
+    logging.info("pkl guardado exitosamente.")
 
 
-def ingesta_consecutiva(cliente, fecha, limite):
+def ingesta_consecutiva(cliente, fecha, limite=1000):
     """
     Obtener los datos posteriores a la fecha indicada
     Inputs:
@@ -86,10 +102,17 @@ def ingesta_consecutiva(cliente, fecha, limite):
     data_filter(json): datos filtrados por la fecha
     """
 
+    logging.info("Obteniendo todos los resultados de Chicago food insepctions a partir de la fecha: {}".format(fecha))
     # Obtener los últimos "limite" registros en formato json
-    data = ingesta_inicial(cliente, limite)
+    data = cliente.get("4ijn-s7e5", limit=limite)
 
     # Filtrar por fecha
-    data_filter = [x for x in data if x['inspection_date'] >= fecha]
-    
-    return data_filter
+    data_filter = [x for x in data if x['inspection_date'] >= str(fecha)]
+
+    file_to_upload = "ingestion/consecutive/consecutive-inspections-{}.pkl".format(fecha)
+
+
+    logging.info("Guardando la ingesta consecutiva en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
+    guardar_ingesta(BUCKET_NAME, file_to_upload, data_filter, CREDENCIALES)
+
+    #return data_filter

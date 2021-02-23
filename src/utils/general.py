@@ -2,6 +2,9 @@
 Módulo de funciones generales
 """
 import yaml
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 def read_yaml_file(yaml_file):
@@ -22,6 +25,7 @@ def read_yaml_file(yaml_file):
         with open(yaml_file, 'r') as f:
             config = yaml.safe_load(f)
     except:
+        logging.warning("No se pudo leer el archivo yaml")
         raise FileNotFoundError('No se pudo leer el archivo')
 
     return config
@@ -39,6 +43,7 @@ def get_s3_credentials(credentials_file):
     Ejemplo:
         >> s3_creds = get_s3_credentials("./conf/local/credentials.yaml")
     """
+    logging.info("Leyendo las credenciales de {}".format(credentials_file))
     credentials = read_yaml_file(credentials_file)
     s3_creds = credentials['s3']
 
