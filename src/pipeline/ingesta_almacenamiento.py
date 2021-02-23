@@ -29,7 +29,7 @@ def get_client():
     return cliente
 
 
-def ingesta_inicial(cliente, limite=1000):
+def ingesta_inicial(cliente, limite=300000):
     """
     Obtener la lista de los elementos que la API generó por medio del cliente
     Inputs:
