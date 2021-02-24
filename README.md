@@ -1,3 +1,4 @@
+![](https://mcdatos.itam.mx/wp-content/uploads/2020/11/ITAM-LOGO.03.jpg)
 # Food inspection 
 
 Los colaboradores en este proyecto somos:
@@ -14,13 +15,13 @@ Los colaboradores en este proyecto somos:
 ¿El establecimiento pasará o no la inspección?
 
 # Base de datos
-La base de datos que se analizará en este trabajo será la de [Chicago food inspection](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5)
+La base de datos que se analizará en este trabajo será la de [Chicago food inspection](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5).
 
 También se puede encontrar en nuestro [_Kaggle_](https://www.kaggle.com/carotovany/food-inspections), de acuerdo a la frecuencia de actualización del producto de datos, que será semanal.
 
 ### Resumen
 
-- Al día 15 de enero del 2021 contamos con 215,067 registros
+- Al día 15 de enero del 2021 contamos con 215,067 registros.
 
 #### Columnas
 
@@ -28,7 +29,7 @@ También se puede encontrar en nuestro [_Kaggle_](https://www.kaggle.com/carotov
 |----------------------|--------------|-----------------|------------------|
 |Inspection ID | ID de la inspección realizada|texto | 215,067 |
 |DBA Name| Nombre del establecimiento |texto | 28,748|
-|AKA Name| (As known as) Nombre común del establecimiento |texto | 27,356 |
+|AKA Name| (Also known as) Nombre común del establecimiento |texto | 27,356 |
 |License #| Número de la licencia del inspector |texto | 39,103 |
 |Facility Type| Tipo de establecimiento |categórico (texto) | 501 |
 |Risk| Tipo de Riesgo |categórico (numérico-texto) | 5 |
@@ -63,7 +64,7 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 
 # Ejecución
 
-1. Crea un ambiente virtual llamado `food-inspection` , actívalo e instala los `requirements.txt` con el siguiente comando:
+1. Crea un ambiente virtual llamado `food-inspection`, actívalo e instala los `requirements.txt` con el siguiente comando:
 > `pip install -r requirements.txt`
 
 2. En la terminal, posiciónate en la raíz del repositorio y ejecuta:
@@ -71,10 +72,10 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 
 ### De Funciones
 
-1. Una  vez creado el ambiente virtual y haber agregado el proyecto como variable de PYTHONPATH, puedes hacer uso de las funciones descritas en cada archivo.
+1. Una  vez creado el ambiente virtual y habiendo agregado el proyecto como variable de PYTHONPATH, puedes hacer uso de las funciones descritas en cada archivo.
 
 **Notas:** en `src/utils/constants.py` mantenemos las constantes de nuestro proyecto, donde tenemos referenciado el nombre de nuestro bucket: ` "data-product-architecture-equipo-3"`  y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
-Si quieres acceder a diferentes buckets con otras credenciales se deberán cambiar en el archivo de las constantes.
+Si quieres acceder a diferentes buckets con otras credenciales esto se deberá cambiar en el archivo de las constantes.
 
 #### Ejemplo de script para ingesta inicial:
 
@@ -85,7 +86,7 @@ Si quieres acceder a diferentes buckets con otras credenciales se deberán cambi
     cliente=get_client()
     
     # Hacemos la ingesta inicial
-    ingesta_inicial(cliente) # El límite esta por default a 300,000, en dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
+    ingesta_inicial(cliente) # El límite está por default a 300,000, en dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
 
 #### Ejemplo de script para ingesta consecutiva:
 
@@ -97,23 +98,23 @@ Si quieres acceder a diferentes buckets con otras credenciales se deberán cambi
 
     fecha=date.today()
 
-    # Hacemos la ingesta inicial
-    ingesta_consecutiva(cliente, fecha) # El límite esta por default a 1000, en dado caso que se quiera cambiar, debe ser ingesta_consecutiva(cliente, fecha, limite=<nuevo_limite>)
+    # Hacemos la ingesta consecutiva
+    ingesta_consecutiva(cliente, fecha) # El límite está por default a 1000, en dado caso que se quiera cambiar, debe ser ingesta_consecutiva(cliente, fecha, limite=<nuevo_limite>)
 
 
 ### De Notebooks
 
-1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`
+1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`.
 2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
 > `jupyter notebook`
 
 
 ## FAQ
 ### ¿Qué hace el proceso de ingestión inicial?
-**R:** La función de `ingesta_inicial` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 300,000. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/inital` bajo el nombre de `historic-inspections-{dia_de_hoy}.pkl`
+**R:** La función de `ingesta_inicial` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 300,000. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/inital` bajo el nombre de `historic-inspections-{dia_de_hoy}.pkl`.
 
 ### ¿Qué hace el proceso de ingestión consecutiva?
-**R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1000 y desde 7 días antes a la fecha especificada hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha_hoy}.pkl`
+**R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1,000 y desde 7 días antes a la fecha especificada hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha_hoy}.pkl`.
 
 
 
