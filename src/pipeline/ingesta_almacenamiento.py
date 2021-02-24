@@ -6,26 +6,30 @@ import pickle
 
 from datetime import date, timedelta
 from sodapy import Socrata
-from src.utils.general import get_s3_credentials, logging
+from src.utils.general import get_s3_credentials, get_api_token, logging
 from src.utils.constants import CREDENCIALES, BUCKET_NAME
 
 def get_client():
     """
     Esta función genera un cliente con un token previamente generado
     Inputs:
-    None
+    credenciales: credenciales para poder acceder al bucket
     Outputs:
     client: cliente que tiene acceso con la cuenta creada previamente
     """
 
+    # Obtener las credenciales del archivo .yaml
+    token = get_api_token(CREDENCIALES)
+    
+    # Conectarse a la API
     logging.info("Obteniendo cliente desde Socrata..")
+    
     # Conectarse por medio del token y usuario generado previamente
     cliente = Socrata("data.cityofchicago.org",
-                      app_token="Ys0XWLepNDhEDms7HrqECMBZe",
-                      username="emoreno@itam.mx",
-                      password="DPA_food3.")
-
-
+                      app_token=token['app_token'],
+                      username=token['username'],
+                      password=token['password'])
+    
     return cliente
 
 

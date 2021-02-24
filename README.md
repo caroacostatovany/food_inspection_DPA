@@ -86,7 +86,7 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
     cliente=get_client()
     
     # Hacemos la ingesta inicial
-    ingesta_inicial(cliente) # El límite está por default a 300,000, en dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
+    ingesta_inicial(cliente) # El límite está por default a 300,000. En dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
 
 #### Ejemplo de script para ingesta consecutiva:
 
@@ -99,7 +99,7 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
     fecha=date.today()
 
     # Hacemos la ingesta consecutiva
-    ingesta_consecutiva(cliente, fecha) # El límite está por default a 1000, en dado caso que se quiera cambiar, debe ser ingesta_consecutiva(cliente, fecha, limite=<nuevo_limite>)
+    ingesta_consecutiva(cliente, fecha) # El límite está por default a 1,000. En dado caso que se quiera cambiar, debe ser ingesta_consecutiva(cliente, fecha, limite=<nuevo_limite>)
 
 
 ### De Notebooks
@@ -108,6 +108,18 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
 2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
 > `jupyter notebook`
 
+### Sobre tus credenciales
+
+En la carpeta `conf/local` deberás colocar tu archivo `credentials.yaml`. La estructura del mismo debe ser la siguiente:
+```
+s3:
+    aws_access_key_id: "tuaccesskeyid"
+    aws_secret_access_key: "tusecretaccesskey"
+food_inspections:
+    app_token: "tutoken"
+    username: "tuusername"
+    password: "tucontraseña"
+```
 
 ## FAQ
 ### ¿Qué hace el proceso de ingestión inicial?

@@ -48,3 +48,22 @@ def get_s3_credentials(credentials_file):
     s3_creds = credentials['s3']
 
     return s3_creds
+
+
+def get_api_token(Credentials_file):
+    """
+    Se obtienen las credenciales para acceder a la API de Chicago Food Inspections
+    ==========
+    * Args:
+         - credentials_file
+    * Return:
+         - token: Info para conectarse a la API
+    Ejemplo:
+        >> token = get_api_token("./conf/local/credentials.yaml")
+    ==========
+    """
+    logging.info("Leyendo las credenciales de {}".format(Credentials_file))
+    Credentials = read_yaml_file(Credentials_file)
+    token = Credentials['food_inspections']
+    
+    return token
