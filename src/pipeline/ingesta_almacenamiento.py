@@ -9,6 +9,7 @@ from sodapy import Socrata
 from src.utils.general import get_s3_credentials, get_api_token, logging
 from src.utils.constants import CREDENCIALES, BUCKET_NAME
 
+
 def get_client():
     """
     Esta función genera un cliente con un token previamente generado
@@ -48,12 +49,12 @@ def ingesta_inicial(cliente, limite=300000):
     results = cliente.get("4ijn-s7e5", limit=limite)
     logging.info("Listo!")
 
-    file_to_upload = "ingestion/initial/historic-inspections-{}.pkl".format(date.today())
 
-    logging.info("Guardando la ingesta inicial en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
-    guardar_ingesta(BUCKET_NAME, file_to_upload, results, CREDENCIALES)
+    # logging.info("Guardando la ingesta inicial en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
+    # guardar_ingesta(BUCKET_NAME, file_to_upload, results, CREDENCIALES)
 
-    #return results
+    return results
+
 
 def get_s3_resource(credenciales):
     """
@@ -74,6 +75,7 @@ def get_s3_resource(credenciales):
     s3 = session.client('s3')
 
     return s3
+
 
 def guardar_ingesta(bucket_name, file_to_upload, data, credenciales):
     """
@@ -97,6 +99,37 @@ def guardar_ingesta(bucket_name, file_to_upload, data, credenciales):
     logging.info("pkl guardado exitosamente.")
 
 
+def guardar_ingesta_localmente(file_to_upload, data):
+    """
+    Guardar los datos dentro del path tmp/luigi
+    Inputs:
+    file_to_upload(string): nombre y ruta del archivo a guardar
+    data(json): objeto json con los datos
+    Outputs:
+    None
+    """
+    #path = "./tmp/luigi/{}".format(file_to_upload)
+    # Cambiar datos de formato json a objetos binario
+    pickle.dump(data, file_to_upload)
+    logging.info("pkl guardado exitosamente en local.")
+    file_to_upload.close()
+
+
+def cargar_ingesta_local(file_to_upload):
+    """
+    Guardar los datos dentro del path tmp/luigi
+    Inputs:
+    file_to_upload(string): nombre y ruta del archivo a guardar
+    data(json): objeto json con los datos
+    Outputs:
+    None
+    """
+    path = "./tmp/luigi/{}".format(file_to_upload)
+    # Cambiar datos de formato json a objetos binario
+    pickle.load(open(path, "rb"))
+    logging.info("pkl cargado exitosamente.")
+
+
 def ingesta_consecutiva(cliente, fecha, limite=1000):
     """
     Obtener los datos posteriores a la fecha indicada
@@ -116,10 +149,8 @@ def ingesta_consecutiva(cliente, fecha, limite=1000):
                        limit=limite,
                        where="inspection_date between '{}' and '{}'".format(fecha_inicio, str(fecha)))
 
-    file_to_upload = "ingestion/consecutive/consecutive-inspections-{}.pkl".format(date.today())
 
+    #logging.info("Guardando la ingesta consecutiva en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
+    #guardar_ingesta(BUCKET_NAME, file_to_upload, data, CREDENCIALES)
 
-    logging.info("Guardando la ingesta consecutiva en s3://{}/{}".format(BUCKET_NAME, file_to_upload))
-    guardar_ingesta(BUCKET_NAME, file_to_upload, data, CREDENCIALES)
-
-    #return data_filter
+    return data
