@@ -10,6 +10,7 @@ from src.pipeline.ingesta_almacenamiento import get_client, ingesta_inicial, ing
 
 
 class TaskIngesta(luigi.Task):
+
     inicial = luigi.BoolParameter()
     fecha = luigi.DateParameter()
     file_to_upload = luigi.Parameter()
