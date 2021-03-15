@@ -12,17 +12,12 @@ class TaskAlmacenamiento(luigi.Task):
     inicial = luigi.BoolParameter()
     fecha = luigi.DateParameter(default=date.today())
 
-
-
-
     def requires(self):
 
         if self.inicial:
-            path_s3 = PATH_INICIAL
-            file_to_upload = NOMBRE_INICIAL
+            file_to_upload = NOMBRE_INICIAL.format(self.fecha)
         else:
-            file_to_upload = NOMBRE_CONSECUTIVO
-            path_s3 = PATH_CONSECUTIVO
+            file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
 
         return TaskIngesta(self.inicial, self.fecha, file_to_upload)
 
@@ -30,9 +25,9 @@ class TaskAlmacenamiento(luigi.Task):
 
         if self.inicial:
             path_s3 = PATH_INICIAL
-            file_to_upload = NOMBRE_INICIAL
+            file_to_upload = NOMBRE_INICIAL.format(self.fecha)
         else:
-            file_to_upload = NOMBRE_CONSECUTIVO
+            file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
             path_s3 = PATH_CONSECUTIVO
         results = cargar_ingesta_local(file_to_upload)
         #outFile = open(self.output().path, 'wb')
@@ -47,9 +42,9 @@ class TaskAlmacenamiento(luigi.Task):
 
         if self.inicial:
             path_s3 = PATH_INICIAL
-            file_to_upload = NOMBRE_INICIAL
+            file_to_upload = NOMBRE_INICIAL.format(self.fecha)
         else:
-            file_to_upload = NOMBRE_CONSECUTIVO
+            file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
             path_s3 = PATH_CONSECUTIVO
 
         output_path = "s3://{}/{}/{}".format(BUCKET_NAME,

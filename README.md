@@ -70,6 +70,7 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 2. En la terminal, posiciónate en la raíz del repositorio y ejecuta:
 >  `export PYTHONPATH=$PWD`
 
+
 ### De Funciones
 
 1. Una  vez creado el ambiente virtual y habiendo agregado el proyecto como variable de PYTHONPATH, puedes hacer uso de las funciones descritas en cada archivo.
@@ -108,6 +109,16 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
 2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
 > `jupyter notebook`
 
+### Con Luigi
+
+Sólo existen los parámetros --inicial (que es booleano, si se escribe será Verdadero, si se omite se considera Falso) y --fecha (que se refiere a la fecha en la que se corre el proceso, si se omite será la de hoy)
+
+Para ingesta inicial
+>  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento --inicial
+
+Para ingesta consecutiva
+> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento  --fecha 2020-11-03
+
 ### Sobre tus credenciales
 
 En la carpeta `conf/local` deberás colocar tu archivo `credentials.yaml`. La estructura del mismo debe ser la siguiente:
@@ -119,6 +130,14 @@ food_inspections:
     app_token: "tutoken"
     username: "tuusername"
     password: "tucontraseña"
+```
+
+Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AWS(~/.aws/credentials) y deberá tener la estructura siguiente:
+```
+[tu_profile]
+    aws_access_key_id = tuaccesskeyid
+    aws_secret_access_key = tusecretaccesskey
+    region = tu-region
 ```
 
 ## FAQ
