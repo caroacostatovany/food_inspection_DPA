@@ -111,13 +111,13 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
 
 ### Con Luigi
 
-Sólo existen los parámetros --inicial (que es booleano, si se escribe será Verdadero, si se omite se considera Falso) y --fecha (que se refiere a la fecha en la que se corre el proceso, si se omite será la de hoy)
+Sólo existen los parámetros --ingesta-inicial (que es booleano, si se escribe será Verdadero), --ingesta-consecutiva(que también es booleano) y --fecha (que se refiere a la fecha en la que se corre el proceso, si se omite será la de hoy, el formato esta en año-mes-día)
 
 Para ingesta inicial
->  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento --inicial
+>  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento --ingesta-inicial
 
 Para ingesta consecutiva
-> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento  --fecha 2020-11-03
+> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento  --ingesta-consecutiva --fecha 2020-11-03
 
 ### Sobre tus credenciales
 

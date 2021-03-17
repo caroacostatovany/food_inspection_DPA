@@ -45,7 +45,7 @@ def ingesta_inicial(cliente, limite=300000):
     """
 
     # Obtener los ultimos "limite" datos
-    logging.info("Obteniendo todos los resultados de Chicago food insepctions... ")
+    logging.info("Obteniendo todos los resultados de Chicago food inspections... ")
     results = cliente.get("4ijn-s7e5", limit=limite)
     logging.info("Listo!")
 
@@ -126,8 +126,9 @@ def cargar_ingesta_local(file_to_upload):
     """
     path = "./tmp/luigi/{}".format(file_to_upload)
     # Cambiar datos de formato json a objetos binario
-    pickle.load(open(path, "rb"))
+    pkl = pickle.load(open(path, "rb"))
     logging.info("pkl cargado exitosamente.")
+    return pkl
 
 
 def ingesta_consecutiva(cliente, fecha, limite=1000):

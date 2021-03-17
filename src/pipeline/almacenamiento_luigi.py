@@ -9,26 +9,27 @@ from src.utils.constants import BUCKET_NAME, CREDENCIALES, NOMBRE_INICIAL, PATH_
 
 class TaskAlmacenamiento(luigi.Task):
 
-    inicial = luigi.BoolParameter()
+    ingesta_inicial = luigi.BoolParameter()
+    ingesta_consecutiva = luigi.BoolParameter()
     fecha = luigi.DateParameter(default=date.today())
 
     def requires(self):
 
-        if self.inicial:
+        if self.ingesta_inicial:
             file_to_upload = NOMBRE_INICIAL.format(self.fecha)
         else:
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
 
-        return TaskIngesta(self.inicial, self.fecha, file_to_upload)
+        return [TaskIngesta(self.ingesta_inicial, self.fecha, file_to_upload)]
 
     def run(self):
 
-        if self.inicial:
-            path_s3 = PATH_INICIAL
+        if self.ingesta_inicial:
+            path_s3 = PATH_INICIAL.format(self.fecha.year, self.fecha.month)
             file_to_upload = NOMBRE_INICIAL.format(self.fecha)
         else:
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
-            path_s3 = PATH_CONSECUTIVO
+            path_s3 = PATH_CONSECUTIVO.format(self.fecha.year, self.fecha.month)
         results = cargar_ingesta_local(file_to_upload)
         #outFile = open(self.output().path, 'wb')
 
@@ -39,13 +40,13 @@ class TaskAlmacenamiento(luigi.Task):
         #    output_file.write("test,luigi,s3")
 
     def output(self):
-
-        if self.inicial:
-            path_s3 = PATH_INICIAL
+        if self.ingesta_inicial:
+            path_s3 = PATH_INICIAL.format(self.fecha.year, self.fecha.month)
             file_to_upload = NOMBRE_INICIAL.format(self.fecha)
+
         else:
+            path_s3 = PATH_CONSECUTIVO.format(self.fecha.year, self.fecha.month)
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
-            path_s3 = PATH_CONSECUTIVO
 
         output_path = "s3://{}/{}/{}".format(BUCKET_NAME,
                                              path_s3,
