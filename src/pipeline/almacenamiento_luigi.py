@@ -9,9 +9,12 @@ from src.utils.constants import BUCKET_NAME, CREDENCIALES, NOMBRE_INICIAL, PATH_
 
 class TaskAlmacenamiento(luigi.Task):
 
-    ingesta_inicial = luigi.BoolParameter()
-    ingesta_consecutiva = luigi.BoolParameter()
-    fecha = luigi.DateParameter(default=date.today())
+    ingesta_inicial = luigi.BoolParameter(description="Parámetro booleano. Si se escribe será Verdadero, "
+                                                      "para crear la ingesta inicial")
+    ingesta_consecutiva = luigi.BoolParameter(description="Parámetro booleano. Si se escribe será Verdadero, "
+                                                          "para crear la ingesta consecutiva")
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
 
     def requires(self):
 
