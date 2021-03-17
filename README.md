@@ -62,7 +62,9 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 
 + `notebooks/eda/EDA_GEDA.ipynb`
 
-# Ejecución
+# Ejecución 
+
+### Instrucciones para correr TODOS los tipos de ejecuciones (Funciones, scripts, jupyter o luigi)
 
 1. Crea un ambiente virtual llamado `food-inspection`, actívalo e instala los `requirements.txt` con el siguiente comando:
 > `pip install -r requirements.txt`
@@ -71,7 +73,7 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 >  `export PYTHONPATH=$PWD`
 
 
-### De Funciones
+### Ejecución De Funciones
 
 1. Una  vez creado el ambiente virtual y habiendo agregado el proyecto como variable de PYTHONPATH, puedes hacer uso de las funciones descritas en cada archivo.
 
@@ -111,13 +113,15 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
 
 ### Con Luigi
 
+Después de correr las instrucciones generales, escribimos algunos ejemplos de cómo correr tareas en Luigi.
+
 Sólo existen los parámetros --ingesta-inicial (que es booleano, si se escribe será Verdadero), --ingesta-consecutiva(que también es booleano) y --fecha (que se refiere a la fecha en la que se corre el proceso, si se omite será la de hoy, el formato esta en año-mes-día)
 
 Para ingesta inicial
 >  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento --ingesta-inicial
 
 Para ingesta consecutiva
-> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento  --ingesta-consecutiva --fecha 2020-11-03
+> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento  --ingesta-consecutiva --fecha 2021-03-15
 
 ### Sobre tus credenciales
 
@@ -146,6 +150,10 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 
 ### ¿Qué hace el proceso de ingestión consecutiva?
 **R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1,000 y desde 7 días antes a la fecha especificada hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha_hoy}.pkl`.
+
+### ¿Cómo se debe ver mi DAG en Luigi?
+**R** Si Luigi corrió bien las tareas de almacenamiento e ingesta, se debería ver así:
+![DAG](./images/DAG_ingesta_consecutiva_2021-03-01.jpeg?raw=true "Task Almacenamiento")
 
 
 
