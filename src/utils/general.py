@@ -3,6 +3,7 @@ Módulo de funciones generales
 """
 import yaml
 import logging
+import pickle
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,7 +51,7 @@ def get_s3_credentials(credentials_file):
     return s3_creds
 
 
-def get_api_token(Credentials_file):
+def get_api_token(credentials_file):
     """
     Se obtienen las credenciales para acceder a la API de Chicago Food Inspections
     ==========
@@ -62,8 +63,30 @@ def get_api_token(Credentials_file):
         >> token = get_api_token("./conf/local/credentials.yaml")
     ==========
     """
-    logging.info("Leyendo las credenciales de {}".format(Credentials_file))
-    Credentials = read_yaml_file(Credentials_file)
-    token = Credentials['food_inspections']
+    logging.info("Leyendo las credenciales de {}".format(credentials_file))
+    credentials = read_yaml_file(credentials_file)
+    token = credentials['food_inspections']
     
     return token
+
+
+def read_pkl_from_s3(s3, bucket_name, filename):
+    """
+    Lee un archivo que fue guardado con pkl desde s3.
+
+    ==========
+    * Args:
+         - s3: Session opened
+         - bucket_name: nombre del bucket
+         - filename: nombre del archivo
+    * Return:
+         - pkl_file
+    ==========
+    Ejemplo:
+        >> json_file = read_pkl_from_s3(s3, bucket, filename)
+    """
+    response = s3.get_object(Bucket=bucket_name,
+                             Key=filename)
+    pkl_file = pickle.loads(response['Body'].read())
+
+    return pkl_file

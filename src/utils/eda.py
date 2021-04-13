@@ -59,6 +59,7 @@ def cuenta_nulos_por_columnas(df):
           " columnas que tienen NA's.")
     return tabla_valores_nulos_ordenada
 
+
 def CreaTablaConteoPorcentaje(df, nomColumna, booleanNA):
     """
     Esta función crea la tabla con información sobre los conteos y el porcentaje al que corresponden del total de los datos.
@@ -85,6 +86,7 @@ def CreaTablaConteoPorcentaje(df, nomColumna, booleanNA):
     df_resultado['porcentaje'] = df[nomColumna].value_counts(dropna=booleanNA, normalize=True).mul(100).round(2).astype(str)+'%'
 
     return df_resultado
+
 
 def CreaTablaConteoPorcentaje_sin_stringformat(df, nomColumna, booleanNA):
     """
@@ -144,6 +146,7 @@ def StringLowercase(df):
 
     return df
 
+
 def StringAcentos(df):
     """
     Función para eliminar acentos, dieresis y eñes de los strings de un
@@ -179,6 +182,7 @@ def StringAcentos(df):
 
     return df
 
+
 def StringStrip(df):
     """
     Función para eliminar espacios al inicio y al final de los strings de un
@@ -208,6 +212,7 @@ def StringStrip(df):
 
     return df
 
+
 def StringEspacios(df):
     """
     Función para eliminar espacios dobles (o mas) de los strings de un
@@ -236,6 +241,7 @@ def StringEspacios(df):
             df[col] = df[col].apply(lambda x: re.sub(' +', ' ', x) if isinstance(x, str) else x)
 
     return df
+
 
 def EstandarizaFormato(df):
     """
@@ -796,6 +802,7 @@ def genera_profiling_de_fechas(df,lista_date,vars_type):
                           num_obs_unicas, obs_faltantes, datos_top1, datos_top2, datos_top3]
         dataframe_profiling_fechas[col] = datos_variable
     return dataframe_profiling_fechas
+
 
 def genera_profiling_por_variable(df):
     """
