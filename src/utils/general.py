@@ -4,6 +4,7 @@ Módulo de funciones generales
 import yaml
 import logging
 import pickle
+import psycopg2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -90,3 +91,20 @@ def read_pkl_from_s3(s3, bucket_name, filename):
     pkl_file = pickle.loads(response['Body'].read())
 
     return pkl_file
+
+
+def get_db_conn(credentials_file):
+    """
+    """
+    creds = read_yaml_file(credentials_file)['db']
+
+    connection = psycopg2.connect(
+        user=creds['user'],
+        password=creds['pass'],
+        host=creds['host'],
+        port=creds['port'],
+        database=creds['db']
+    )
+
+    return connection
+
