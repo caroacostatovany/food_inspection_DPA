@@ -65,8 +65,8 @@ class TaskJson2RDS(CopyToTable):
     end_time = time.time() - start_time
 
     path = "./tmp/luigi/eq3/raw_created.txt"
-    with path.open('w') as output_file:
-        output_file.write("{"
+    file_output = open(path,'w')
+    file_output.write("{"
                           "{parametros:{0},{1}},"
                           "{dia_ejecucion: {2}},"
                           "{usuario_ejecucion:{3}},"
@@ -82,6 +82,7 @@ class TaskJson2RDS(CopyToTable):
                                                             sql_script,
                                                             output,
                                                             objects))
+    file_output.close()
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
