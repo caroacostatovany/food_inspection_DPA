@@ -93,7 +93,7 @@ def read_pkl_from_s3(s3, bucket_name, filename):
     return pkl_file
 
 
-def get_db_conn(credentials_file):
+def get_db_conn_psycopg(credentials_file):
     """
     """
     creds = read_yaml_file(credentials_file)['db']
@@ -107,4 +107,12 @@ def get_db_conn(credentials_file):
     )
 
     return connection
+
+def get_db(credentials_file):
+    """
+
+    """
+    creds = read_yaml_file(credentials_file)['db']
+
+    return creds
 
