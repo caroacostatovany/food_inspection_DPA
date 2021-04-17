@@ -108,6 +108,7 @@ def get_db_conn_psycopg(credentials_file):
 
     return connection
 
+
 def get_db(credentials_file):
     """
 

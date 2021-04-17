@@ -12,7 +12,8 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamiento
 from src.utils.constants import BUCKET_NAME, CREDENCIALES
-from src.utils.general import get_db
+from src.utils.general import get_db, read_pkl_from_s3
+from src.pipeline.ingesta_almacenamiento import get_s3_resource
 
 #["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
@@ -28,7 +29,7 @@ class TaskJson2RDS(CopyToTable):
     start_time = time.time()
     # Por ahora vamos a borrar el esquema raw y volverlo a crear desde cero e insertar un pkl por pkl..
     # No es lo ideal, pero por simplicidad del ejercicio
-    s3 = get_s3_resource()
+    s3 = get_s3_resource(CREDENCIALES)
     objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
     # Establecer conexión con la base de datos
