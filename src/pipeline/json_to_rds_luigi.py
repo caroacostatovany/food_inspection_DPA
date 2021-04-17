@@ -65,6 +65,8 @@ class TaskJson2RDS(CopyToTable):
     end_time = time.time() - start_time
 
     path = "./tmp/luigi/eq3/raw_created.txt"
+
+    # Debe estar creado el path tmp/luigi/eq3
     file_output = open(path,'w')
     file_output.write("{"
                           "{parametros:{0},{1}},"
@@ -74,7 +76,7 @@ class TaskJson2RDS(CopyToTable):
                           "{num_registros_guardados:{5}},"
                           "{sql_que_ejecuto:{6}},"
                           "{output_sql:{7}}"
-                          "{pkl_que_se_utilizaron:{8}}".format(self.ingesta,self.fecha,
+                          "{pkl_que_se_utilizaron:{8}}".format(ingesta,fecha,
                                                             date.today(),
                                                             "-",
                                                             end_time,
