@@ -1,13 +1,17 @@
 import logging
 import pandas as pd
 import luigi
+import time
+from datetime import date, timedelta
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
-from src.pipeline.ingesta_almacenamiento import guardar_ingesta
+from src.pipeline.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
 from src.pipeline.preprocessing import df_to_lower_case, change_misspelled_chicago_city_names, convert_nan, transform_label
-
+from src.utils.general import get_db, read_pkl_from_s3
+from src.utils.constants import CREDENCIALES, BUCKET_NAME
+from src.pipeline.almacenamiento_luigi import TaskAlmacenamiento
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,10 +32,12 @@ class TaskPreprocessingMetadata(CopyToTable):
     host = cred['host']
     port = cred['port']
 
-    table = "metadata.json2rds"
+    table = "metadata.preprocessing"
 
     columns = [("user_id", "varchar"),
-               ("metadata", "json")]
+               ("parametros", "varchar"),
+               ("tiempo", "float"),
+               ("num_registros", "integer")]
 
     def requires(self):
 
@@ -39,9 +45,10 @@ class TaskPreprocessingMetadata(CopyToTable):
 
 
     def rows(self):
-        path = "./tmp/luigi/eq3/preprocess_created.txt"
-        f = open(path, "r")
-        r = [(self.user, f.read())]
+        path = "./tmp/luigi/eq3/preprocess_created.csv"
+        data = pd.read_csv(path)
+        print("###########################################____{}".format(data.columns))
+        r = [(self.user, data.parametros[0], data.tiempo[0], data.num_registros[0])]
         for element in r:
             yield element
 
@@ -103,11 +110,11 @@ class TaskPreprocessing(luigi.Task):
 
         end_time = time.time() - start_time
 
-        path = "./tmp/luigi/eq3/preprocess_created.txt"
+        path = "./tmp/luigi/eq3/preprocess_created.csv"
 
         # Debe estar creado el path tmp/luigi/eq3
         file_output = open(path,'w')
-        file_output.write("parametros, tiempo, num_registros")
+        file_output.write("parametros,tiempo,num_registros\n")
         file_output.write("{0};{1},{2},{3}".format(self.ingesta, self.fecha,
                                             end_time,
                                             num_registros))
