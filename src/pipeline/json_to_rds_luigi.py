@@ -68,20 +68,17 @@ class TaskJson2RDS(CopyToTable):
 
     # Debe estar creado el path tmp/luigi/eq3
     file_output = open(path,'w')
-    file_output.write("{"
-                          "{parametros:{0},{1}},"
-                          "{dia_ejecucion: {2}},"
-                          "{usuario_ejecucion:{3}},"
-                          "{tiempo_que_tarda:{4}},"
-                          "{num_registros_guardados:{5}},"
-                          "{sql_que_ejecuto:{6}},"
-                          "{pkl_que_se_utilizaron:{7}}}".format(ingesta,fecha,
-                                                            date.today(),
-                                                            "-",
-                                                            end_time,
-                                                            num_registros,
-                                                            sql_script,
-                                                            objects))
+    file_output.write("{{parametros:{0},{1}},"
+                      "{dia_ejecucion: {2}},"
+                      "{usuario_ejecucion:{3}},"
+                      "{tiempo_que_tarda:{4}},"
+                      "{num_registros_guardados:{5}},"
+                      "{sql_que_ejecuto:{6}}}".format(ingesta,fecha,
+                                                    date.today(),
+                                                    "-",
+                                                    end_time,
+                                                    num_registros,
+                                                    sql_script))
     file_output.close()
 
     cred = get_db(CREDENCIALES)
