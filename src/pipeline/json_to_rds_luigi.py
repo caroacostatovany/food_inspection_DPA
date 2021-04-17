@@ -39,12 +39,12 @@ class TaskJson2RDS(CopyToTable):
     # Leer el sql y ejecutarlo para borrar el esquema y crearlo de nuevo
 
     table_name = "raw.food_inspection"
-    sql_script = "sql/create_raw_food_inspection.sql"
-    cursor = conn.cursor()
-    cursor.execute(open(sql_script, "r").read())
+    #sql_script = "sql/create_raw_food_inspection.sql"
+    #cursor = conn.cursor()
+    #cursor.execute(open(sql_script, "r").read())
     #sites_result = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    #cursor.close()
+    #conn.close()
 
     num_registros = 0
     # Ahora debemos insertar los json a la tabla vacía
@@ -67,19 +67,19 @@ class TaskJson2RDS(CopyToTable):
     path = "./tmp/luigi/eq3/raw_created.txt"
 
     # Debe estar creado el path tmp/luigi/eq3
-    file_output = open(path,'w')
-    file_output.write("{{parametros:{0},{1}},"
-                      "{dia_ejecucion: {2}},"
-                      "{usuario_ejecucion:{3}},"
-                      "{tiempo_que_tarda:{4}},"
-                      "{num_registros_guardados:{5}},"
-                      "{sql_que_ejecuto:{6}}}".format(ingesta,fecha,
-                                                    date.today(),
-                                                    "-",
-                                                    end_time,
-                                                    num_registros,
-                                                    sql_script))
-    file_output.close()
+    #file_output = open(path,'w')
+    #file_output.write("{{parametros:{0},{1}},"
+    #                  "{dia_ejecucion: {2}},"
+    #                  "{usuario_ejecucion:{3}},"
+    ##                  "{tiempo_que_tarda:{4}},"
+    #                  "{num_registros_guardados:{5}},"
+    #                  "{sql_que_ejecuto:{6}}}".format(ingesta,fecha,
+    #                                                date.today(),
+    #                                                "-",
+    #                                                end_time,
+    #                                                num_registros,
+    #                                                sql_script))
+    #file_output.close()
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
@@ -104,29 +104,31 @@ class TaskJson2RDS(CopyToTable):
                ("results", "varchar"),
                ("latitude", "varchar"),
                ("longitude", "varchar"),
-               ("location", "json")]
+               ("location", "json"),
+               ("violations", "varchar")]
 
 
     def requires(self):
 
         dia = self.fecha
-        if self.ingest != 'No':
+        if self.ingesta != 'No':
 
             if self.ingesta == 'inicial':
                 return [TaskAlmacenamiento(True, False, dia)] # Cambiar por el task de metadata de almacenamiento
             else:
                 if self.ingesta == 'consecutiva':
-                    return [TaskAlmacenamiento(True, False, dia)] # Cambiar por el task de metadata de almacenamiento
+                    return [TaskAlmacenamiento(False, True, dia)] # Cambiar por el task de metadata de almacenamiento
         else:
-            while dia.weekday != 0:
+            while dia.weekday() != 0:
                 dia = dia - timedelta(days=1)
-            return [TaskAlmacenamiento(True, False, dia)] # Cambiar por el task de metadata de almacenamiento
+            return [TaskAlmacenamiento(False, True, dia)] # Cambiar por el task de metadata de almacenamiento
 
 
 
     def rows(self):
         tuplas = self.df.to_records(index=False)
         for element in tuplas:
+            print("#############################___{}".format(element))
             yield element
 
 
