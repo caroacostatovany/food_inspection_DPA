@@ -1,7 +1,10 @@
 import logging
 import pandas as pd
+import luigi
 
+from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
+
 from src.pipeline.ingesta_almacenamiento import guardar_ingesta
 from src.pipeline.preprocessing import df_to_lower_case, change_misspelled_chicago_city_names, convert_nan, transform_label
 
