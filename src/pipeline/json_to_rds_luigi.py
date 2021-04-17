@@ -64,8 +64,8 @@ class TaskJson2RDS(CopyToTable):
 
     end_time = time.time() - start_time
 
-
-    with self.output().open('w') as output_file:
+    path = "./tmp/luigi/eq3/raw_created.txt"
+    with path.open('w') as output_file:
         output_file.write("{"
                           "{parametros:{0},{1}},"
                           "{dia_ejecucion: {2}},"
