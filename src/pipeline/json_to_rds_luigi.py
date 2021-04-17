@@ -52,8 +52,9 @@ class TaskJson2RDS(CopyToTable):
         df = pd.DataFrame()
 
         for file in objects:
-            print("Leyendo {}...".format(file))
-            json_file = read_pkl_from_s3(s3, BUCKET_NAME, file)
+            filename = file['Key']
+            print("Leyendo {}...".format(filename))
+            json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
             df_temp = pd.DataFrame(json_file)
             df = pd.concat([df, df_temp], axis=0)
 
