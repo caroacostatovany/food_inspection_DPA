@@ -39,8 +39,11 @@ class TaskJson2RDS(CopyToTable):
 
     table_name = "raw.food_inspection"
     sql_script = "sql/create_raw_food_inspection.sql"
-    with conn as cursor:
-        cursor.execute(open(sql_script, "r").read())
+    cursor = conn.cursor()
+    cursor.execute(open(sql_script, "r").read())
+    sites_result = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
     num_registros = 0
     # Ahora debemos insertar los json a la tabla vacía
