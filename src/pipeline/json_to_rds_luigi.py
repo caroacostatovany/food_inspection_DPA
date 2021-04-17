@@ -75,7 +75,7 @@ class TaskJson2RDS(CopyToTable):
                           "{tiempo_que_tarda:{4}},"
                           "{num_registros_guardados:{5}},"
                           "{sql_que_ejecuto:{6}},"
-                          "{pkl_que_se_utilizaron:{7}}".format(ingesta,fecha,
+                          "{pkl_que_se_utilizaron:{7}}}".format(ingesta,fecha,
                                                             date.today(),
                                                             "-",
                                                             end_time,
