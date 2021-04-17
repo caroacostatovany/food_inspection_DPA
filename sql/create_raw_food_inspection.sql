@@ -1,6 +1,6 @@
 set time zone  'America/Mexico_City';
 
-set role tovany; -- cambiarlo
+--set role tovany; -- cambiarlo
 
 --schema raw
 DROP SCHEMA IF EXISTS raw CASCADE;
