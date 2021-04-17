@@ -41,7 +41,7 @@ class TaskJson2RDS(CopyToTable):
     sql_script = "sql/create_raw_food_inspection.sql"
     cursor = conn.cursor()
     cursor.execute(open(sql_script, "r").read())
-    sites_result = cursor.fetchall()
+    #sites_result = cursor.fetchall()
     cursor.close()
     conn.close()
 
