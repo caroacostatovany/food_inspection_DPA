@@ -6,6 +6,7 @@ import pickle
 import boto3
 import json
 import time
+import pandas as pd
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
