@@ -36,6 +36,7 @@ class TaskPreprocessingMetadata(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("parametros", "varchar"),
+               ("dia_ejecucion", "varchar"),
                ("tiempo", "float"),
                ("num_registros", "integer")]
 
@@ -47,8 +48,7 @@ class TaskPreprocessingMetadata(CopyToTable):
     def rows(self):
         path = "./tmp/luigi/eq3/preprocess_created.csv"
         data = pd.read_csv(path)
-        print("###########################################____{}".format(data.columns))
-        r = [(self.user, data.parametros[0], data.tiempo[0], data.num_registros[0])]
+        r = [(self.user, data.parametros[0], data.dia_ejecucion[0], data.tiempo[0], data.num_registros[0])]
         for element in r:
             yield element
 
@@ -92,11 +92,12 @@ class TaskPreprocessing(luigi.Task):
         if len(objects) > 0:
 
             for file in objects:
-                filename = file['Key']
-                logging.info("Leyendo {}...".format(filename))
-                json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
-                df_temp = pd.DataFrame(json_file)
-                df = pd.concat([df, df_temp], axis=0)
+                if file['Key'].find("ingestion/") >= 0 :
+                    filename = file['Key']
+                    logging.info("Leyendo {}...".format(filename))
+                    json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+                    df_temp = pd.DataFrame(json_file)
+                    df = pd.concat([df, df_temp], axis=0)
 
         # Contamos los registros
         num_registros = len(df)
@@ -114,10 +115,11 @@ class TaskPreprocessing(luigi.Task):
 
         # Debe estar creado el path tmp/luigi/eq3
         file_output = open(path,'w')
-        file_output.write("parametros,tiempo,num_registros\n")
-        file_output.write("{0};{1},{2},{3}".format(self.ingesta, self.fecha,
-                                            end_time,
-                                            num_registros))
+        file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
+        file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
+                                                   date.today(),
+                                                   end_time,
+                                                   num_registros))
         file_output.close()
 
         path_s3 = "preprocessing/{}/{}".format(self.fecha.year, self.fecha.month)

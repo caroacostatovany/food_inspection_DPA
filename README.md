@@ -115,13 +115,19 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
 
 Después de correr las instrucciones generales, escribimos algunos ejemplos de cómo correr tareas en Luigi.
 
-Sólo existen los parámetros --ingesta-inicial (que es booleano, si se escribe será Verdadero), --ingesta-consecutiva(que también es booleano) y --fecha (que se refiere a la fecha en la que se corre el proceso, si se omite será la de hoy, el formato esta en año-mes-día)
+Sólo existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", y --fecha con la que se quiere correr el pipeline. 
 
-Para ingesta inicial
->  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento --ingesta-inicial
+Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`. O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_schema.sql"
 
-Para ingesta consecutiva
-> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.almacenamiento_luigi TaskAlmacenamiento  --ingesta-consecutiva --fecha 2021-03-15
+Algunos ejemplos para correr:
+
+Para preprocesamiento
+>  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config>  luigi --module src.pipeline.preprocessing_luigi TaskPreprocessingMetadata
+ 
+
+Para feature engineering
+> 
+ 
 
 ### Sobre tus credenciales
 
@@ -134,6 +140,12 @@ food_inspections:
     app_token: "tutoken"
     username: "tuusername"
     password: "tucontraseña"
+db:
+    user: "tu_username"
+    pass: "tu_contraseña"
+    host: "tu_host"
+    port: "5432" 
+    db: "nombre_de_tu_bd"
 ```
 
 Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AWS(~/.aws/credentials) y deberá tener la estructura siguiente:
@@ -150,6 +162,10 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 
 ### ¿Qué hace el proceso de ingestión consecutiva?
 **R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1,000 y desde 7 días antes a la fecha especificada hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha_hoy}.pkl`.
+
+### ¿Qué debo cambiar si quiero adaptarlo a mi bucket?
+**R:** Si deseas cambiar algunos paths debes hacerlo en el archivo de `constants.py` que se encuentra en `src.utils`. 
+Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. Si quieres modificar los nombres de los archivos, modifica los que dicen NOMBRES.
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien las tareas de almacenamiento e ingesta, se debería ver así:
