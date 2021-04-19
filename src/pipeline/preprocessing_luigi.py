@@ -130,7 +130,7 @@ class TaskPreprocessing(luigi.Task):
 
     def output(self):
         path_s3 = "preprocessing/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "clean_data.pkl".format(self.fecha)
+        file_to_upload = "clean_data_{}.pkl".format(self.fecha)
         output_path = "s3://{}/{}/{}".format(BUCKET_NAME,
                                              path_s3,
                                              file_to_upload)
