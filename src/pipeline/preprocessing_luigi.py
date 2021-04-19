@@ -123,14 +123,14 @@ class TaskPreprocessing(luigi.Task):
         file_output.close()
 
         path_s3 = "preprocessing/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "clean_data.pkl"
+        file_to_upload = "clean_data_{}.pkl".format(self.fecha)
 
         path_run = path_s3 + "/" + file_to_upload
         guardar_ingesta(BUCKET_NAME, path_run, food_df, CREDENCIALES)
 
     def output(self):
         path_s3 = "preprocessing/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "clean_data.pkl"
+        file_to_upload = "clean_data.pkl".format(self.fecha)
         output_path = "s3://{}/{}/{}".format(BUCKET_NAME,
                                              path_s3,
                                              file_to_upload)
