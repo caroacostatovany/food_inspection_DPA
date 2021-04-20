@@ -1,5 +1,5 @@
 """
-Módulo de preprocesamiento
+Módulo de preprocesamiento y limpieza de datos
 """
 import pandas as pd
 import logging
@@ -10,11 +10,43 @@ logging.basicConfig(level=logging.INFO)
 
 
 def get_zipcode(df, geolocator, lat_field, lon_field):
+    """
+    Obtiene el código zip utilizando latitud y longitud
+
+    ==========
+    * Args:
+         - df: dataframe
+         - geolocator: objeto Nominatim de geocoder con http
+         - lat_field: latitud
+         - lon_field: longitud
+    * Return:
+         - location.raw['address']['postcode']: lista de los códigos zip
+    ==========
+    Ejemplo:
+        >> zipcodes = zip_notnull_df.apply(get_zipcode, axis=1,
+                                    geolocator=geolocator,
+                                    lat_field='latitude', lon_field='longitude')
+    """
     location = geolocator.reverse((df[lat_field], df[lon_field]))
+
     return location.raw['address']['postcode']
 
 
 def transform_label(df):
+    """
+    Transforma la etiqueta en 1 y 0.
+    > 1 para los resultados que fueron "Pass" y "Pass w/ conditions"
+    > 0 para el resto
+
+    ==========
+    * Args:
+         - df: dataframe
+    * Return:
+         - df: dataframe
+    ==========
+    Ejemplo:
+        >> food_inspection_df = transform_label(food_inspection_df)
+    """
 
     f = lambda s: 1 if (s['results'] == 'pass') or (s['results'] == 'pass w/ conditions') else 0
     df["label"] = df.apply(f, axis=1)
@@ -65,6 +97,30 @@ def change_misspelled_chicago_city_names(df):
 
 
 def convert_nan(df):
+    """
+    Imputa los valores nulos de la siguiente forma:
+    Para los valores nulos de:
+    facility_type -> unkown_facility_type
+    inspection_type -> unkown_inspection_type
+    license_ -> unkown_license
+    city -> unkown_city
+    state -> unkown_state
+    risk -> unkown_risk
+    zip -> los obtiene de la ubicación con geocoder
+
+    Corrige:
+     > para los que tienen ciudad 'chicago' a estado 'il'
+     > para el riesgo, mantiene sólo una palabra, lo que esta dentro del paréntesis
+
+    ==========
+    * Args:
+         - df: dataframe
+    * Return:
+         - df: dataframe
+    ==========
+    Ejemplo:
+        >> food_inspection_df = convert_nan(food_inspection_df)
+    """
 
     # creating bool series True for NaN values
     bool_series = pd.isnull(df['facility_type'])
@@ -114,9 +170,27 @@ def convert_nan(df):
     return df
 
 
+def preprocessing(df):
+    """
+    Hace todo el preprocesamiento y limpieza de datos:
+    > Cambiar a minúsculas las columnas tipo string
+    > Cambiar las ciudades que se nombraron mal
+    > imputar nulos
+    > Transformar la etiqueta
 
-def main_preprocessing():
-    # Obtener el dataframe...
-    df_to_lower_case(df)
-    change_misspelled_chicago_city_names(df)
+    ==========
+    * Args:
+         - df: dataframe
+    * Return:
+         - df: dataframe
+    ==========
+    Ejemplo:
+        >> food_inspection_df = preprocessing(food_inspection_df)
+    """
+    food_df = df_to_lower_case(df)
+    food_df = change_misspelled_chicago_city_names(food_df)
+    food_df = convert_nan(food_df)
+    food_df = transform_label(food_df)
+
+    return food_df
 

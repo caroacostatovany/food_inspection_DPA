@@ -7,7 +7,7 @@ import pickle
 from datetime import date, timedelta
 from sodapy import Socrata
 from src.utils.general import get_s3_credentials, get_api_token, logging
-from src.utils.constants import CREDENCIALES, BUCKET_NAME
+from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP
 
 
 def get_client():
@@ -101,14 +101,13 @@ def guardar_ingesta(bucket_name, file_to_upload, data, credenciales):
 
 def guardar_ingesta_localmente(file_to_upload, data):
     """
-    Guardar los datos dentro del path tmp/luigi
+    Guardar los datos dentro del path file_to_upload
     Inputs:
     file_to_upload(string): nombre y ruta del archivo a guardar
     data(json): objeto json con los datos
     Outputs:
     None
     """
-    #path = "./tmp/luigi/{}".format(file_to_upload)
     # Cambiar datos de formato json a objetos binario
     pickle.dump(data, file_to_upload)
     logging.info("pkl guardado exitosamente en local.")
@@ -124,7 +123,7 @@ def cargar_ingesta_local(file_to_upload):
     Outputs:
     None
     """
-    path = "./tmp/luigi/{}".format(file_to_upload)
+    path = "{}/{}".format(PATH_LUIGI_TMP, file_to_upload)
     # Cambiar datos de formato json a objetos binario
     pkl = pickle.load(open(path, "rb"))
     logging.info("pkl cargado exitosamente.")

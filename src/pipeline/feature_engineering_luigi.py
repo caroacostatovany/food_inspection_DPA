@@ -64,7 +64,7 @@ class TaskFeatureEngineering(luigi.Task):
 
     def requires(self):
         dia = self.fecha
-        return [TaskPreprocessingMetadata(self.ingesta, dia)] # Cambiar por el task de metadata de almacenamiento
+        return [TaskPreprocessingMetadata(self.ingesta, dia)]
 
     def run(self):
         start_time = time.time()
