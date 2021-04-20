@@ -11,7 +11,7 @@ from src.pipeline.ingesta_almacenamiento import get_s3_resource
 from src.pipeline.feature_engineering import feature_generation, guardar_feature_engineering
 from src.utils.general import get_db, read_pkl_from_s3
 from src.utils.constants import CREDENCIALES, BUCKET_NAME
-from src.pipeline.preprocessing_luigi import TaskPreprocessing
+from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 
 logging.basicConfig(level=logging.INFO)
 
@@ -42,7 +42,7 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
                ("num_registros", "integer")]
 
     def requires(self):
-        return [TaskPreprocessing(self.ingesta, self.fecha)]
+        return [TaskFeatureEngineering(self.ingesta, self.fecha)]
 
 
     def rows(self):
@@ -64,7 +64,7 @@ class TaskFeatureEngineering(luigi.Task):
 
     def requires(self):
         dia = self.fecha
-        return [TaskPreprocessing(self.ingesta, dia)] # Cambiar por el task de metadata de almacenamiento
+        return [TaskPreprocessingMetadata(self.ingesta, dia)] # Cambiar por el task de metadata de almacenamiento
 
     def run(self):
         start_time = time.time()
@@ -103,7 +103,7 @@ class TaskFeatureEngineering(luigi.Task):
         path = "./tmp/luigi/eq3/feature_engineering_created.csv"
 
         # Debe estar creado el path tmp/luigi/eq3
-        file_output = open(path, 'w')
+        file_output = open(path,'w')
         file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
         file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
                                                    date.today(),
