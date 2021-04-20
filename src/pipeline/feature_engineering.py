@@ -122,10 +122,12 @@ def feature_generation(df):
     logging.info("Successfully transformation of the discrete variables.'")
 
     logging.info("Converting to dataframe...")
+    del df
     X = X.todense()
     df = pd.DataFrame(X, columns=col_trans.get_feature_names())
     df['label'] = y
 
+    logging.info("Feature engineering succesfully...")
     return df
 
 
