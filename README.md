@@ -145,13 +145,15 @@ Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. 
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien las tareas de almacenamiento e ingesta, se debería ver así:
-![DAG](./images/DAG_ingesta_consecutiva_2021-03-01.jpeg?raw=true "Task Almacenamiento")
+![DAG](./images/DAG_Checkpoint_%204_042021.jpeg?raw=true "Task Almacenamiento")
 
 
 ## Arquitectura
 La arquitectura que construimos en nuestro proyecto fue la siguiente:
 ![Arquitectura](./images/ec2_security_groups.png?raw=true "Arquitectura")
 \* Tomado del github de [ITAM-DS/data-product-architecture](https://github.com/ITAM-DS/data-product-architecture)
+
+
 **Bastion:**
 - EC2 instance:  t3.small
 - Volume size:  20Gb
