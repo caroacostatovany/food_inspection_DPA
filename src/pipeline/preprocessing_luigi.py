@@ -4,13 +4,11 @@ import luigi
 import time
 from datetime import date, timedelta
 
-from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
 from src.pipeline.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
-from src.pipeline.preprocessing import df_to_lower_case, change_misspelled_chicago_city_names, convert_nan, \
-    transform_label, preprocessing
-from src.pipeline.almacenamiento_luigi import TaskAlmacenamiento
+from src.pipeline.preprocessing import preprocessing
+from src.pipeline.almacenamiento_luigi import TaskAlmacenamientoMetadata
 from src.utils.general import get_db, read_pkl_from_s3
 from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS
 
@@ -67,14 +65,14 @@ class TaskPreprocessing(luigi.Task):
         dia = self.fecha
         if self.ingesta != 'No':
             if self.ingesta == 'inicial':
-                return [TaskAlmacenamiento(True, False, dia)] # Cambiar por el task de metadata de almacenamiento
+                return [TaskAlmacenamientoMetadata(True, False, dia)] # Ya lo cambié por el task de metadata de almacenamiento
             else:
                 if self.ingesta == 'consecutiva':
-                    return [TaskAlmacenamiento(False, True, dia)] # Cambiar por el task de metadata de almacenamiento
+                    return [TaskAlmacenamientoMetadata(False, True, dia)] # Ya lo cambié por el task de metadata de almacenamiento
         else:
             while dia.weekday() != 0:
                 dia = dia - timedelta(days=1)
-            return [TaskAlmacenamiento(False, True, dia)] # Cambiar por el task de metadata de almacenamiento
+            return [TaskAlmacenamientoMetadata (False, True, dia)] # Ya lo cambié por el task de metadata de almacenamiento
 
     def run(self):
         start_time = time.time()
