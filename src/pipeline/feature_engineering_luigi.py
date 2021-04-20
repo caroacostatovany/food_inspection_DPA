@@ -10,8 +10,9 @@ from luigi.contrib.postgres import CopyToTable
 from src.pipeline.ingesta_almacenamiento import get_s3_resource
 from src.pipeline.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
 from src.utils.general import get_db, read_pkl_from_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
+from src.utils.constants import PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_xtrain, NOMBRE_FE_ytest, NOMBRE_FE_ytrain, \
+    NOMBRE_FE_full, PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,7 +47,7 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
 
 
     def rows(self):
-        path = "./tmp/luigi/eq3/feature_engineering_created.csv"
+        path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
         data = pd.read_csv(path)
         r = [(self.user, data.parametros[0], data.dia_ejecucion[0], data.tiempo[0], data.num_registros[0])]
         for element in r:
@@ -104,7 +105,7 @@ class TaskFeatureEngineering(luigi.Task):
         end_time = time.time() - start_time
 
         # Path para guardar
-        path = "./tmp/luigi/eq3/feature_engineering_created.csv"
+        path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
 
         # Debe estar creado el path tmp/luigi/eq3
         file_output = open(path,'w')
@@ -116,69 +117,61 @@ class TaskFeatureEngineering(luigi.Task):
         file_output.close()
 
         # Guardar food_df
-        path_s3 = "feature_engineering_full/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "feature_engineering_data_full_{}.pkl".format(self.fecha)
+        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
+        file_to_upload = NOMBRE_FE_full.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, food_df, CREDENCIALES)
 
         # Guardar X_train
-        path_s3 = "feature_engineering_X_train/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "feature_engineering_data_X_train_{}.pkl".format(self.fecha)
+        file_to_upload = NOMBRE_FE_xtrain.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, X_train, CREDENCIALES)
 
         # Guardar X_test
-        path_s3 = "feature_engineering_X_test/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "feature_engineering_data_X_test_{}.pkl".format(self.fecha)
+        file_to_upload = NOMBRE_FE_xtest.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, X_test, CREDENCIALES)
 
         # Guardar y_train
-        path_s3 = "feature_engineering_y_train/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "feature_engineering_data_y_train_{}.pkl".format(self.fecha)
+        file_to_upload = NOMBRE_FE_ytrain.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, X_train, CREDENCIALES)
 
         # Guardar y_test
-        path_s3 = "feature_engineering_y_test/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "feature_engineering_data_y_test_{}.pkl".format(self.fecha)
+        file_to_upload = NOMBRE_FE_ytest.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, X_test, CREDENCIALES)
 
     def output(self):
         # Full
-        path_s3_full = "feature_engineering_full/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload_full = "feature_engineering_data_full_{}.pkl".format(self.fecha)
+        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
+        file_to_upload_full = NOMBRE_FE_full.format(self.fecha)
         output_path_full = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                             path_s3_full,
+                                             path_s3,
                                              file_to_upload_full)
 
         # X_train
-        path_s3_xtrain = "feature_engineering_X_train/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload_xtrain = "feature_engineering_data_X_train_{}.pkl".format(self.fecha)
+        file_to_upload_xtrain = NOMBRE_FE_xtrain.format(self.fecha)
         output_path_xtrain = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                  path_s3_xtrain,
+                                                  path_s3,
                                                   file_to_upload_xtrain)
 
         # X_test
-        path_s3_xtest = "feature_engineering_X_test/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload_xtest = "feature_engineering_data_X_test_{}.pkl".format(self.fecha)
+        file_to_upload_xtest = NOMBRE_FE_xtest.format(self.fecha)
         output_path_xtest = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                    path_s3_xtest,
+                                                    path_s3,
                                                     file_to_upload_xtest)
 
         # y_train
-        path_s3_ytrain = "feature_engineering_y_train/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload_ytrain = "feature_engineering_data_y_train_{}.pkl".format(self.fecha)
+        file_to_upload_ytrain = NOMBRE_FE_ytrain.format(self.fecha)
         output_path_ytrain = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                    path_s3_ytrain,
+                                                    path_s3,
                                                     file_to_upload_ytrain)
 
         # y_test
-        path_s3_ytest = "feature_engineering_y_test/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload_ytest = "feature_engineering_data_y_test_{}.pkl".format(self.fecha)
+        file_to_upload_ytest = NOMBRE_FE_ytest.format(self.fecha)
         output_path_ytest = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                   path_s3_ytest,
+                                                   path_s3,
                                                    file_to_upload_ytest)
 
         return luigi.contrib.s3.S3Target(path=output_path_full), \

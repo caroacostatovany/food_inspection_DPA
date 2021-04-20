@@ -25,7 +25,11 @@ NOMBRE_PREPROCESS = "clean_data_{}.pkl"
 
 # Feature engineering:
 PATH_FE = "feature_engineering/YEAR={}/MONTH={}"
-NOMBRE_FE = "feature_engineering_inspections_{}.pkl"
+NOMBRE_FE_full = "feature_engineering_inspections_full_{}.pkl"
+NOMBRE_FE_xtrain = "feature_engineering_inspections_x_train_{}.pkl"
+NOMBRE_FE_xtest = "feature_engineering_inspections_x_test_{}.pkl"
+NOMBRE_FE_ytrain = "feature_engineering_inspections_y_train_{}.pkl"
+NOMBRE_FE_ytest = "feature_engineering_inspections_y_test_{}.pkl"
 
 # Definimos la lista de lo que queremos para nuestro feature engineering
 L = ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter']
