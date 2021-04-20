@@ -23,7 +23,7 @@ class TaskAlmacenamiento(luigi.Task):
         else:
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
 
-        return [TaskIngesta(self.ingesta_inicial, self.fecha, file_to_upload)]
+        return [TaskIngesta(self.ingesta_inicial, self.fecha, file_to_upload)] #Cambiar a TaskIngestaMetadata
 
     def run(self):
 

@@ -42,7 +42,6 @@ class TaskPreprocessingMetadata(CopyToTable):
                ("num_registros", "integer")]
 
     def requires(self):
-
         return [TaskPreprocessing(self.ingesta, self.fecha)]
 
 
