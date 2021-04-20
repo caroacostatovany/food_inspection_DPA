@@ -1,10 +1,47 @@
-from src.pipeline.ingesta_luigi import TaskIngesta
+from src.pipeline.ingesta_luigi import TaskIngestaMetadata
 from datetime import date
 import luigi
-from luigi.contrib.s3 import S3Target
+from luigi.contrib.postgres import CopyToTable
 from src.pipeline.ingesta_almacenamiento import guardar_ingesta, cargar_ingesta_local
 from src.utils.constants import BUCKET_NAME, CREDENCIALES, NOMBRE_INICIAL, PATH_INICIAL,\
     NOMBRE_CONSECUTIVO, PATH_CONSECUTIVO, PATH_LUIGI_TMP
+from src.utils.general import get_db
+
+
+class TaskAlmacenamientoMetadata(CopyToTable):
+
+    ingesta_inicial = luigi.BoolParameter(description="Parámetro booleano. Si se escribe será Verdadero, "
+                                                      "para crear la ingesta inicial")
+    ingesta_consecutiva = luigi.BoolParameter(description="Parámetro booleano. Si se escribe será Verdadero, "
+                                                          "para crear la ingesta consecutiva")
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    cred = get_db(CREDENCIALES)
+    print(cred)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "metadata.almacenamiento"
+
+    columns = [("user_id", "varchar"),
+               ("parametros", "varchar"),
+               ("dia_ejecucion", "varchar")]
+
+    def requires(self):
+        return [TaskAlmacenamiento(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
+
+
+    def rows(self):
+        #path = "./tmp/luigi/eq3/preprocess_created.csv"
+        #data = pd.read_csv(path)
+        param = "{0}; {1}; {2}".format(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)
+        r = [(self.user, param, date.today())]
+        for element in r:
+            yield element
 
 
 class TaskAlmacenamiento(luigi.Task):
@@ -23,7 +60,7 @@ class TaskAlmacenamiento(luigi.Task):
         else:
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
 
-        return [TaskIngesta(self.ingesta_inicial, self.fecha, file_to_upload)] #Cambiar a TaskIngestaMetadata
+        return [TaskIngestaMetadata(self.ingesta_inicial, self.fecha, file_to_upload)] #Ya le cambié a TaskIngestaMetadata
 
     def run(self):
 
