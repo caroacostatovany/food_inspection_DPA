@@ -123,7 +123,7 @@ def feature_generation(df):
 
     logging.info("Converting to dataframe...")
     del df
-    X = X.todense()
+    #X = X.todense()
     df = pd.DataFrame(X, columns=col_trans.get_feature_names())
     df['label'] = y
 
