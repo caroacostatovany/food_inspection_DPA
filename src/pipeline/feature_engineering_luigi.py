@@ -89,6 +89,8 @@ class TaskFeatureEngineering(luigi.Task):
                     df_temp = pd.DataFrame(json_file)
                     df = pd.concat([df, df_temp], axis=0)
 
+        print("Encabezado de df:")
+        print(df.head(5))
         # Contamos los registros
         num_registros = len(df)
 
