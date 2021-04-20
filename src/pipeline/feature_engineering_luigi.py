@@ -73,6 +73,7 @@ class TaskFeatureEngineering(luigi.Task):
         # No es lo ideal, pero por simplicidad del ejercicio
         s3 = get_s3_resource(CREDENCIALES)
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
+        print("Impresion de contenido en el S3")
         print(objects)
         # Leer el sql y ejecutarlo para borrar el esquema y crearlo de nuevo
 
