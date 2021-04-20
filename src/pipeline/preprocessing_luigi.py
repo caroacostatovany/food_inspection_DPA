@@ -2,6 +2,7 @@ import logging
 import pandas as pd
 import luigi
 import time
+from luigi.contrib.s3 import S3Target
 from datetime import date, timedelta
 
 from luigi.contrib.postgres import CopyToTable
