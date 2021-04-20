@@ -152,5 +152,24 @@ Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. 
 La arquitectura que construimos en nuestro proyecto fue la siguiente:
 ![Arquitectura](./images/ec2_security_groups.png?raw=true "Arquitectura")
 \* Tomado del github de [ITAM-DS/data-product-architecture](https://github.com/ITAM-DS/data-product-architecture)
+**Bastion:**
+- EC2 instance:  t3.small
+- Volume size:  20Gb
+- AMI:  Ubuntu 18
+- Region:  us-east-1
 
+**EC2 Procesamiento:**
+- EC2 instance:  c5.xlarge
+- Volume size:  20Gb
+- AMI:  Ubuntu 18
+- Region:  us-east-1
+
+**RDS:**
+- DB:  Postgresql 10.6
+- Class: db.t2.micro
+- Storage:  20Gb (autoscaling enabled)
+- Region:  us-east-1
+- Encryption:  Not enabled
+- Maintenance window:  Thursdays 3:35-3:55 CST
+- Public accessibility:  No
 
