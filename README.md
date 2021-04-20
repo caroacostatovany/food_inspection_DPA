@@ -144,7 +144,7 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. Si quieres modificar los nombres de los archivos, modifica los que dicen NOMBRES.
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
-**R** Si Luigi corrió bien las tareas de almacenamiento e ingesta, se debería ver así:
+**R** Si Luigi corrió bien todas las tareas, se debe ver así:
 ![](https://github.com/caroacostatovany/food_inspection_DPA/blob/main/images/DAG_Checkpoint_%204_042021.jpeg)
 
 
