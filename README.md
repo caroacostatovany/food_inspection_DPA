@@ -145,7 +145,7 @@ Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. 
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien las tareas de almacenamiento e ingesta, se debería ver así:
-![DAG](./images/DAG_Checkpoint_ 4_042021.jpeg?raw=true "Task Almacenamiento")
+![](https://github.com/caroacostatovany/food_inspection_DPA/blob/main/images/DAG_Checkpoint_%204_042021.jpeg)
 
 
 ## Arquitectura
