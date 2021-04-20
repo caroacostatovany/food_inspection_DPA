@@ -73,14 +73,13 @@ class TaskFeatureEngineering(luigi.Task):
         # No es lo ideal, pero por simplicidad del ejercicio
         s3 = get_s3_resource(CREDENCIALES)
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
-        print("Impresion de contenido en el S3")
-        print(objects)
+
         # Leer el sql y ejecutarlo para borrar el esquema y crearlo de nuevo
 
         # Ahora debemos insertar los json a la tabla vacía
         df = pd.DataFrame()
-        if len(objects) > 0:
 
+        if len(objects) > 0:
             for file in objects:
                 if file['Key'].find("preprocessing/") >= 0:
                     filename = file['Key']
@@ -89,11 +88,11 @@ class TaskFeatureEngineering(luigi.Task):
                     df_temp = pd.DataFrame(json_file)
                     df = pd.concat([df, df_temp], axis=0)
 
-        print("Encabezado de df:")
-        print(df.head(5))
+
         # Contamos los registros
         num_registros = len(df)
 
+        print("Hagamos feature engineering")
         # Comienza feature engineering
         food_df = feature_generation(df)
 
