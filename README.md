@@ -148,4 +148,9 @@ Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. 
 ![DAG](./images/DAG_ingesta_consecutiva_2021-03-01.jpeg?raw=true "Task Almacenamiento")
 
 
+## Arquitectura
+La arquitectura que construimos en nuestro proyecto fue la siguiente:
+![Arquitectura](./images/ec2_security_groups.png?raw=true "Arquitectura")
+\* Tomado del github de [ITAM-DS/data-product-architecture](https://github.com/ITAM-DS/data-product-architecture)
+
 
