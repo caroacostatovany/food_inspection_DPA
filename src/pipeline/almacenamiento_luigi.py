@@ -4,7 +4,7 @@ import luigi
 from luigi.contrib.s3 import S3Target
 from src.pipeline.ingesta_almacenamiento import guardar_ingesta, cargar_ingesta_local
 from src.utils.constants import BUCKET_NAME, CREDENCIALES, NOMBRE_INICIAL, PATH_INICIAL,\
-    NOMBRE_CONSECUTIVO, PATH_CONSECUTIVO
+    NOMBRE_CONSECUTIVO, PATH_CONSECUTIVO, PATH_LUIGI_TMP
 
 
 class TaskAlmacenamiento(luigi.Task):
@@ -33,14 +33,12 @@ class TaskAlmacenamiento(luigi.Task):
         else:
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
             path_s3 = PATH_CONSECUTIVO.format(self.fecha.year, self.fecha.month)
-        results = cargar_ingesta_local(file_to_upload)
-        #outFile = open(self.output().path, 'wb')
 
-        path_run = path_s3+"/"+file_to_upload
+        path = "{}/{}".format(PATH_LUIGI_TMP, file_to_upload)
+        results = cargar_ingesta_local(path)
+
+        path_run = "{}/{}".format(path_s3, file_to_upload)
         guardar_ingesta(BUCKET_NAME, path_run, results, CREDENCIALES)
-
-        #with self.output().open('w') as output_file:
-        #    output_file.write("test,luigi,s3")
 
     def output(self):
         if self.ingesta_inicial:

@@ -8,10 +8,11 @@ from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
 from src.pipeline.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
-from src.pipeline.preprocessing import df_to_lower_case, change_misspelled_chicago_city_names, convert_nan, transform_label
-from src.utils.general import get_db, read_pkl_from_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME
+from src.pipeline.preprocessing import df_to_lower_case, change_misspelled_chicago_city_names, convert_nan, \
+    transform_label, preprocessing
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamiento
+from src.utils.general import get_db, read_pkl_from_s3
+from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,9 +45,8 @@ class TaskPreprocessingMetadata(CopyToTable):
     def requires(self):
         return [TaskPreprocessing(self.ingesta, self.fecha)]
 
-
     def rows(self):
-        path = "./tmp/luigi/eq3/preprocess_created.csv"
+        path = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)
         data = pd.read_csv(path)
         r = [(self.user, data.parametros[0], data.dia_ejecucion[0], data.tiempo[0], data.num_registros[0])]
         for element in r:
@@ -78,15 +78,11 @@ class TaskPreprocessing(luigi.Task):
 
     def run(self):
         start_time = time.time()
-        # Por ahora vamos a borrar el esquema raw y volverlo a crear desde cero e insertar un pkl por pkl..
-        # No es lo ideal, pero por simplicidad del ejercicio
+
         s3 = get_s3_resource(CREDENCIALES)
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
-        # Leer el sql y ejecutarlo para borrar el esquema y crearlo de nuevo
-
-        # Ahora debemos insertar los json a la tabla vacía
-
+        # Ahora debemos insertar los json a la tabla vacía y sólo leerá los pkl que estan bajo el folder de ingestion
         df = pd.DataFrame()
         if len(objects) > 0:
 
@@ -101,19 +97,14 @@ class TaskPreprocessing(luigi.Task):
         # Contamos los registros
         num_registros = len(df)
 
-        food_df = df_to_lower_case(df)
-        # Creo que esta parte se puede hacer mejor en sql
-        food_df = change_misspelled_chicago_city_names(food_df)
-        # Creo que esta parte se puede hacer mejor en sql
-        food_df = convert_nan(food_df)
-        food_df = transform_label(food_df)
+        logging.info("Empezemos el preprocesamiento y limpieza de datos...")
+        food_df = preprocessing(df)
 
         end_time = time.time() - start_time
 
-        path = "./tmp/luigi/eq3/preprocess_created.csv"
+        path = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)
 
-        # Debe estar creado el path tmp/luigi/eq3
-        file_output = open(path,'w')
+        file_output = open(path, 'w')
         file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
         file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
                                                    date.today(),
@@ -121,15 +112,16 @@ class TaskPreprocessing(luigi.Task):
                                                    num_registros))
         file_output.close()
 
-        path_s3 = "preprocessing/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "clean_data_{}.pkl".format(self.fecha)
+        path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
+        file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
 
-        path_run = path_s3 + "/" + file_to_upload
+        path_run = "{}/{}".format(path_s3, file_to_upload)
         guardar_ingesta(BUCKET_NAME, path_run, food_df, CREDENCIALES)
 
     def output(self):
-        path_s3 = "preprocessing/{}/{}".format(self.fecha.year, self.fecha.month)
-        file_to_upload = "clean_data_{}.pkl".format(self.fecha)
+        path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
+        file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
+
         output_path = "s3://{}/{}/{}".format(BUCKET_NAME,
                                              path_s3,
                                              file_to_upload)

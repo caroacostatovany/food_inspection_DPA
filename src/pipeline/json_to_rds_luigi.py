@@ -12,7 +12,7 @@ from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamiento
-from src.utils.constants import BUCKET_NAME, CREDENCIALES
+from src.utils.constants import BUCKET_NAME, CREDENCIALES, PATH_LUIGI_TMP
 from src.utils.general import get_db, read_pkl_from_s3, get_db_conn_psycopg
 from src.pipeline.ingesta_almacenamiento import get_s3_resource
 
@@ -53,7 +53,7 @@ class TaskJson2RDS(CopyToTable):
 
         for file in objects:
             filename = file['Key']
-            print("Leyendo {}...".format(filename))
+            logging.info("Leyendo {}...".format(filename))
             json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
             df_temp = pd.DataFrame(json_file)
             df = pd.concat([df, df_temp], axis=0)
@@ -64,9 +64,8 @@ class TaskJson2RDS(CopyToTable):
 
     end_time = time.time() - start_time
 
-    path = "./tmp/luigi/eq3/raw_created.txt"
+    path = "{}/raw_created.txt".format(PATH_LUIGI_TMP)
 
-    # Debe estar creado el path tmp/luigi/eq3
     #file_output = open(path,'w')
     #file_output.write("{{parametros:{0},{1}},"
     #                  "{dia_ejecucion: {2}},"
@@ -159,7 +158,7 @@ class TaskRawTableMetadata(CopyToTable):
 
 
     def rows(self):
-        path = "./tmp/luigi/eq3/raw_created.txt"
+        path = "{}/raw_created.txt".format(PATH_LUIGI_TMP)
         f = open(path, "r")
         r = [(self.user, f.read())]
         for element in r:

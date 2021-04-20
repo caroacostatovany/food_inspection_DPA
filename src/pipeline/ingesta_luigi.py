@@ -8,6 +8,8 @@ from luigi.contrib.s3 import S3Target
 from src.pipeline.ingesta_almacenamiento import get_client, ingesta_inicial, ingesta_consecutiva, \
     guardar_ingesta_localmente
 
+from src.utils.constants import PATH_LUIGI_TMP
+
 
 class TaskIngesta(luigi.Task):
 
@@ -27,6 +29,6 @@ class TaskIngesta(luigi.Task):
         guardar_ingesta_localmente(outFile, data=results)
 
     def output(self):
-        path = "./tmp/luigi/{}".format(self.file_to_upload)
+        path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
         return luigi.local_target.LocalTarget(path)
         # return luigi.contrib.s3.S3Target('s3://{}/{}'.format(BUCKET_NAME, self.file_to_upload))

@@ -72,44 +72,8 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 2. En la terminal, posiciónate en la raíz del repositorio y ejecuta:
 >  `export PYTHONPATH=$PWD`
 
-
-### Ejecución De Funciones
-
-1. Una  vez creado el ambiente virtual y habiendo agregado el proyecto como variable de PYTHONPATH, puedes hacer uso de las funciones descritas en cada archivo.
-
 **Notas:** en `src/utils/constants.py` mantenemos las constantes de nuestro proyecto, donde tenemos referenciado el nombre de nuestro bucket: ` "data-product-architecture-equipo-3"`  y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
-Si quieres acceder a diferentes buckets con otras credenciales esto se deberá cambiar en el archivo de las constantes.
-
-#### Ejemplo de script para ingesta inicial:
-
-    from src.pipeline.ingesta_almacenamiento import ingesta_inicial, get_client
-    from datetime import date
-    
-    # Nos conectamos a data.cityofchicago.org a través de Socrata
-    cliente=get_client()
-    
-    # Hacemos la ingesta inicial
-    ingesta_inicial(cliente) # El límite está por default a 300,000. En dado caso que se quiera cambiar, debe ser ingesta_inicial(cliente, limite=<nuevo_limite>)
-
-#### Ejemplo de script para ingesta consecutiva:
-
-    from src.pipeline.ingesta_almacenamiento import ingesta_consecutiva, get_client
-    from datetime import date
-    
-    # Nos conectamos a data.cityofchicago.org a través de Socrata
-    cliente=get_client()
-
-    fecha=date.today()
-
-    # Hacemos la ingesta consecutiva
-    ingesta_consecutiva(cliente, fecha) # El límite está por default a 1,000. En dado caso que se quiera cambiar, debe ser ingesta_consecutiva(cliente, fecha, limite=<nuevo_limite>)
-
-
-### De Notebooks
-
-1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`.
-2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
-> `jupyter notebook`
+Si quieres acceder a diferentes buckets con otras credenciales esto se deberá cambiar en el archivo de las constantes. También hay un **FAQ** al último de este archivo, donde podrás encontrar más respuestas sobre las constantes.
 
 ### Con Luigi
 
@@ -117,17 +81,23 @@ Después de correr las instrucciones generales, escribimos algunos ejemplos de c
 
 Sólo existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", y --fecha con la que se quiere correr el pipeline. 
 
-Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`. O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_schema.sql"
+**Nota:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`. O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql"
 
 Algunos ejemplos para correr:
 
 Para preprocesamiento
 >  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config>  luigi --module src.pipeline.preprocessing_luigi TaskPreprocessingMetadata
- 
 
 Para feature engineering
-> 
+> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config>  luigi --module src.pipeline.feature_engineering_luigi TaskFeatureEngineeringMetadata
  
+
+### De Notebooks
+
+1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`.
+2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
+> `jupyter notebook`
+
 
 ### Sobre tus credenciales
 
@@ -163,7 +133,13 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 ### ¿Qué hace el proceso de ingestión consecutiva?
 **R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1,000 y desde 7 días antes a la fecha especificada hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha_hoy}.pkl`.
 
-### ¿Qué debo cambiar si quiero adaptarlo a mi bucket?
+### ¿Qué contiene el preprocessing?
+**R:** La función de `preprocessing` cambia todas las columnas de tipo string a minúsculas, renombra la ciudad de chicago a los que fueron mal escritos, se imputan valores nulos con ciertas características (ver función `convert_nan`) y transforma la etiqueta en 0 y 1 (1 para los resultados en "Pass" y "Pass w/ conditions", 0 para el resto). 
+
+### ¿Qué contiene el feature engineering?
+**R:** La función de `feature generation` transforma las fechas a su tipo date, quita renglones donde tenga algún nulo que no se pudo limpiar en el preprocessing y agrega nuevas variables como: 'year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter', 'num_violations' y por último hace la transformación de features categóricos con OneHotEncoder. 
+
+### ¿Qué debo cambiar si quiero adaptarlo a mi bucket y PATHS?
 **R:** Si deseas cambiar algunos paths debes hacerlo en el archivo de `constants.py` que se encuentra en `src.utils`. 
 Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. Si quieres modificar los nombres de los archivos, modifica los que dicen NOMBRES.
 

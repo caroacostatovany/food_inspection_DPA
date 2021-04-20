@@ -47,13 +47,12 @@ def aggregate_num_violations(df):
     Si esta en nulo, tiene 0 violaciones, independientemente del resultado o riesgo.
     ==========
     * Args:
-         - lista: ejemplo >> ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter']
-         - df
+         - df: dataframe
     * Return:
          - df: dataframe con las nuevas columnas
     ==========
     Ejemplo:
-        >> food_inspection_df = transformate_and_aggregate_dates(L, food_inspection_df)
+        >> food_inspection_df = aggregate_num_violations(food_inspection_df)
     """
     f = lambda x: len(x['violations'].split('|')) if type(x['violations']) == str else 0
     df["num_violations"] = df.apply(f, axis=1)
@@ -87,9 +86,15 @@ def remove_non_useful_columns(df):
 
 def remove_nan_rows(df):
     """
-    Elimiinar renglones con nan
-    :param df: dataframe con nan's
-    :return: dataframe sin nan's
+    Eliminar renglones con nan
+    ==========
+    * Args:
+         - df: dataframe con nan's
+    * Return:
+         - df: dataframe sin nan's
+    ==========
+    Ejemplo:
+        >> food_inspection_df = remove_nan_rows(food_inspection_df)
     """
 
     df = df.dropna()
@@ -99,10 +104,15 @@ def remove_nan_rows(df):
 def feature_generation(df):
     """
     Generación de variables a formato deseable para análisis de datos y futuro modelado
-    :param df: dataframe
-    :return: dataframe con variables generadas
+    ==========
+    * Args:
+         - df: dataframe
+    * Return:
+         - df: dataframe con variables generadas
+    ==========
+    Ejemplo:
+        >> food_inspection_df = feature_generation(food_inspection_df)
     """
-
 
     df = transformate_and_aggregate_dates(df)
     df = aggregate_num_violations(df)
@@ -134,9 +144,15 @@ def feature_generation(df):
 
 def feature_selection(df):
     """
-    Selección de variables, partición de datos en entrenamiento y test
-    :param df: dataframe
-    :return: datos para entrenamiento y prueba
+    Selección de variables, partición de datos en entrenamiento y test con 70% para entrenamiento y 30% de prueba
+    ==========
+    * Args:
+         - df: dataframe
+    * Return:
+         - X_train, X_test, y_train, y_test:  datos para entrenamiento y prueba
+    ==========
+    Ejemplo:
+        >> X_train, X_test, y_train, y_test = feature_selection(food_inspection_df)
     """
     # Separación en train y test manualmente para no hacer data leaking
     lim = round(df.shape[0] * .70)  # 70% de train
@@ -144,24 +160,3 @@ def feature_selection(df):
     y_train, y_test = df[['label']][:lim], df[['label']][lim:]
 
     return X_train, X_test, y_train, y_test
-
-def guardar_feature_engineering(bucket_name, file_to_upload, data, credenciales):
-    """
-    Guardar los datos dentro del bucket en el path especificado
-    Inputs:
-    bucket_name:  bucket s3
-    file_to_upload(string): nombre y ruta del archivo a guardar
-    data(json): objeto json con los datos
-    Outputs:
-    None
-    """
-
-    # Obtener bucket
-    s3 = get_s3_resource(credenciales)
-
-    # Cambiar datos de formato json a objetos binario
-    pickle_dump = pickle.dumps(data)
-
-    # Guardar los datos (pickle) en el bucket y ruta específica
-    s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
-    logging.info("pkl guardado exitosamente.")
