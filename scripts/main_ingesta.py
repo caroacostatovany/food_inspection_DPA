@@ -3,9 +3,8 @@ from datetime import date
 
 cliente=get_client()
 # Probamos para guardar la ingesta inicial
-ingesta_inicial(cliente)
+#ingesta_inicial(cliente)
 
 # Probamos para guardar la ingesta consecutiva
 fecha=date.today()
 ingesta_consecutiva(cliente, fecha)
-

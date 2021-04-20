@@ -2,6 +2,7 @@
 Módulo de feature engineering
 """
 import pandas as pd
+import pickle
 import logging
 
 from sklearn.preprocessing import OneHotEncoder
@@ -12,7 +13,7 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn import metrics
 
 from src.utils.constants import L
-
+from src.pipeline.ingesta_almacenamiento import get_s3_resource
 logging.basicConfig(level=logging.INFO)
 
 
@@ -85,15 +86,27 @@ def remove_non_useful_columns(df):
 
 
 def remove_nan_rows(df):
+    """
+    Elimiinar renglones con nan
+    :param df: dataframe con nan's
+    :return: dataframe sin nan's
+    """
 
     df = df.dropna()
     return df
 
 
 def feature_generation(df):
+    """
+    Generación de variables a formato deseable para análisis de datos y futuro modelado
+    :param df: dataframe
+    :return: dataframe con variables generadas
+    """
+
+
     df = transformate_and_aggregate_dates(df)
     df = aggregate_num_violations(df)
-
+    df = remove_non_useful_columns(df)
 
     # Aplicamos OneHot Encoder para las categóricas
     transformers = [('one_hot', OneHotEncoder(), ['facility_type', 'risk',
@@ -117,11 +130,35 @@ def feature_generation(df):
 
 
 def feature_selection(df):
-
+    """
+    Selección de variables, partición de datos en entrenamiento y test
+    :param df: dataframe
+    :return: datos para entrenamiento y prueba
+    """
     # Separación en train y test manualmente para no hacer data leaking
     lim = round(df.shape[0] * .70)  # 70% de train
     X_train, X_test = df[:lim].drop('label', axis=1), df[lim:].drop('label', axis=1)
     y_train, y_test = df[['label']][:lim], df[['label']][lim:]
 
-    return  X_train, X_test, y_train, y_test
+    return X_train, X_test, y_train, y_test
 
+def guardar_feature_engineering(bucket_name, file_to_upload, data, credenciales):
+    """
+    Guardar los datos dentro del bucket en el path especificado
+    Inputs:
+    bucket_name:  bucket s3
+    file_to_upload(string): nombre y ruta del archivo a guardar
+    data(json): objeto json con los datos
+    Outputs:
+    None
+    """
+
+    # Obtener bucket
+    s3 = get_s3_resource(credenciales)
+
+    # Cambiar datos de formato json a objetos binario
+    pickle_dump = pickle.dumps(data)
+
+    # Guardar los datos (pickle) en el bucket y ruta específica
+    s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
+    logging.info("pkl guardado exitosamente.")
