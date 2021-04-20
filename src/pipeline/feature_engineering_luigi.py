@@ -56,8 +56,8 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
 class TaskFeatureEngineering(luigi.Task):
 
     ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
-                                          "'inicial': Para correr una ingesta inicial. "
-                                          "'consecutiva': Para correr una ingesta consecutiva")
+                                                        "'inicial': Para correr una ingesta inicial."
+                                                        "'consecutiva': Para correr una ingesta consecutiva")
 
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
@@ -73,11 +73,10 @@ class TaskFeatureEngineering(luigi.Task):
         # No es lo ideal, pero por simplicidad del ejercicio
         s3 = get_s3_resource(CREDENCIALES)
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
-
+        print(objects)
         # Leer el sql y ejecutarlo para borrar el esquema y crearlo de nuevo
 
         # Ahora debemos insertar los json a la tabla vacía
-
         df = pd.DataFrame()
         if len(objects) > 0:
 
