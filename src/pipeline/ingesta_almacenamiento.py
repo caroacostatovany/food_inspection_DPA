@@ -123,7 +123,7 @@ def cargar_ingesta_local(file_to_upload):
     Outputs:
     None
     """
-    path = "{}/{}".format(PATH_LUIGI_TMP, file_to_upload)
+    path = file_to_upload
     # Cambiar datos de formato json a objetos binario
     pkl = pickle.load(open(path, "rb"))
     logging.info("pkl cargado exitosamente.")
