@@ -1,11 +1,14 @@
-from src.pipeline.ingesta_luigi import TaskIngestaMetadata
+
 from datetime import date
 import luigi
+
 from luigi.contrib.postgres import CopyToTable
-from src.pipeline.ingesta_almacenamiento import guardar_ingesta, cargar_ingesta_local
+
 from src.utils.constants import BUCKET_NAME, CREDENCIALES, NOMBRE_INICIAL, PATH_INICIAL,\
     NOMBRE_CONSECUTIVO, PATH_CONSECUTIVO, PATH_LUIGI_TMP
 from src.utils.general import get_db
+from src.etl.ingesta_almacenamiento import guardar_ingesta, cargar_ingesta_local
+from src.pipeline.ingesta_luigi import TaskIngestaMetadata
 
 
 class TaskAlmacenamientoMetadata(CopyToTable):

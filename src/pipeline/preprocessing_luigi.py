@@ -2,13 +2,14 @@ import logging
 import pandas as pd
 import luigi
 import time
+
 from luigi.contrib.s3 import S3Target
 from datetime import date, timedelta
 
 from luigi.contrib.postgres import CopyToTable
 
-from src.pipeline.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
-from src.pipeline.preprocessing import preprocessing
+from src.etl.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
+from src.etl.preprocessing import preprocessing
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamientoMetadata
 from src.utils.general import get_db, read_pkl_from_s3
 from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS

@@ -3,12 +3,16 @@ Módulo de funciones para ingesta y almacenamiento
 """
 import boto3
 import pickle
+import logging
 
 from datetime import date, timedelta
 from sodapy import Socrata
+
 from src.utils.general import get_s3_credentials, get_api_token, logging
 from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP
 
+
+logging.basicConfig(level=logging.INFO)
 
 def get_client():
     """

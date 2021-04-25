@@ -7,8 +7,8 @@ from datetime import date, timedelta
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
-from src.pipeline.ingesta_almacenamiento import get_s3_resource
-from src.pipeline.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
+from src.etl.ingesta_almacenamiento import get_s3_resource
+from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
 from src.utils.general import get_db, read_pkl_from_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.utils.constants import PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_xtrain, NOMBRE_FE_ytest, NOMBRE_FE_ytrain, \
@@ -44,7 +44,6 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
 
     def requires(self):
         return [TaskFeatureEngineering(self.ingesta, self.fecha)]
-
 
     def rows(self):
         path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)

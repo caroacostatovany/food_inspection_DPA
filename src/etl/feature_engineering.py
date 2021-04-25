@@ -1,6 +1,7 @@
 """
 Módulo de feature engineering
 """
+
 import pandas as pd
 import pickle
 import logging
@@ -13,7 +14,8 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn import metrics
 
 from src.utils.constants import L
-from src.pipeline.ingesta_almacenamiento import get_s3_resource
+from src.etl.ingesta_almacenamiento import get_s3_resource
+
 logging.basicConfig(level=logging.INFO)
 
 

@@ -2,11 +2,16 @@
 from datetime import date
 import luigi
 import logging
+
 from luigi.contrib.postgres import CopyToTable
-from src.pipeline.ingesta_almacenamiento import get_client, ingesta_inicial, ingesta_consecutiva, \
+
+from src.etl.ingesta_almacenamiento import get_client, ingesta_inicial, ingesta_consecutiva, \
     guardar_ingesta_localmente
 from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES
 from src.utils.general import get_db
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 class TaskIngestaMetadata(CopyToTable):
@@ -32,10 +37,7 @@ class TaskIngestaMetadata(CopyToTable):
     def requires(self):
         return [TaskIngesta(self.inicial, self.fecha, self.file_to_upload)]
 
-
     def rows(self):
-        #path = "./tmp/luigi/eq3/preprocess_created.csv"
-        #data = pd.read_csv(path)
         param = "{0}; {1}; {2}".format(self.inicial, self.fecha, self.file_to_upload)
         r = [(self.user, param, date.today())]
         for element in r:
@@ -62,4 +64,3 @@ class TaskIngesta(luigi.Task):
     def output(self):
         path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
         return luigi.local_target.LocalTarget(path)
-        # return luigi.contrib.s3.S3Target('s3://{}/{}'.format(BUCKET_NAME, self.file_to_upload))
