@@ -4,7 +4,7 @@ import luigi
 import logging
 
 from luigi.contrib.postgres import CopyToTable
-
+from luigi.contrib.s3 import S3Target
 from src.etl.ingesta_almacenamiento import get_client, ingesta_inicial, ingesta_consecutiva, \
     guardar_ingesta_localmente
 from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES
@@ -35,7 +35,7 @@ class TaskIngestaUnitTesting(CopyToTable):
                ("task", "varchar")]
 
     unit_testing = TestIngesta()
-    print(unit_testing)
+    print("#############################################################{}".format(unit_testing))
 
     def requires(self):
         return [TaskIngesta(self.inicial, self.fecha, self.file_to_upload)]
