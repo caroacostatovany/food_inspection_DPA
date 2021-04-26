@@ -27,7 +27,6 @@ class TaskPreprocessingMetadata(CopyToTable):
                                                                   "Formato 'año-mes-día'")
 
     cred = get_db(CREDENCIALES)
-    print(cred)
     user = cred['user']
     password = cred['pass']
     database = cred['db']

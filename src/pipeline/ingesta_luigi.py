@@ -21,7 +21,6 @@ class TaskIngestaUnitTesting(CopyToTable):
     file_to_upload = luigi.Parameter()
 
     cred = get_db(CREDENCIALES)
-    print(cred)
     user = cred['user']
     password = cred['pass']
     database = cred['db']
@@ -34,13 +33,15 @@ class TaskIngestaUnitTesting(CopyToTable):
                ("parametros", "varchar"),
                ("task", "varchar")]
 
-    unit_testing = TestIngesta()
-    print("#############################################################{}".format(unit_testing))
 
     def requires(self):
         return [TaskIngesta(self.inicial, self.fecha, self.file_to_upload)]
 
     def rows(self):
+
+        unit_testing = TestIngesta()
+        path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
+        unit_testing.test_ingesta(path)
         param = "{0}; {1}; {2}".format(self.inicial, self.fecha, self.file_to_upload)
         r = [(self.user, param, "ingesta")]
         for element in r:
@@ -54,7 +55,6 @@ class TaskIngestaMetadata(CopyToTable):
     file_to_upload = luigi.Parameter()
 
     cred = get_db(CREDENCIALES)
-    print(cred)
     user = cred['user']
     password = cred['pass']
     database = cred['db']
