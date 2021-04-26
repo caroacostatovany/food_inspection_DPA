@@ -14,6 +14,7 @@ from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP
 
 logging.basicConfig(level=logging.INFO)
 
+
 def get_client():
     """
     Esta función genera un cliente con un token previamente generado
@@ -49,7 +50,7 @@ def ingesta_inicial(cliente, limite=300000):
     """
 
     # Obtener los ultimos "limite" datos
-    logging.info("Obteniendo todos los resultados de Chicago food inspections... ")
+    logging.info("Obteniendo todos los resultados de Chicago food inspections...")
     results = cliente.get("4ijn-s7e5", limit=limite)
     logging.info("Listo!")
 
