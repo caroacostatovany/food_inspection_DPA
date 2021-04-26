@@ -8,6 +8,49 @@ from src.utils.constants import BUCKET_NAME, CREDENCIALES, NOMBRE_INICIAL, PATH_
 from src.utils.general import get_db
 from src.etl.ingesta_almacenamiento import guardar_ingesta, cargar_ingesta_local
 from src.pipeline.ingesta_luigi import TaskIngestaMetadata
+from src.unit_testing.test_almacenamiento import TestAlmacenamiento
+
+
+class TaskAlmacenamientoUnitTesting(CopyToTable):
+
+    ingesta_inicial = luigi.BoolParameter(description="Parámetro booleano. Si se escribe será Verdadero, "
+                                                      "para crear la ingesta inicial")
+    ingesta_consecutiva = luigi.BoolParameter(description="Parámetro booleano. Si se escribe será Verdadero, "
+                                                          "para crear la ingesta consecutiva")
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "test.unit_testing"
+
+    columns = [("user_id", "varchar"),
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
+
+    def requires(self):
+        return [TaskAlmacenamiento(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
+
+    def rows(self):
+        if self.ingesta_inicial:
+            path_s3 = PATH_INICIAL.format(self.fecha.year, self.fecha.month)
+            file_to_upload = NOMBRE_INICIAL.format(self.fecha)
+        else:
+            file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
+            path_s3 = PATH_CONSECUTIVO.format(self.fecha.year, self.fecha.month)
+
+        path = "{}/{}".format(path_s3,file_to_upload)
+        unit_testing = TestAlmacenamiento()
+        unit_testing.test_almacenamiento_json(path)
+
+        r = [(self.user, "almacenamiento", "test_almacenamiento_json")]
+        for element in r:
+            yield element
 
 
 class TaskAlmacenamientoMetadata(CopyToTable):
@@ -20,7 +63,6 @@ class TaskAlmacenamientoMetadata(CopyToTable):
                                                                   "Formato 'año-mes-día'")
 
     cred = get_db(CREDENCIALES)
-    print(cred)
     user = cred['user']
     password = cred['pass']
     database = cred['db']
@@ -34,12 +76,9 @@ class TaskAlmacenamientoMetadata(CopyToTable):
                ("dia_ejecucion", "varchar")]
 
     def requires(self):
-        return [TaskAlmacenamiento(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
-
+        return [TaskAlmacenamientoUnitTesting(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
 
     def rows(self):
-        #path = "./tmp/luigi/eq3/preprocess_created.csv"
-        #data = pd.read_csv(path)
         param = "{0}; {1}; {2}".format(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)
         r = [(self.user, param, date.today())]
         for element in r:
@@ -62,7 +101,7 @@ class TaskAlmacenamiento(luigi.Task):
         else:
             file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
 
-        return [TaskIngestaMetadata(self.ingesta_inicial, self.fecha, file_to_upload)] #Ya le cambié a TaskIngestaMetadata
+        return [TaskIngestaMetadata(self.ingesta_inicial, self.fecha, file_to_upload)]
 
     def run(self):
 

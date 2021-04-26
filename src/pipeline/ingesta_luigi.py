@@ -30,8 +30,8 @@ class TaskIngestaUnitTesting(CopyToTable):
     table = "test.unit_testing"
 
     columns = [("user_id", "varchar"),
-               ("parametros", "varchar"),
-               ("task", "varchar")]
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
 
 
     def requires(self):
@@ -42,8 +42,8 @@ class TaskIngestaUnitTesting(CopyToTable):
         unit_testing = TestIngesta()
         path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
         unit_testing.test_ingesta(path)
-        param = "{0}; {1}; {2}".format(self.inicial, self.fecha, self.file_to_upload)
-        r = [(self.user, param, "ingesta")]
+        # param = "{0}; {1}; {2}".format(self.inicial, self.fecha, self.file_to_upload)
+        r = [(self.user, "ingesta", "test_ingesta")]
         for element in r:
             yield element
 
