@@ -45,11 +45,16 @@ class TaskFeatureEngineeringUnitTesting(CopyToTable):
         return [TaskFeatureEngineering(self.ingesta, self.fecha)]
 
     def rows(self):
+        s3 = get_s3_resource(CREDENCIALES)
+        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
+        file_to_upload_xtrain = NOMBRE_FE_xtrain.format(self.fecha)
+        filename = "{}/{}".format(path_s3, file_to_upload_xtrain)
 
         unit_testing = TestFeatureEngineering()
-        #path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
-        unit_testing.test_feature_engineering()
-        r = [(self.user, "feature_engineering", "test_feature_engineering")]
+
+        df = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+        unit_testing.test_feature_engineering_month(df)
+        r = [(self.user, "feature_engineering", "test_feature_engineering_month")]
         for element in r:
             yield element
 
@@ -80,7 +85,7 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
                ("num_registros", "integer")]
 
     def requires(self):
-        return [TaskFeatureEngineering(self.ingesta, self.fecha)]
+        return [TaskFeatureEngineeringUnitTesting(self.ingesta, self.fecha)]
 
     def rows(self):
         path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)

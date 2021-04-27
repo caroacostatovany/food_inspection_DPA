@@ -15,4 +15,4 @@ class TestPreprocessing(marbles.core.TestCase, mixins.CategoricalMixins):
 
     def test_preprocessing_label(self, df):
         """Revisa la etiqueta sea 0 ó 1"""
-        self.assertCategoricalLevelsEqual(df['label'], self.labels)
+        self.assertCategoricalLevelsEqual(df['label'], self.labels, note="La etiqueta sólo puede contener valores de 0 y 1")
