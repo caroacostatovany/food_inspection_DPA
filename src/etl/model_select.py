@@ -5,6 +5,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 def best_model_selection(threshold, objects, s3):
     """
     Selección del mejor modelo de acuerdo al criterio del cliente
@@ -15,7 +16,6 @@ def best_model_selection(threshold, objects, s3):
     best_model = ''
     best_score = 0
     max_score = 0
-
 
     # Leyendo modelos
     if len(objects) > 0:

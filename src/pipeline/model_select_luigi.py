@@ -27,6 +27,11 @@ class TaskModelSelectUnitTesting(CopyToTable):
 
     threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description="gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                            "randomclassifier: Si quieres que cree un modelo random classifier."
+                                            "decisiontree: Si quieres que cree un modelo con decision tree.")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -40,7 +45,7 @@ class TaskModelSelectUnitTesting(CopyToTable):
                ("prueba", "varchar")]
 
     def requires(self):
-        return [TaskModelSelection(self.ingesta, self.fecha, self.threshold)]
+        return [TaskModelSelection(self.ingesta, self.fecha, self.threshold, self.algoritmo)]
 
     def rows(self):
         s3 = get_s3_resource(CREDENCIALES)
@@ -72,6 +77,11 @@ class TaskModelSelectionMetadata(CopyToTable):
 
     threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description="gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                            "randomclassifier: Si quieres que cree un modelo random classifier."
+                                            "decisiontree: Si quieres que cree un modelo con decision tree.")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -86,7 +96,7 @@ class TaskModelSelectionMetadata(CopyToTable):
                ("dia_ejecucion", "varchar")]
 
     def requires(self):
-        return [TaskModelSelectUnitTesting(self.ingesta, self.fecha, self.threshold)]
+        return [TaskModelSelectUnitTesting(self.ingesta, self.fecha, self.threshold, self.algoritmo)]
 
     def rows(self):
         param = "{0}; {1}".format(self.ingesta, self.fecha)
@@ -106,11 +116,16 @@ class TaskModelSelection(luigi.Task):
 
     threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description="gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                            "randomclassifier: Si quieres que cree un modelo random classifier."
+                                            "decisiontree: Si quieres que cree un modelo con decision tree.")
+
     best_model = ''
 
     def requires(self):
         dia = self.fecha
-        return [TaskTrainingMetadata(self.ingesta, dia)]
+        return [TaskTrainingMetadata(self.ingesta, dia, self.algoritmo)]
 
     def run(self):
 
@@ -128,8 +143,6 @@ class TaskModelSelection(luigi.Task):
         path_run = path_s3 + "/" + file_to_upload
         guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, self.best_model)
         #guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
-
-
 
     def output(self):
         # Best model selection

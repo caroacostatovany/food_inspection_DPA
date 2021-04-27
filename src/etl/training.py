@@ -11,13 +11,13 @@ import time
 
 logging.basicConfig(level=logging.INFO)
 
+
 def fit_training_food(X_train, y_train, algorithm):
     """
-    Evaluación de metodología Magic Loop en la etapa de modelling
+    Entrenamiento de algoritmo
     :df: dataframe
     :best_model: mejor modelo
     """
-
 
     # Empezar proceso
     logging.info("Model selection processing...")

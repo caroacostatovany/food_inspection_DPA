@@ -18,6 +18,7 @@ from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_
     NOMBRE_FE_xtrain, NOMBRE_FE_ytrain
 from src.utils.model_constants import ALGORITHMS
 from src.unit_testing.test_training import TestTraining
+from sklearn.dummy import DummyClassifier
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,6 +32,11 @@ class TaskTrainingUnitTesting(CopyToTable):
 
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
+
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description="gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                            "randomclassifier: Si quieres que cree un modelo random classifier."
+                                            "decisiontree: Si quieres que cree un modelo con decision tree.")
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
@@ -46,7 +52,7 @@ class TaskTrainingUnitTesting(CopyToTable):
                ("prueba", "varchar")]
 
     def requires(self):
-        return [TaskTraining(self.ingesta, self.fecha)]
+        return [TaskTraining(self.ingesta, self.fecha, self.algoritmo)]
 
     def rows(self):
         s3 = get_s3_resource(CREDENCIALES)
@@ -54,8 +60,16 @@ class TaskTrainingUnitTesting(CopyToTable):
 
         unit_testing = TestTraining()
 
-        for algorithm in ALGORITHMS:
-            filename = NOMBRE_TR.format(algorithm, self.fecha)
+        if self.algoritmo == 'gridsearch':
+
+            for algorithm in ALGORITHMS:
+                filename = NOMBRE_TR.format(algorithm, self.fecha)
+                path_name = "{}/{}".format(path_s3, filename)
+                pkl_file = read_pkl_from_s3(s3, BUCKET_NAME, path_name)
+                unit_testing.test_training_gs(pkl_file)
+
+        else:
+            filename = NOMBRE_TR.format(self.algorithm, self.fecha)
             path_name = "{}/{}".format(path_s3, filename)
             pkl_file = read_pkl_from_s3(s3, BUCKET_NAME, path_name)
             unit_testing.test_training_gs(pkl_file)
@@ -75,6 +89,11 @@ class TaskTrainingMetadata(CopyToTable):
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
 
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description = "gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                              "randomclassifier: Si quieres que cree un modelo random classifier."
+                                              "decisiontree: Si quieres que cree un modelo con decision tree.")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -91,7 +110,7 @@ class TaskTrainingMetadata(CopyToTable):
                ("y_train_file", "varchar")]
 
     def requires(self):
-        return [TaskTrainingUnitTesting(self.ingesta, self.fecha)]
+        return [TaskTrainingUnitTesting(self.ingesta, self.fecha, self.algoritmo)]
 
     def rows(self):
 
@@ -114,6 +133,12 @@ class TaskTraining(luigi.Task):
 
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
+
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description="gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                            "randomclassifier: Si quieres que cree un modelo random classifier."
+                                            "decisiontree: Si quieres que cree un modelo con decision tree."
+                                            "dummyclassifier: Si quieres que cree un modelo dummy classifier")
 
     def requires(self):
         dia = self.fecha
@@ -148,22 +173,34 @@ class TaskTraining(luigi.Task):
         file_output = open(path, 'w')
         file_output.write("fecha;algoritmo;parametros;xtrain;ytrain\n")
 
-        # Entrenamiento de modelos
-        for algorithm in ALGORITHMS:
-            model = fit_training_food(X_train, y_train, algorithm)
+        path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
 
-            # Guardar best model
-            path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
-            file_to_upload = NOMBRE_TR.format(algorithm, self.fecha)
+        # Para mejora, aquí se tendría que modificar la parte de entrenamiento para hacer de acuerdo al algoritmo
+        if self.algoritmo == 'gridsearch':
+            # Entrenamiento de modelos
+            for algorithm in ALGORITHMS:
+                model = fit_training_food(X_train, y_train, algorithm)
+
+                file_to_upload = NOMBRE_TR.format(algorithm, self.fecha)
+                path_run = path_s3 + "/" + file_to_upload
+                guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, model)
+
+                file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, algorithm,
+                                                           model.best_params_,
+                                                           X_train_file, y_train_file))
+
+        if self.algoritmo == 'dummylassifier':
+            dummy_clf = DummyClassifier(strategy="most_frequent")
+            dummy = dummy_clf.fit(X, y)
+
+            file_to_upload = NOMBRE_TR.format(self.algorithm, self.fecha)
             path_run = path_s3 + "/" + file_to_upload
-            guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, model)
-            #guardar_feature_engineering(BUCKET_NAME, path_run, model, CREDENCIALES)
+            guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, dummy)
 
-            
-            # Debe estar creado el path tmp/luigi/eq3
-            file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, algorithm,
-                                                       model.best_params_,
-                                                       X_train_file, y_train_file))
+            file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, self.algorithm,
+                                                             "strategy:most_frequent",
+                                                             X_train_file, y_train_file))
+
         file_output.close()
 
     def output(self):
