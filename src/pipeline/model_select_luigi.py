@@ -40,7 +40,7 @@ class TaskModelSelectUnitTesting(CopyToTable):
                ("dia_ejecucion", "varchar")]
 
     def requires(self):
-        return [TaskModelSelection(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
+        return [TaskModelSelection(self.ingesta, self.fecha, self.threshold)]
 
     def rows(self):
         s3 = get_s3_resource(CREDENCIALES)
