@@ -44,9 +44,15 @@ class TaskPreprocessingUnitTesting(CopyToTable):
 
     def rows(self):
 
+        path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
+        file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
+        filename = "{}/{}".format(path_s3, file_to_upload)
+
         unit_testing = TestPreprocessing()
-        #path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
+
+        df = read_pkl_from_s3(s3, BUCKET_NAME, filename)
         unit_testing.test_preprocessing_label(df)
+
         r = [(self.user, "preprocessing", "test_preprocessing_label")]
         for element in r:
             yield element
