@@ -13,8 +13,44 @@ from src.utils.general import get_db, read_pkl_from_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.utils.constants import PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_xtrain, NOMBRE_FE_ytest, NOMBRE_FE_ytrain, \
     NOMBRE_FE_full, PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME
+from src.unit_testing.test_feature_engineering import TestFeatureEngineering
 
 logging.basicConfig(level=logging.INFO)
+
+class TaskFeatureEngineeringUnitTesting(CopyToTable):
+
+    ingesta = luigi.Parameter(default="No",
+                              description="'No': si no quieres que corra ingesta. "
+                                          "'inicial': Para correr una ingesta inicial. "
+                                          "'consecutiva': Para correr una ingesta consecutiva")
+
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "test.unit_testing"
+
+    columns = [("user_id", "varchar"),
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
+
+    def requires(self):
+        return [TaskFeatureEngineering(self.ingesta, self.fecha)]
+
+    def rows(self):
+
+        unit_testing = TestFeatureEngineering()
+        #path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
+        #unit_testing.test_ingesta(path)
+        #r = [(self.user, "ingesta", "test_ingesta")]
+        #for element in r:
+        #    yield element
 
 
 class TaskFeatureEngineeringMetadata(CopyToTable):

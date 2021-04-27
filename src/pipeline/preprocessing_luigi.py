@@ -13,8 +13,42 @@ from src.etl.preprocessing import preprocessing
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamientoMetadata
 from src.utils.general import get_db, read_pkl_from_s3
 from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS
+from src.unit_testing.test_preprocessing import TestPreprocessing
 
 logging.basicConfig(level=logging.INFO)
+
+class TaskPreprocessingUnitTesting(CopyToTable):
+    ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
+                                                        "'inicial': Para correr una ingesta inicial. "
+                                                        "'consecutiva': Para correr una ingesta consecutiva")
+
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "test.unit_testing"
+
+    columns = [("user_id", "varchar"),
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
+
+    def requires(self):
+        return [TaskPreprocessing(self.ingesta, self.fecha)]
+
+    def rows(self):
+
+        unit_testing = TestPreprocessing()
+        #path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
+        #unit_testing.test_ingesta(path)
+        #r = [(self.user, "ingesta", "test_ingesta")]
+        #for element in r:
+        #    yield element
 
 
 class TaskPreprocessingMetadata(CopyToTable):
