@@ -9,18 +9,12 @@ import time
 
 logging.basicConfig(level=logging.INFO)
 
-def magic_loop(X_train, y_train, df):
+def magic_loop(X_train, y_train):
     """
     Evaluación de metodología Magic Loop en la etapa de modelling
     :df: dataframe
     :best_model: mejor modelo
     """
-
-    # Procesamiento de datos
-    X = df
-    y = df.label
-    X = pd.DataFrame(X.drop(['label'], axis=1))
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=False, random_state=None)
 
     # Magic Loop
     algorithms = ['tree', 'random_forest', 'logistic_regression']
