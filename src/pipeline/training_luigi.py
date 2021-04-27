@@ -89,7 +89,6 @@ class TaskTraining(luigi.Task):
         X_train_file = file_to_upload_xtrain.split("/")
         X_train_file = X_train_file[-1]
         X_train_file = X_train_file[:-4]
-        print("#############", X_train_file)
 
         # Leer y_train
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
@@ -98,7 +97,6 @@ class TaskTraining(luigi.Task):
         y_train_file = file_to_upload_ytrain.split("/")
         y_train_file = y_train_file[-1]
         y_train_file = y_train_file[:-4]
-        print("#############", y_train_file)
 
 
         # Path para guardar
