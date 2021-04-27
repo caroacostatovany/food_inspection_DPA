@@ -29,7 +29,7 @@ class TaskModelSelectionMetadata(CopyToTable):
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
 
-    threshold = luigi.Parameter(default=0.80, description="Umbral del desempeño del modelo")
+    threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
