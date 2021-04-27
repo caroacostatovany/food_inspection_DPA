@@ -157,7 +157,7 @@ class TaskFeatureEngineering(luigi.Task):
         #                                           num_registros))
         #file_output.close()
 
-        with self.output().open('w') as output_file:
+        with self.output()[-1].open('w') as output_file:
             #output_file.write("test,luigi,s3")
             output_file.write("parametros,dia_ejecucion,tiempo,num_registros\n")
             output_file.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
