@@ -4,6 +4,8 @@ Módulo para pruebas unitarias de feature engineering
 import unittest
 import marbles.core
 
+
+from marbles.mixins import mixins
 from unittest.mock import patch, Mock
 from src.etl.feature_engineering import feature_generation
 
