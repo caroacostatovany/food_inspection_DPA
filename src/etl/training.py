@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 import pandas as pd
-from src.utils.model_constants import ESTIMATORS_DICT, ALGORITHMS_DICT, GRID_SEARCH_DICT
+from src.utils.model_constants import ESTIMATORS_DICT, GRID_SEARCH_DICT
 
 import time
 
