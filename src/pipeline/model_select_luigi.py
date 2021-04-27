@@ -36,8 +36,8 @@ class TaskModelSelectUnitTesting(CopyToTable):
 
     table = "test.unit_testing"
     columns = [("user_id", "varchar"),
-               ("parametros", "varchar"),
-               ("dia_ejecucion", "varchar")]
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
 
     def requires(self):
         return [TaskModelSelection(self.ingesta, self.fecha, self.threshold)]
