@@ -17,6 +17,7 @@ from src.unit_testing.test_preprocessing import TestPreprocessing
 
 logging.basicConfig(level=logging.INFO)
 
+
 class TaskPreprocessingUnitTesting(CopyToTable):
     ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
                                                         "'inicial': Para correr una ingesta inicial. "
@@ -45,10 +46,10 @@ class TaskPreprocessingUnitTesting(CopyToTable):
 
         unit_testing = TestPreprocessing()
         #path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
-        #unit_testing.test_ingesta(path)
-        #r = [(self.user, "ingesta", "test_ingesta")]
-        #for element in r:
-        #    yield element
+        unit_testing.test_preprocessing_label(df)
+        r = [(self.user, "preprocessing", "test_preprocessing_label")]
+        for element in r:
+            yield element
 
 
 class TaskPreprocessingMetadata(CopyToTable):
@@ -76,7 +77,7 @@ class TaskPreprocessingMetadata(CopyToTable):
                ("num_registros", "integer")]
 
     def requires(self):
-        return [TaskPreprocessing(self.ingesta, self.fecha)]
+        return [TaskPreprocessingUnitTesting(self.ingesta, self.fecha)]
 
     def rows(self):
         path = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)

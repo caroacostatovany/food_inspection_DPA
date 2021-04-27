@@ -9,11 +9,10 @@ from unittest.mock import patch, Mock
 from src.etl.preprocessing import preprocessing
 
 
-class TestPreprocessing(marbles.core.TestCase, mixins.BetweenMixins):
+class TestPreprocessing(marbles.core.TestCase, mixins.CategoricalMixins):
 
-    def test_preprocessing(self):
+    labels = [0, 1]
+
+    def test_preprocessing_label(self, df):
         """Revisa la etiqueta sea 0 ó 1"""
-
-        self.food_df = preprocessing()
-        label = self.food_df['label']
-        return self.assertBetween(label, lower=0, upper=1)
+        self.assertCategoricalLevelsEqual(df['label'], self.labels)

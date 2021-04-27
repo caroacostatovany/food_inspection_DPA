@@ -47,10 +47,10 @@ class TaskFeatureEngineeringUnitTesting(CopyToTable):
 
         unit_testing = TestFeatureEngineering()
         #path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
-        #unit_testing.test_ingesta(path)
-        #r = [(self.user, "ingesta", "test_ingesta")]
-        #for element in r:
-        #    yield element
+        unit_testing.test_feature_engineering()
+        r = [(self.user, "feature_engineering", "test_feature_engineering")]
+        for element in r:
+            yield element
 
 
 class TaskFeatureEngineeringMetadata(CopyToTable):
