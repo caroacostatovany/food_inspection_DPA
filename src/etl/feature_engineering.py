@@ -135,7 +135,6 @@ def feature_generation(df):
 
     logging.info("Converting to dataframe...")
     del df
-    print("#################################################################{}".format(X))
     #X = X.todense()
     df = pd.DataFrame(X, columns=col_trans.get_feature_names())
     del X

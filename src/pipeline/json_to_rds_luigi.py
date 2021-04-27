@@ -127,7 +127,6 @@ class TaskJson2RDS(CopyToTable):
     def rows(self):
         tuplas = self.df.to_records(index=False)
         for element in tuplas:
-            print("#############################___{}".format(element))
             yield element
 
 
