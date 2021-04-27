@@ -114,4 +114,4 @@ class TaskModelSelection(luigi.Task):
                                                         path_s3,
                                                         file_to_upload_best_model)
 
-        return luigi.contrib.s3.S3Target(path=file_to_upload_best_model)
+        return luigi.contrib.s3.S3Target(path=output_path_best_model)
