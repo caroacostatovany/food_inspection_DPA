@@ -44,10 +44,18 @@ class TaskModelSelectUnitTesting(CopyToTable):
 
     def rows(self):
         s3 = get_s3_resource(CREDENCIALES)
-        objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
-        unit_testing = TestModelSelect()
 
-        best_model = best_model_selection(self.threshold, objects, s3)
+        path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
+        file_to_upload_best_model = NOMBRE_MS.format(self.best_model)
+        file_to_upload_best_model = file_to_upload_best_model.split("/")
+        file_to_upload_best_model = file_to_upload_best_model[-1]
+        file_to_upload_best_model = file_to_upload_best_model[:-4]
+
+        path_run = path_s3 + "/" + file_to_upload_best_model
+
+        best_model = read_pkl_from_s3(s3, BUCKET_NAME, path_run)
+
+        unit_testing = TestModelSelect()
         unit_testing.test_model_select(best_model)
 
         r = [(self.user, "model_selection", "test_model_selection_month")]
@@ -105,7 +113,7 @@ class TaskModelSelection(luigi.Task):
 
     def requires(self):
         dia = self.fecha
-        return [TaskTrainingMetadata(self.ingesta, dia, self.threshold)]
+        return [TaskTrainingMetadata(self.ingesta, dia)]
 
     def run(self):
 
@@ -116,12 +124,10 @@ class TaskModelSelection(luigi.Task):
         # Selección del mejor modelo
         self.best_model = best_model_selection(self.threshold, objects, s3)
 
+
         # Guardar best model
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        file_to_upload = NOMBRE_MS.format(self.best_model)
-        file_to_upload = file_to_upload.split("/")
-        file_to_upload = file_to_upload[-1]
-        file_to_upload = file_to_upload[:-4]
+        file_to_upload = NOMBRE_MS.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, self.best_model)
         #guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
@@ -131,10 +137,7 @@ class TaskModelSelection(luigi.Task):
     def output(self):
         # Best model selection
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        file_to_upload_best_model = NOMBRE_MS.format(self.best_model)
-        file_to_upload_best_model = file_to_upload_best_model.split("/")
-        file_to_upload_best_model = file_to_upload_best_model[-1]
-        file_to_upload_best_model = file_to_upload_best_model[:-4]
+        file_to_upload_best_model = NOMBRE_MS.format(self.fecha)
         output_path_best_model = "s3://{}/{}/{}".format(BUCKET_NAME,
                                                         path_s3,
                                                         file_to_upload_best_model)
