@@ -107,9 +107,8 @@ class TaskModelSelection(luigi.Task):
     def output(self):
         # Best model selection
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        modelos = []
 
-        file_to_upload_best_model = NOMBRE_MS.format(self.fecha)
+        file_to_upload_best_model = "best_model"
         output_path_best_model = "s3://{}/{}/{}".format(BUCKET_NAME,
                                                         path_s3,
                                                         file_to_upload_best_model)
