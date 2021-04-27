@@ -12,8 +12,8 @@ def best_model_selection(threshold, objects, s3):
     :return: mejor modelo
     """
 
-    best_model = None
-    best_score = None
+    best_model = ''
+    best_score = 0
     max_score = 0
 
 

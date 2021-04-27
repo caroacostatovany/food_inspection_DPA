@@ -8,8 +8,9 @@ import os
 from unittest.mock import patch, Mock
 
 
-class TestIngesta(marbles.core.TestCase):
+class TestModelSelect(marbles.core.TestCase):
 
-    def test_model_select(self, filepath):
-        """Revisa que el archivo pese más de 1KB"""
-        return self.assertGreater(filesize, 1000)
+    def test_model_select(self, modelo):
+        """Revisa que el modelo sea distinto a la cadena vacia que indica que no hubo mejor modelo"""
+
+        return self.assertNotEqual(modelo, '')

@@ -15,6 +15,50 @@ from src.etl.model_select import best_model_selection
 logging.basicConfig(level=logging.INFO)
 
 
+
+class TaskModelSelectUnitTesting(CopyToTable):
+    ingesta = luigi.Parameter(default="No",
+                              description="'No': si no quieres que corra ingesta. "
+                                          "'inicial': Para correr una ingesta inicial. "
+                                          "'consecutiva': Para correr una ingesta consecutiva")
+
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
+
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "test.unit_testing"
+
+    columns = [("user_id", "varchar"),
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
+
+    def requires(self):
+        return [TaskModelSelection(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
+
+    def rows(self):
+        if self.ingesta_inicial:
+            path_s3 = PATH_INICIAL.format(self.fecha.year, self.fecha.month)
+            file_to_upload = NOMBRE_INICIAL.format(self.fecha)
+        else:
+            file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
+            path_s3 = PATH_CONSECUTIVO.format(self.fecha.year, self.fecha.month)
+
+        path = "{}/{}".format(path_s3,file_to_upload)
+        unit_testing = TestAlmacenamiento()
+        unit_testing.test_almacenamiento_json(path)
+
+        r = [(self.user, "almacenamiento", "test_almacenamiento_json")]
+        for element in r:
+            yield element
+
 class TaskModelSelectionMetadata(CopyToTable):
 
     ingesta = luigi.Parameter(default="No",
