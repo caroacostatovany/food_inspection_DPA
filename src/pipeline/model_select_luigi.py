@@ -65,6 +65,8 @@ class TaskModelSelection(luigi.Task):
 
     threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
+    best_model = ''
+
     def requires(self):
         dia = self.fecha
         return [TaskTrainingMetadata(self.ingesta, dia)]
@@ -77,7 +79,6 @@ class TaskModelSelection(luigi.Task):
 
         # Scores
         max_score = 0
-        best_model = ''
 
         # Leyendo modelos
         if len(objects) > 0:
@@ -89,48 +90,27 @@ class TaskModelSelection(luigi.Task):
                     loaded_model = json_file
                     if loaded_model.best_score_ >= self.threshold:
                         if loaded_model.best_score_ >= max_score:
-                            best_model = filename
+                            self.best_model = filename
                             best_score = loaded_model.best_score_
 
-        print('\n\n#####Mejor modelo: ', best_model)
+        print('\n\n#####Mejor modelo: ', self.best_model)
         print('#####Mejor score: ', best_score)
 
 
         # Guardar best model
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        file_to_upload = NOMBRE_MS.format(best_model)
+        file_to_upload = NOMBRE_MS.format(self.best_model)
         file_to_upload = file_to_upload.split("/")
         file_to_upload = file_to_upload[-1]
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, best_model, CREDENCIALES)
+        guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
 
 
 
     def output(self):
         # Best model selection
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-
-        # Conexión a bucket S3 para extraer datos para modelaje
-        s3 = get_s3_resource(CREDENCIALES)
-        objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
-
-        # Scores
-        max_score = 0
-        best_model = ''
-
-        # Leyendo modelos
-        if len(objects) > 0:
-            for file in objects:
-                if file['Key'].find("models/") >= 0:
-                    filename = file['Key']
-                    logging.info("Leyendo {}...".format(filename))
-                    json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
-                    loaded_model = json_file
-                    if loaded_model.best_score_ >= self.threshold:
-                        if loaded_model.best_score_ >= max_score:
-                            best_model = filename
-
-        file_to_upload_best_model = NOMBRE_MS.format(best_model)
+        file_to_upload_best_model = NOMBRE_MS.format(self.best_model)
         file_to_upload_best_model = file_to_upload_best_model.split("/")
         file_to_upload_best_model = file_to_upload_best_model[-1]
         output_path_best_model = "s3://{}/{}/{}".format(BUCKET_NAME,
