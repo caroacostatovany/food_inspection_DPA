@@ -1,20 +1,16 @@
 import logging
 import pandas as pd
 import luigi
-import pickle
-import time
-from datetime import date, timedelta
+from datetime import date
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
-from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
-from src.etl.training import fit_training_food
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
-from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE
-from src.utils.model_constants import ALGORITHMS
+from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS
 from src.pipeline.training_luigi import TaskTrainingMetadata
+from src.etl.model_select import best_model_selection
 
 logging.basicConfig(level=logging.INFO)
 
@@ -65,7 +61,7 @@ class TaskModelSelection(luigi.Task):
 
     threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
-    best_model = ''
+    best_model = None
 
     def requires(self):
         dia = self.fecha
@@ -77,22 +73,8 @@ class TaskModelSelection(luigi.Task):
         s3 = get_s3_resource(CREDENCIALES)
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
-        # Scores
-        max_score = 0
-
-        # Leyendo modelos
-        if len(objects) > 0:
-            for file in objects:
-                if file['Key'].find("models/") >= 0:
-                    filename = file['Key']
-                    logging.info("Leyendo {}...".format(filename))
-                    json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
-                    loaded_model = json_file
-                    if loaded_model.best_score_ >= self.threshold:
-                        if loaded_model.best_score_ >= max_score:
-                            self.best_model = filename
-                            best_score = loaded_model.best_score_
-
+        # Selección del mejor modelo
+        self.best_model, best_score = best_model_selection(self.threshold, objects, s3)
         print('\n\n#####Mejor modelo: ', self.best_model)
         print('#####Mejor score: ', best_score)
 
