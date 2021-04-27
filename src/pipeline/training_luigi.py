@@ -9,17 +9,18 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
-from src.etl.model_selection import magic_loop
+from src.etl.training import magic_loop
 from src.utils.general import get_db, read_pkl_from_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineeringMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineering
-from src.utils.constants import  PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS
+from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, \
+    NOMBRE_FE_xtrain, NOMBRE_FE_ytrain
 
 logging.basicConfig(level=logging.INFO)
 
 
-class TaskModelSelectionMetadata(CopyToTable):
+class TaskTrainingMetadata(CopyToTable):
 
     ingesta = luigi.Parameter(default="No",
                               description="'No': si no quieres que corra ingesta. "
@@ -36,26 +37,23 @@ class TaskModelSelectionMetadata(CopyToTable):
     host = cred['host']
     port = cred['port']
 
-    table = "metadata.feature_engineering"
+    table = "metadata.training"
 
     columns = [("user_id", "varchar"),
                ("parametros", "varchar"),
-               ("dia_ejecucion", "varchar"),
-               ("tiempo", "float"),
-               ("num_registros", "integer")]
+               ("dia_ejecucion", "varchar")]
 
     def requires(self):
-        return [TaskModelSelection(self.ingesta, self.fecha)]
+        return [TaskTraining(self.ingesta, self.fecha)]
 
     def rows(self):
-        path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
-        data = pd.read_csv(path)
-        r = [(self.user, data.parametros[0], data.dia_ejecucion[0], data.tiempo[0], data.num_registros[0])]
+        param = "{0}; {1}".format(self.ingesta, self.fecha)
+        r = [(self.user, param, date.today())]
         for element in r:
             yield element
 
 
-class TaskModelSelection(luigi.Task):
+class TaskTraining(luigi.Task):
 
     ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
                                                         "'inicial': Para correr una ingesta inicial."
@@ -66,7 +64,7 @@ class TaskModelSelection(luigi.Task):
 
     def requires(self):
         dia = self.fecha
-        return [TaskModelSelectionMetadata(self.ingesta, dia)]
+        return [TaskTrainingMetadata(self.ingesta, dia)]
 
     def run(self):
 
@@ -75,21 +73,18 @@ class TaskModelSelection(luigi.Task):
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
         # Leyendo datos
-        list_data = []
-        if len(objects) > 0:
-            for file in objects:
-                if file['Key'].find("feature_engineering/") >= 0:
-                    filename = file['Key']
-                    logging.info("Leyendo {}...".format(filename))
-                    json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
-                    df_temp = pd.DataFrame(json_file)
-                    list_data.append(df_temp)
 
-        # Feature generation
-        logging.info("Realizando model selection")
-        X_train = list_data[1]
-        y_train = list_data[2]
+        # Leer X_train
+        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
+        file_to_upload_xtrain = '{}/{}'.format(path_s3, NOMBRE_FE_xtrain.format(self.fecha))
+        X_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_xtrain)
 
+        # Leer y_train
+        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
+        file_to_upload_ytrain = '{}/{}'.format(path_s3, NOMBRE_FE_ytrain.format(self.fecha))
+        y_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_ytrain)
+
+        # Entrenamiento de modelo
         best_model = magic_loop(X_train, y_train)
 
         # Guardar best model
@@ -97,6 +92,8 @@ class TaskModelSelection(luigi.Task):
         file_to_upload = NOMBRE_MS.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, best_model, CREDENCIALES)
+
+
 
     def output(self):
         # Best model selection

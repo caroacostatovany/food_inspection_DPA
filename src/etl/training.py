@@ -54,6 +54,7 @@ def magic_loop(X_train, y_train, df):
 
         # train
         gs.fit(X_train, y_train)
+
         # best estimator
         best_estimators.append(gs)
 
