@@ -96,7 +96,7 @@ class TaskPreprocessing(luigi.Task):
         # Contamos los registros
         num_registros = len(df)
 
-        logging.info("Empezemos el preprocesamiento y limpieza de datos...")
+        logging.info("Empecemos el preprocesamiento y limpieza de datos...")
         food_df = preprocessing(df)
 
         end_time = time.time() - start_time
