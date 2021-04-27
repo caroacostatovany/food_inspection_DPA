@@ -114,10 +114,7 @@ class TaskModelSelection(luigi.Task):
         objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
         # Selección del mejor modelo
-        self.best_model, best_score = best_model_selection(self.threshold, objects, s3)
-        print('\n\n#####Mejor modelo: ', self.best_model)
-        print('#####Mejor score: ', best_score)
-
+        self.best_model = best_model_selection(self.threshold, objects, s3)
 
         # Guardar best model
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
