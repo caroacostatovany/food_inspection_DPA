@@ -163,6 +163,7 @@ def feature_selection(df):
 
     return X_train, X_test, y_train, y_test
 
+
 def guardar_feature_engineering(bucket_name, file_to_upload, data, credenciales):
     """
     Guardar los datos dentro del bucket en el path especificado

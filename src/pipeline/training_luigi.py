@@ -17,8 +17,52 @@ from src.pipeline.feature_engineering_luigi import TaskFeatureEngineering
 from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_TR, NOMBRE_TR, PATH_FE, \
     NOMBRE_FE_xtrain, NOMBRE_FE_ytrain
 from src.utils.model_constants import ALGORITHMS
+from src.unit_testing.test_training import TestTraining
 
 logging.basicConfig(level=logging.INFO)
+
+
+class TaskTrainingUnitTesting(CopyToTable):
+
+    ingesta = luigi.Parameter(default="No",
+                              description="'No': si no quieres que corra ingesta. "
+                                          "'inicial': Para correr una ingesta inicial. "
+                                          "'consecutiva': Para correr una ingesta consecutiva")
+
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "test.unit_testing"
+
+    columns = [("user_id", "varchar"),
+               ("modulo", "varchar"),
+               ("prueba", "varchar")]
+
+    def requires(self):
+        return [TaskTraining(self.ingesta, self.fecha)]
+
+    def rows(self):
+        s3 = get_s3_resource(CREDENCIALES)
+        path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
+
+        unit_testing = TestTraining()
+
+        for algorithm in ALGORITHMS:
+            filename = NOMBRE_TR.format(algorithm, self.fecha)
+            path_name = "{}/{}".format(path_s3, filename)
+            pkl_file = read_pkl_from_s3(s3, BUCKET_NAME, path_name)
+            unit_testing.test_training_gs(pkl_file)
+
+        r = [(self.user, "training", "test_training_gs")]
+        for element in r:
+            yield element
 
 
 class TaskTrainingMetadata(CopyToTable):
@@ -47,7 +91,7 @@ class TaskTrainingMetadata(CopyToTable):
                ("y_train_file", "varchar")]
 
     def requires(self):
-        return [TaskTraining(self.ingesta, self.fecha)]
+        return [TaskTrainingUnitTesting(self.ingesta, self.fecha)]
 
     def rows(self):
 
@@ -89,7 +133,6 @@ class TaskTraining(luigi.Task):
         X_train_file = file_to_upload_xtrain.split("/")
         X_train_file = X_train_file[-1]
         X_train_file = X_train_file[:-4]
-        print("#############", X_train_file)
 
         # Leer y_train
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
@@ -98,7 +141,6 @@ class TaskTraining(luigi.Task):
         y_train_file = file_to_upload_ytrain.split("/")
         y_train_file = y_train_file[-1]
         y_train_file = y_train_file[:-4]
-        print("#############", y_train_file)
 
 
         # Path para guardar
@@ -123,7 +165,6 @@ class TaskTraining(luigi.Task):
                                                        model.best_params_,
                                                        X_train_file, y_train_file))
         file_output.close()
-
 
     def output(self):
         # Training model
