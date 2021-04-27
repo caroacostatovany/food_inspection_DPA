@@ -35,5 +35,9 @@ NOMBRE_FE_ytest = "feature_engineering_inspections_y_test_{}.pkl"
 PATH_TR = "models/YEAR={}/MONTH={}"
 NOMBRE_TR = "models_{}_{}.pkl"
 
+# Model Select:
+PATH_MS = "best_model/YEAR={}/MONTH={}"
+NOMBRE_MS = "best_model_{}.pkl"
+
 # Definimos la lista de lo que queremos para nuestro feature engineering
 L = ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter']
