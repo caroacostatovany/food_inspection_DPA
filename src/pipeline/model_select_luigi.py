@@ -63,7 +63,7 @@ class TaskModelSelection(luigi.Task):
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
 
-    threshold = luigi.Parameter(default=0.80, description="Umbral del desempeño del modelo")
+    threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
     def requires(self):
         dia = self.fecha
