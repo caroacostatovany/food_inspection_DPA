@@ -13,7 +13,11 @@ def best_model_selection(threshold, objects, s3):
     """
 
     best_model = ''
+<<<<<<< HEAD
     best_score = 0
+=======
+    best_score = ''
+>>>>>>> a6546391a37b9ba89a0154a0531444021a7cb810
     max_score = 0
 
 

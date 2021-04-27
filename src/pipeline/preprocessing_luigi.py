@@ -144,15 +144,15 @@ class TaskPreprocessing(luigi.Task):
 
         end_time = time.time() - start_time
 
-        path = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)
+        #path = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)
 
-        file_output = open(path, 'w')
-        file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
-        file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
+        with self.output()[-1].open('w') as output_file:
+            #output_file.write("test,luigi,s3")
+            output_file.write("parametros,dia_ejecucion,tiempo,num_registros\n")
+            output_file.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
                                                    date.today(),
                                                    end_time,
                                                    num_registros))
-        file_output.close()
 
         path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
         file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
@@ -167,4 +167,7 @@ class TaskPreprocessing(luigi.Task):
         output_path = "s3://{}/{}/{}".format(BUCKET_NAME,
                                              path_s3,
                                              file_to_upload)
-        return luigi.contrib.s3.S3Target(path=output_path)
+
+        path_csv = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)
+
+        return luigi.contrib.s3.S3Target(path=output_path), luigi.local_target.LocalTarget(path_csv)

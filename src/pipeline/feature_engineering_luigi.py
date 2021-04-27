@@ -146,16 +146,24 @@ class TaskFeatureEngineering(luigi.Task):
         end_time = time.time() - start_time
 
         # Path para guardar
-        path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
+        #path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
 
         # Debe estar creado el path tmp/luigi/eq3
-        file_output = open(path,'w')
-        file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
-        file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
+        #file_output = open(path, 'w')
+        #file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
+        #file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
+        #                                           date.today(),
+        #                                           end_time,
+        #                                           num_registros))
+        #file_output.close()
+
+        with self.output()[-1].open('w') as output_file:
+            #output_file.write("test,luigi,s3")
+            output_file.write("parametros,dia_ejecucion,tiempo,num_registros\n")
+            output_file.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
                                                    date.today(),
                                                    end_time,
                                                    num_registros))
-        file_output.close()
 
         # Guardar food_df
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
@@ -220,8 +228,11 @@ class TaskFeatureEngineering(luigi.Task):
                                                    path_s3,
                                                    file_to_upload_ytest)
 
+        path_csv = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
+
         return luigi.contrib.s3.S3Target(path=output_path_full), \
                luigi.contrib.s3.S3Target(path=output_path_xtrain), \
                luigi.contrib.s3.S3Target(path=output_path_xtest), \
                luigi.contrib.s3.S3Target(path=output_path_ytrain), \
-               luigi.contrib.s3.S3Target(path=output_path_ytest)
+               luigi.contrib.s3.S3Target(path=output_path_ytest), \
+               luigi.local_target.LocalTarget(path_csv)
