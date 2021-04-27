@@ -64,7 +64,7 @@ class TaskTraining(luigi.Task):
 
     def requires(self):
         dia = self.fecha
-        return [TaskTrainingMetadata(self.ingesta, dia)]
+        return [TaskFeatureEngineeringMetadata(self.ingesta, dia)]
 
     def run(self):
 
