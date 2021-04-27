@@ -9,13 +9,14 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
-from src.etl.training import magic_loop
+from src.etl.training import fit_training_food
 from src.utils.general import get_db, read_pkl_from_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineeringMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineering
-from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, \
+from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_TR, NOMBRE_TR, PATH_FE, \
     NOMBRE_FE_xtrain, NOMBRE_FE_ytrain
+from src.utils.model_constants import ALGORITHMS
 
 logging.basicConfig(level=logging.INFO)
 
@@ -84,21 +85,27 @@ class TaskTraining(luigi.Task):
         file_to_upload_ytrain = '{}/{}'.format(path_s3, NOMBRE_FE_ytrain.format(self.fecha))
         y_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_ytrain)
 
-        # Entrenamiento de modelo
-        best_model = magic_loop(X_train, y_train)
+        # Entrenamiento de modelos
+        for algorithm in ALGORITHMS:
+            model = fit_training_food(X_train, y_train, algorithm)
+            parametros = model.best_params_
 
-        # Guardar best model
-        path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        file_to_upload = NOMBRE_MS.format(self.fecha)
-        path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, best_model, CREDENCIALES)
+            # Guardar best model
+            path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
+            file_to_upload = NOMBRE_TR.format(algorithm, self.fecha)
+            path_run = path_s3 + "/" + file_to_upload
+            guardar_feature_engineering(BUCKET_NAME, path_run, model, CREDENCIALES)
 
 
 
     def output(self):
-        # Best model selection
-        path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        file_to_upload_ms = NOMBRE_MS.format(self.fecha)
-        output_path_ms = "s3://{}/{}/{}".format(BUCKET_NAME, path_s3, file_to_upload_ms)
+        # Training model
+        path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
+        modelos = []
 
-        return luigi.contrib.s3.S3Target(path=output_path_ms)
+        for algorithm in ALGORITHMS:
+            file_to_upload_tr = NOMBRE_TR.format(algorithm, self.fecha)
+            output_path_tr = "s3://{}/{}/{}".format(BUCKET_NAME, path_s3, file_to_upload_tr)
+            modelos.append(luigi.contrib.s3.S3Target(path=output_path_tr))
+
+        return modelos
