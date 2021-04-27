@@ -61,7 +61,7 @@ class TaskModelSelection(luigi.Task):
 
     threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño del modelo")
 
-    best_model = None
+    best_model = ''
 
     def requires(self):
         dia = self.fecha
