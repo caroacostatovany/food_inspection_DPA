@@ -69,7 +69,7 @@ class TaskTrainingUnitTesting(CopyToTable):
                 unit_testing.test_training_gs(pkl_file)
 
         else:
-            filename = NOMBRE_TR.format(self.algorithm, self.fecha)
+            filename = NOMBRE_TR.format(self.algoritmo, self.fecha)
             path_name = "{}/{}".format(path_s3, filename)
             pkl_file = read_pkl_from_s3(s3, BUCKET_NAME, path_name)
             unit_testing.test_training_gs(pkl_file)
@@ -189,15 +189,15 @@ class TaskTraining(luigi.Task):
                                                            model.best_params_,
                                                            X_train_file, y_train_file))
 
-        if self.algoritmo == 'dummylassifier':
+        if self.algoritmo == 'dummyclassifier':
             dummy_clf = DummyClassifier(strategy="most_frequent")
-            dummy = dummy_clf.fit(X, y)
+            dummy = dummy_clf.fit(X_train, y_train)
 
-            file_to_upload = NOMBRE_TR.format(self.algorithm, self.fecha)
+            file_to_upload = NOMBRE_TR.format(self.algoritmo, self.fecha)
             path_run = path_s3 + "/" + file_to_upload
             guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, dummy)
 
-            file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, self.algorithm,
+            file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, self.algoritmo,
                                                              "strategy:most_frequent",
                                                              X_train_file, y_train_file))
 
@@ -208,9 +208,15 @@ class TaskTraining(luigi.Task):
         path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
         modelos = []
 
-        for algorithm in ALGORITHMS:
-            file_to_upload_tr = NOMBRE_TR.format(algorithm, self.fecha)
-            output_path_tr = "s3://{}/{}/{}".format(BUCKET_NAME, path_s3, file_to_upload_tr)
+        if self.algoritmo == 'gridsearch':
+            for algorithm in ALGORITHMS:
+                file_to_upload_tr = NOMBRE_TR.format(algorithm, self.fecha)
+                output_path_tr = "s3://{}/{}/{}".format(BUCKET_NAME, path_s3, file_to_upload_tr)
+                modelos.append(luigi.contrib.s3.S3Target(path=output_path_tr))
+
+        else:
+            file_to_upload = NOMBRE_TR.format(self.algoritmo, self.fecha)
+            output_path_tr = "s3://{}/{}/{}".format(BUCKET_NAME, path_s3, file_to_upload)
             modelos.append(luigi.contrib.s3.S3Target(path=output_path_tr))
 
         return modelos
