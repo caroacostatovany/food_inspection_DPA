@@ -31,4 +31,4 @@ def best_model_selection(threshold, objects, s3):
                         best_score = loaded_model.best_score_
                         max_score = best_score
 
-    return best_model, best_score
+    return best_model

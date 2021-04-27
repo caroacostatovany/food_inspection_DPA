@@ -10,10 +10,10 @@ from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
 from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS
 from src.pipeline.training_luigi import TaskTrainingMetadata
+from src.unit_testing.test_model_select import TestModelSelect
 from src.etl.model_select import best_model_selection
 
 logging.basicConfig(level=logging.INFO)
-
 
 
 class TaskModelSelectUnitTesting(CopyToTable):
@@ -35,29 +35,25 @@ class TaskModelSelectUnitTesting(CopyToTable):
     port = cred['port']
 
     table = "test.unit_testing"
-
     columns = [("user_id", "varchar"),
-               ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("parametros", "varchar"),
+               ("dia_ejecucion", "varchar")]
 
     def requires(self):
         return [TaskModelSelection(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
 
     def rows(self):
-        if self.ingesta_inicial:
-            path_s3 = PATH_INICIAL.format(self.fecha.year, self.fecha.month)
-            file_to_upload = NOMBRE_INICIAL.format(self.fecha)
-        else:
-            file_to_upload = NOMBRE_CONSECUTIVO.format(self.fecha)
-            path_s3 = PATH_CONSECUTIVO.format(self.fecha.year, self.fecha.month)
+        s3 = get_s3_resource(CREDENCIALES)
+        objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
+        unit_testing = TestModelSelect()
 
-        path = "{}/{}".format(path_s3,file_to_upload)
-        unit_testing = TestAlmacenamiento()
-        unit_testing.test_almacenamiento_json(path)
+        best_model = best_model_selection(self.threshold, objects, s3)
+        unit_testing.test_model_select(best_model)
 
-        r = [(self.user, "almacenamiento", "test_almacenamiento_json")]
+        r = [(self.user, "model_selection", "test_model_selection_month")]
         for element in r:
             yield element
+
 
 class TaskModelSelectionMetadata(CopyToTable):
 
@@ -85,7 +81,7 @@ class TaskModelSelectionMetadata(CopyToTable):
                ("dia_ejecucion", "varchar")]
 
     def requires(self):
-        return [TaskModelSelection(self.ingesta, self.fecha)]
+        return [TaskModelSelectUnitTesting(self.ingesta, self.fecha)]
 
     def rows(self):
         param = "{0}; {1}".format(self.ingesta, self.fecha)
