@@ -52,8 +52,12 @@ class TaskTrainingMetadata(CopyToTable):
     def rows(self):
 
         path = "{}/training_created.csv".format(PATH_LUIGI_TMP)
-        data = pd.read_csv(path)
-        r = [(data.algoritmo[0], data.params[0], data.xtrain[0], data.ytrain[0])]
+        data = pd.read_csv(path, sep=";")
+        r = []
+        for i in range(len(data)):
+            aux = (data.fecha[i], data.algoritmo[i], data.parametros[i], data.xtrain[i], data.ytrain[i])
+            r.append(aux)
+
         for element in r:
             yield element
 
@@ -82,20 +86,25 @@ class TaskTraining(luigi.Task):
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_xtrain = '{}/{}'.format(path_s3, NOMBRE_FE_xtrain.format(self.fecha))
         X_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_xtrain)
-        X_train_file = X_train.split("/")
+        X_train_file = file_to_upload_xtrain.split("/")
         X_train_file = X_train_file[-1]
         X_train_file = X_train_file[:-4]
+        print("#############", X_train_file)
 
         # Leer y_train
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_ytrain = '{}/{}'.format(path_s3, NOMBRE_FE_ytrain.format(self.fecha))
         y_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_ytrain)
-        y_train_file = y_train.split("/")
+        y_train_file = file_to_upload_ytrain.split("/")
         y_train_file = y_train_file[-1]
         y_train_file = y_train_file[:-4]
+        print("#############", y_train_file)
+
 
         # Path para guardar
-        path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
+        path = "{}/training_created.csv".format(PATH_LUIGI_TMP)
+        file_output = open(path, 'w')
+        file_output.write("fecha;algoritmo;parametros;xtrain;ytrain\n")
 
         # Entrenamiento de modelos
         for algorithm in ALGORITHMS:
@@ -108,13 +117,12 @@ class TaskTraining(luigi.Task):
             guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, model)
             #guardar_feature_engineering(BUCKET_NAME, path_run, model, CREDENCIALES)
 
+            
             # Debe estar creado el path tmp/luigi/eq3
-            file_output = open(path, 'w')
-            file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
-            file_output.write("{0};{1},{2},{3}".format(self.fecha, algorithm,
+            file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, algorithm,
                                                        model.best_params_,
                                                        X_train_file, y_train_file))
-            file_output.close()
+        file_output.close()
 
 
     def output(self):
