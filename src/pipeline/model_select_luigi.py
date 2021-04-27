@@ -86,7 +86,7 @@ class TaskModelSelection(luigi.Task):
                     filename = file['Key']
                     logging.info("Leyendo {}...".format(filename))
                     json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
-                    loaded_model = pickle.load(open(json_file, 'rb'))
+                    loaded_model = json_file
                     if loaded_model.best_score_ >= self.threshold:
                         if loaded_model.best_score_ >= max_score:
                             best_model = filename
