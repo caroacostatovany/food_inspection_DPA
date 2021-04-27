@@ -83,6 +83,7 @@ class TaskTraining(luigi.Task):
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_ytrain = '{}/{}'.format(path_s3, NOMBRE_FE_ytrain.format(self.fecha))
         y_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_ytrain)
+        print(y_train)
 
         # Entrenamiento de modelo
         best_model = magic_loop(X_train, y_train)

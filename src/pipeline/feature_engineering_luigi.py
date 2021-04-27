@@ -99,6 +99,7 @@ class TaskFeatureEngineering(luigi.Task):
         # Feature selection
         logging.info("Realizando feature selection")
         X_train, X_test, y_train, y_test = feature_selection(food_df)
+        print(y_train)
 
         # Fin de tiempo para feature engineering
         end_time = time.time() - start_time
