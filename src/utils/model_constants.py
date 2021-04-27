@@ -12,7 +12,7 @@ GRID_SEARCH_DICT = {'tree': {'max_depth': [None],
                                       'max_depth': [5],
                                       'min_samples_leaf': [3]},
 
-                    'logistic_regression': {'penalty': ['l1'],
+                    'logistic_regression': {'penalty': ['l2'],
                                             'C': [0.01]}}
 
 ESTIMATORS_DICT = {'tree': DecisionTreeClassifier(random_state=1111),
