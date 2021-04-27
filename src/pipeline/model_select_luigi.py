@@ -46,10 +46,7 @@ class TaskModelSelectUnitTesting(CopyToTable):
         s3 = get_s3_resource(CREDENCIALES)
 
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
-        file_to_upload_best_model = NOMBRE_MS.format(self.best_model)
-        file_to_upload_best_model = file_to_upload_best_model.split("/")
-        file_to_upload_best_model = file_to_upload_best_model[-1]
-        file_to_upload_best_model = file_to_upload_best_model[:-4]
+        file_to_upload_best_model = NOMBRE_MS.format(self.fecha)
 
         path_run = path_s3 + "/" + file_to_upload_best_model
 
@@ -58,7 +55,7 @@ class TaskModelSelectUnitTesting(CopyToTable):
         unit_testing = TestModelSelect()
         unit_testing.test_model_select(best_model)
 
-        r = [(self.user, "model_selection", "test_model_selection_month")]
+        r = [(self.user, "model_selection", "test_model_select")]
         for element in r:
             yield element
 
