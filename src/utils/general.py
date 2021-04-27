@@ -117,3 +117,21 @@ def get_db(credentials_file):
 
     return creds
 
+
+def guardar_pkl_en_s3(s3, bucket_name, file_to_upload, data):
+    """
+    Guardar los datos dentro del bucket en el path especificado
+    Inputs:
+    bucket_name:  bucket s3
+    file_to_upload(string): nombre y ruta del archivo a guardar
+    data(json): objeto json con los datos
+    Outputs:
+    None
+    """
+
+    # Cambiar datos de formato json a objetos binario
+    pickle_dump = pickle.dumps(data)
+
+    # Guardar los datos (pickle) en el bucket y ruta específica
+    s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
+    logging.info("pkl guardado exitosamente.")

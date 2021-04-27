@@ -9,13 +9,14 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
-from src.utils.general import get_db, read_pkl_from_s3
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.utils.constants import PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_xtrain, NOMBRE_FE_ytest, NOMBRE_FE_ytrain, \
     NOMBRE_FE_full, PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME
 from src.unit_testing.test_feature_engineering import TestFeatureEngineering
 
 logging.basicConfig(level=logging.INFO)
+
 
 class TaskFeatureEngineeringUnitTesting(CopyToTable):
 
@@ -156,27 +157,32 @@ class TaskFeatureEngineering(luigi.Task):
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload = NOMBRE_FE_full.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, food_df, CREDENCIALES)
+        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, food_df)
+        #guardar_feature_engineering(BUCKET_NAME, path_run, food_df, CREDENCIALES)
 
         # Guardar X_train
         file_to_upload = NOMBRE_FE_xtrain.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, X_train, CREDENCIALES)
+        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, X_train)
+        #guardar_feature_engineering(BUCKET_NAME, path_run, X_train, CREDENCIALES)
 
         # Guardar X_test
         file_to_upload = NOMBRE_FE_xtest.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, X_test, CREDENCIALES)
+        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, X_test)
+        #guardar_feature_engineering(BUCKET_NAME, path_run, X_test, CREDENCIALES)
 
         # Guardar y_train
         file_to_upload = NOMBRE_FE_ytrain.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, y_train, CREDENCIALES)
+        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, y_train)
+        #guardar_feature_engineering(BUCKET_NAME, path_run, y_train, CREDENCIALES)
 
         # Guardar y_test
         file_to_upload = NOMBRE_FE_ytest.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, y_test, CREDENCIALES)
+        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, y_test)
+        #guardar_feature_engineering(BUCKET_NAME, path_run, y_test, CREDENCIALES)
 
     def output(self):
         # Full

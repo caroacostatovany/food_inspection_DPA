@@ -43,6 +43,7 @@ class TaskPreprocessingUnitTesting(CopyToTable):
         return [TaskPreprocessing(self.ingesta, self.fecha)]
 
     def rows(self):
+        s3 = get_s3_resource(CREDENCIALES)
 
         path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
         file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
@@ -86,6 +87,7 @@ class TaskPreprocessingMetadata(CopyToTable):
         return [TaskPreprocessingUnitTesting(self.ingesta, self.fecha)]
 
     def rows(self):
+
         path = "{}/preprocess_created.csv".format(PATH_LUIGI_TMP)
         data = pd.read_csv(path)
         r = [(self.user, data.parametros[0], data.dia_ejecucion[0], data.tiempo[0], data.num_registros[0])]
