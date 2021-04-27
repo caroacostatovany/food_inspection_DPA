@@ -40,16 +40,20 @@ class TaskTrainingMetadata(CopyToTable):
 
     table = "metadata.training"
 
-    columns = [("user_id", "varchar"),
-               ("parametros", "varchar"),
-               ("dia_ejecucion", "varchar")]
+    columns = [("date", "varchar"),
+               ("algorithm", "varchar"),
+               ("best_params", "varchar"),
+               ("X_train_file", "varchar"),
+               ("y_train_file", "varchar")]
 
     def requires(self):
         return [TaskTraining(self.ingesta, self.fecha)]
 
     def rows(self):
-        param = "{0}; {1}".format(self.ingesta, self.fecha)
-        r = [(self.user, param, date.today())]
+
+        path = "{}/training_created.csv".format(PATH_LUIGI_TMP)
+        data = pd.read_csv(path)
+        r = [(data.algoritmo[0], data.params[0], data.xtrain[0], data.ytrain[0])]
         for element in r:
             yield element
 
@@ -78,11 +82,20 @@ class TaskTraining(luigi.Task):
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_xtrain = '{}/{}'.format(path_s3, NOMBRE_FE_xtrain.format(self.fecha))
         X_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_xtrain)
+        X_train_file = X_train.split("/")
+        X_train_file = X_train_file[-1]
+        X_train_file = X_train_file[:-4]
 
         # Leer y_train
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_ytrain = '{}/{}'.format(path_s3, NOMBRE_FE_ytrain.format(self.fecha))
         y_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_ytrain)
+        y_train_file = y_train.split("/")
+        y_train_file = y_train_file[-1]
+        y_train_file = y_train_file[:-4]
+
+        # Path para guardar
+        path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
 
         # Entrenamiento de modelos
         for algorithm in ALGORITHMS:
@@ -94,6 +107,13 @@ class TaskTraining(luigi.Task):
             path_run = path_s3 + "/" + file_to_upload
             guardar_feature_engineering(BUCKET_NAME, path_run, model, CREDENCIALES)
 
+            # Debe estar creado el path tmp/luigi/eq3
+            file_output = open(path, 'w')
+            file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
+            file_output.write("{0};{1},{2},{3}".format(self.fecha, algorithm,
+                                                       model.best_params_,
+                                                       X_train_file, y_train_file))
+            file_output.close()
 
 
     def output(self):

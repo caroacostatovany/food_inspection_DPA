@@ -102,6 +102,7 @@ class TaskModelSelection(luigi.Task):
         file_to_upload = NOMBRE_MS.format(self.best_model)
         file_to_upload = file_to_upload.split("/")
         file_to_upload = file_to_upload[-1]
+        file_to_upload = file_to_upload[:-4]
         path_run = path_s3 + "/" + file_to_upload
         guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
 
@@ -113,6 +114,7 @@ class TaskModelSelection(luigi.Task):
         file_to_upload_best_model = NOMBRE_MS.format(self.best_model)
         file_to_upload_best_model = file_to_upload_best_model.split("/")
         file_to_upload_best_model = file_to_upload_best_model[-1]
+        file_to_upload_best_model = file_to_upload_best_model[:-4]
         output_path_best_model = "s3://{}/{}/{}".format(BUCKET_NAME,
                                                         path_s3,
                                                         file_to_upload_best_model)
