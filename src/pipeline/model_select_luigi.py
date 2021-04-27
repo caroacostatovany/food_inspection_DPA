@@ -11,7 +11,7 @@ from luigi.contrib.postgres import CopyToTable
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
 from src.etl.training import fit_training_food
-from src.utils.general import get_db, read_pkl_from_s3
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
 from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE
 from src.utils.model_constants import ALGORITHMS
 from src.pipeline.training_luigi import TaskTrainingMetadata
@@ -104,7 +104,8 @@ class TaskModelSelection(luigi.Task):
         file_to_upload = file_to_upload[-1]
         file_to_upload = file_to_upload[:-4]
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
+        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, self.best_model)
+        #guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
 
 
 

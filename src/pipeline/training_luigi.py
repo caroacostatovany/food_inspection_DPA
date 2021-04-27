@@ -10,7 +10,7 @@ from luigi.contrib.postgres import CopyToTable
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
 from src.etl.training import fit_training_food
-from src.utils.general import get_db, read_pkl_from_s3
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineeringMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineering
@@ -105,7 +105,8 @@ class TaskTraining(luigi.Task):
             path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
             file_to_upload = NOMBRE_TR.format(algorithm, self.fecha)
             path_run = path_s3 + "/" + file_to_upload
-            guardar_feature_engineering(BUCKET_NAME, path_run, model, CREDENCIALES)
+            guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, model)
+            #guardar_feature_engineering(BUCKET_NAME, path_run, model, CREDENCIALES)
 
             # Debe estar creado el path tmp/luigi/eq3
             file_output = open(path, 'w')
