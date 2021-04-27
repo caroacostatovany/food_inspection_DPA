@@ -135,12 +135,12 @@ class TaskFeatureEngineering(luigi.Task):
         # Guardar y_train
         file_to_upload = NOMBRE_FE_ytrain.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, X_train, CREDENCIALES)
+        guardar_feature_engineering(BUCKET_NAME, path_run, y_train, CREDENCIALES)
 
         # Guardar y_test
         file_to_upload = NOMBRE_FE_ytest.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_feature_engineering(BUCKET_NAME, path_run, X_test, CREDENCIALES)
+        guardar_feature_engineering(BUCKET_NAME, path_run, y_test, CREDENCIALES)
 
     def output(self):
         # Full
