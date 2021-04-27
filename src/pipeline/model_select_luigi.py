@@ -81,7 +81,7 @@ class TaskModelSelectionMetadata(CopyToTable):
                ("dia_ejecucion", "varchar")]
 
     def requires(self):
-        return [TaskModelSelectUnitTesting(self.ingesta, self.fecha)]
+        return [TaskModelSelectUnitTesting(self.ingesta, self.fecha, self.threshold)]
 
     def rows(self):
         param = "{0}; {1}".format(self.ingesta, self.fecha)
@@ -105,7 +105,7 @@ class TaskModelSelection(luigi.Task):
 
     def requires(self):
         dia = self.fecha
-        return [TaskTrainingMetadata(self.ingesta, dia)]
+        return [TaskTrainingMetadata(self.ingesta, dia, self.threshold)]
 
     def run(self):
 
