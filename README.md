@@ -153,7 +153,7 @@ Si deseas cambiar los modelos a probar en el GridSearch, modifica `src.utils.mod
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien todas las tareas, se debe ver así:
-![Luigi](./images/DAG_Checkpoint_%204_042021.jpeg)
+![Luigi](./images/DAG_Luigi_Checkpoint_5_042721.png)
 
 
 ## Arquitectura
