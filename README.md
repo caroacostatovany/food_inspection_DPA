@@ -79,18 +79,18 @@ Si quieres acceder a diferentes buckets con otras credenciales esto se deberá c
 
 Después de correr las instrucciones generales, escribimos algunos ejemplos de cómo correr tareas en Luigi.
 
-Sólo existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", y --fecha con la que se quiere correr el pipeline. 
 
-**Nota:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`. O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql"
+**Nota:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata` y `test`. O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql" y "create_unittesting_tables.sql".
 
 Algunos ejemplos para correr:
 
-Para preprocesamiento
->  PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config>  luigi --module src.pipeline.preprocessing_luigi TaskPreprocessingMetadata
+Para entrenamiento:
+Existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", --fecha con la que se quiere correr el pipeline y --algoritmo donde el default es "gridsearch" y toma los algoritmos declarados en nuestras constantes, la etiqueta de --algoritmo también funciona con "dummyclassifier" por el momento.
+> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.training_luigi TaskTrainingMetadata --fecha "2021-04-19" --algoritmo gridsearch
 
-Para feature engineering
-> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config>  luigi --module src.pipeline.feature_engineering_luigi TaskFeatureEngineeringMetadata
- 
+Para la selección de modelo:
+Sólo existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", --fecha con la que se quiere correr el pipeline,  --algoritmo donde el default es "gridsearch" y toma los algoritmos declarados en nuestras constantes y --threshold que indica el score deseado para seleccionar el mejor modelo. La etiqueta de --algoritmo también funciona con "dummyclassifier" por el momento.
+> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.model_select_luigi TaskModelSelectionMetadata --fecha "2021-04-19" --threshold 0.8
 
 ### De Notebooks
 
@@ -139,13 +139,21 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 ### ¿Qué contiene el feature engineering?
 **R:** La función de `feature generation` transforma las fechas a su tipo date, quita renglones donde tenga algún nulo que no se pudo limpiar en el preprocessing y agrega nuevas variables como: 'year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter', 'num_violations' y por último hace la transformación de features categóricos con OneHotEncoder. 
 
+### ¿Qué contiene el entrenamiento?
+**R:** La función de `fit_training_food` entrena con un GridSearchCV de acuerdo con el algoritmo dado; y los parámetros los toma de una constante definida en `src.utils.model_constants.py`. Regresa el mejor modelo de ese algoritmo.
+
+### ¿Qué contiene el model selection?
+**R:** La función de `best_model_selection` selecciona el mejor modelo (que se encuentran en el bucket de dentro de la carpeta models) que tenga mejor score y cumpla con el threshold dado por el cliente, si no hay regresa vacío. 
+
 ### ¿Qué debo cambiar si quiero adaptarlo a mi bucket y PATHS?
 **R:** Si deseas cambiar algunos paths debes hacerlo en el archivo de `constants.py` que se encuentra en `src.utils`. 
 Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. Si quieres modificar los nombres de los archivos, modifica los que dicen NOMBRES.
 
+Si deseas cambiar los modelos a probar en el GridSearch, modifica `src.utils.model_constants.py`.
+
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien todas las tareas, se debe ver así:
-![](https://github.com/caroacostatovany/food_inspection_DPA/blob/main/images/DAG_Checkpoint_%204_042021.jpeg)
+![Luigi](./images/DAG_Checkpoint_%204_042021.jpeg)
 
 
 ## Arquitectura
@@ -161,7 +169,7 @@ La arquitectura que construimos en nuestro proyecto fue la siguiente:
 - Region:  us-east-1
 
 **EC2 Procesamiento:**
-- EC2 instance:  c5.xlarge
+- EC2 instance:  c5.2xlarge
 - Volume size:  20Gb
 - AMI:  Ubuntu 18
 - Region:  us-east-1
@@ -175,3 +183,15 @@ La arquitectura que construimos en nuestro proyecto fue la siguiente:
 - Maintenance window:  Thursdays 3:35-3:55 CST
 - Public accessibility:  No
 
+## Pruebas unitarias
+
+Por ahora las pruebas unitarias con las que contamos son:
+
+| Módulo | Nombre prueba unitaria | Descripción |
+| ------ | ---------------------- | ----------- |
+| Ingesta | test_ingesta | Revisa que el archivo creado en ingesta pese más de 1KB |
+| Almacenamiento | test_almacenamiento_json | Revisa que el archivo guardado sea un json |
+| Preprocesamiento | test_preprocessing_label | Revisa la etiqueta del dataframe sea 0 ó 1 |
+| Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe este entre 1 y 12 |
+| Entrenamiento | test_training_gs | Revisa que el archivo es un objeto GridSearchCV |
+| Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacia que indica que no hubo mejor modelo |

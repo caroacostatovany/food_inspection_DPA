@@ -13,4 +13,5 @@ from src.etl.feature_engineering import feature_generation
 class TestFeatureEngineering(marbles.core.TestCase, mixins.BetweenMixins):
 
     def test_feature_engineering_month(self, df):
+        """Revisa que la columna month del dataframe este entre 1 y 12"""
         self.assertBetween(df['month'].any(), strict=False, lower=1, upper=12, note="Sólo puede haber meses entre 0 y 12")
