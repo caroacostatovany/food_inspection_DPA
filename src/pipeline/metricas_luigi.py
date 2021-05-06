@@ -8,7 +8,7 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_ytest
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_ytest
 from src.pipeline.model_select_luigi import TaskModelSelectionMetadata
 from src.etl.metricas import get_metrics_matrix
 
@@ -68,30 +68,27 @@ class TaskMetricas(CopyToTable):
 
     def rows(self):
 
-        # Conexión a bucket S3 para extraer datos para modelaje
-        s3 = get_s3_resource(CREDENCIALES)
-
         # Leemos x_test y y_test
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_xtest = NOMBRE_FE_xtest.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_xtest)
-        X_test = read_pkl_from_s3(s3, bucket, filename)
+        X_test = read_pkl_from_s3(S3, bucket, filename)
 
         file_ytest = NOMBRE_FE_xtest.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_ytest)
-        y_test = read_pkl_from_s3(s3, bucket, filename)
+        y_test = read_pkl_from_s3(S3, bucket, filename)
 
         # Leer el mejor modelo
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
         filename = path_s3 + "/" + NOMBRE_MS.format(self.fecha)
-        best_model = read_pkl_from_s3(s3, bucket, filename)
-        model = read_pkl_from_s3(s3, bucket, best_model)
+        best_model = read_pkl_from_s3(S3, bucket, filename)
+        model = read_pkl_from_s3(S3, bucket, best_model)
 
         predicted_scores = model.predict_proba(X_test)
 
         path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
         preprocess_file = "{}/{}".format(path_s3, NOMBRE_PREPROCESS.format(self.fecha))
-        clean_data = read_pkl_from_s3(s3, bucket, preprocess_file)
+        clean_data = read_pkl_from_s3(S3, bucket, preprocess_file)
 
         metricas = get_metrics_matrix(y_test, predicted_scores)
 

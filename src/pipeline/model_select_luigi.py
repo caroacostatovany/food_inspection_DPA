@@ -8,7 +8,7 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS
 from src.pipeline.training_luigi import TaskTrainingMetadata
 from src.unit_testing.test_model_select import TestModelSelect
 from src.etl.model_select import best_model_selection
@@ -48,14 +48,14 @@ class TaskModelSelectUnitTesting(CopyToTable):
         return [TaskModelSelection(self.ingesta, self.fecha, self.threshold, self.algoritmo)]
 
     def rows(self):
-        s3 = get_s3_resource(CREDENCIALES)
+        #s3 = get_s3_resource(CREDENCIALES)
 
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
         file_to_upload_best_model = NOMBRE_MS.format(self.fecha)
 
         path_run = path_s3 + "/" + file_to_upload_best_model
 
-        best_model = read_pkl_from_s3(s3, BUCKET_NAME, path_run)
+        best_model = read_pkl_from_s3(S3, BUCKET_NAME, path_run)
 
         unit_testing = TestModelSelect()
         unit_testing.test_model_select(best_model)
@@ -130,18 +130,18 @@ class TaskModelSelection(luigi.Task):
     def run(self):
 
         # Conexión a bucket S3 para extraer datos para modelaje
-        s3 = get_s3_resource(CREDENCIALES)
-        objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
+        #s3 = get_s3_resource(CREDENCIALES)
+        objects = S3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
         # Selección del mejor modelo
-        self.best_model = best_model_selection(self.threshold, objects, s3)
+        self.best_model = best_model_selection(self.threshold, objects, S3)
 
 
         # Guardar best model
         path_s3 = PATH_MS.format(self.fecha.year, self.fecha.month)
         file_to_upload = NOMBRE_MS.format(self.fecha)
         path_run = path_s3 + "/" + file_to_upload
-        guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, self.best_model)
+        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, self.best_model)
         #guardar_feature_engineering(BUCKET_NAME, path_run, self.best_model, CREDENCIALES)
 
     def output(self):

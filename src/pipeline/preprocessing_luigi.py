@@ -12,7 +12,7 @@ from src.etl.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
 from src.etl.preprocessing import preprocessing
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamientoMetadata
 from src.utils.general import get_db, read_pkl_from_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS
 from src.unit_testing.test_preprocessing import TestPreprocessing
 
 logging.basicConfig(level=logging.INFO)
@@ -43,7 +43,7 @@ class TaskPreprocessingUnitTesting(CopyToTable):
         return [TaskPreprocessing(self.ingesta, self.fecha)]
 
     def rows(self):
-        s3 = get_s3_resource(CREDENCIALES)
+        #s3 = get_s3_resource(CREDENCIALES)
 
         path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
         file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
@@ -51,7 +51,7 @@ class TaskPreprocessingUnitTesting(CopyToTable):
 
         unit_testing = TestPreprocessing()
 
-        df = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+        df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
         unit_testing.test_preprocessing_label(df)
 
         r = [(self.user, "preprocessing", "test_preprocessing_label")]
@@ -121,8 +121,8 @@ class TaskPreprocessing(luigi.Task):
     def run(self):
         start_time = time.time()
 
-        s3 = get_s3_resource(CREDENCIALES)
-        objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
+        #s3 = get_s3_resource(CREDENCIALES)
+        objects = S3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
         # Ahora debemos insertar los json a la tabla vacía y sólo leerá los pkl que estan bajo el folder de ingestion
         df = pd.DataFrame()
@@ -132,7 +132,7 @@ class TaskPreprocessing(luigi.Task):
                 if file['Key'].find("ingestion/") >= 0 :
                     filename = file['Key']
                     logging.info("Leyendo {}...".format(filename))
-                    json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+                    json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
                     df_temp = pd.DataFrame(json_file)
                     df = pd.concat([df, df_temp], axis=0)
 

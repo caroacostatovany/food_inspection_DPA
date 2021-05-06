@@ -1,9 +1,13 @@
 """
 Módulo para constantes
 """
+from src.etl.ingesta_almacenamiento import get_s3_resource
 
 # PATH de las credenciales
 CREDENCIALES = "conf/local/credentials.yaml"
+
+# Conexión a bucket S3 para extraer datos para modelaje
+S3 = get_s3_resource(CREDENCIALES)
 
 # Nombre del bucket name
 BUCKET_NAME = "data-product-architecture-equipo-3"

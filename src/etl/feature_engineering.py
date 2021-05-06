@@ -15,6 +15,7 @@ from sklearn import metrics
 
 from src.utils.constants import L
 from src.etl.ingesta_almacenamiento import get_s3_resource
+from src.utils.constants import S3
 
 logging.basicConfig(level=logging.INFO)
 
@@ -176,11 +177,11 @@ def guardar_feature_engineering(bucket_name, file_to_upload, data, credenciales)
     """
 
     # Obtener bucket
-    s3 = get_s3_resource(credenciales)
+    #s3 = get_s3_resource(credenciales)
 
     # Cambiar datos de formato json a objetos binario
     pickle_dump = pickle.dumps(data)
 
     # Guardar los datos (pickle) en el bucket y ruta específica
-    s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
+    S3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
     logging.info("pkl guardado exitosamente.")

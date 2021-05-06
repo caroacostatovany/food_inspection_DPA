@@ -14,7 +14,7 @@ from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineeringMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineering
-from src.utils.constants import PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_TR, NOMBRE_TR, PATH_FE, \
+from src.utils.constants import S3, PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, PATH_TR, NOMBRE_TR, PATH_FE, \
     NOMBRE_FE_xtrain, NOMBRE_FE_ytrain
 from src.utils.model_constants import ALGORITHMS
 from src.unit_testing.test_training import TestTraining
@@ -55,7 +55,7 @@ class TaskTrainingUnitTesting(CopyToTable):
         return [TaskTraining(self.ingesta, self.fecha, self.algoritmo)]
 
     def rows(self):
-        s3 = get_s3_resource(CREDENCIALES)
+        #s3 = get_s3_resource(CREDENCIALES)
         path_s3 = PATH_TR.format(self.fecha.year, self.fecha.month)
 
         unit_testing = TestTraining()
@@ -65,13 +65,13 @@ class TaskTrainingUnitTesting(CopyToTable):
             for algorithm in ALGORITHMS:
                 filename = NOMBRE_TR.format(algorithm, self.fecha)
                 path_name = "{}/{}".format(path_s3, filename)
-                pkl_file = read_pkl_from_s3(s3, BUCKET_NAME, path_name)
+                pkl_file = read_pkl_from_s3(S3, BUCKET_NAME, path_name)
                 unit_testing.test_training_gs(pkl_file)
 
         else:
             filename = NOMBRE_TR.format(self.algoritmo, self.fecha)
             path_name = "{}/{}".format(path_s3, filename)
-            pkl_file = read_pkl_from_s3(s3, BUCKET_NAME, path_name)
+            pkl_file = read_pkl_from_s3(S3, BUCKET_NAME, path_name)
             unit_testing.test_training_gs(pkl_file)
 
         r = [(self.user, "training", "test_training_gs")]
@@ -147,14 +147,14 @@ class TaskTraining(luigi.Task):
     def run(self):
 
         # Conexión a bucket S3 para extraer datos para modelaje
-        s3 = get_s3_resource(CREDENCIALES)
+        #s3 = get_s3_resource(CREDENCIALES)
 
         # Leyendo datos
 
         # Leer X_train
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_xtrain = '{}/{}'.format(path_s3, NOMBRE_FE_xtrain.format(self.fecha))
-        X_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_xtrain)
+        X_train = read_pkl_from_s3(S3, BUCKET_NAME, file_to_upload_xtrain)
         X_train_file = file_to_upload_xtrain.split("/")
         X_train_file = X_train_file[-1]
         X_train_file = X_train_file[:-4]
@@ -162,7 +162,7 @@ class TaskTraining(luigi.Task):
         # Leer y_train
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_ytrain = '{}/{}'.format(path_s3, NOMBRE_FE_ytrain.format(self.fecha))
-        y_train = read_pkl_from_s3(s3, BUCKET_NAME, file_to_upload_ytrain)
+        y_train = read_pkl_from_s3(S3, BUCKET_NAME, file_to_upload_ytrain)
         y_train_file = file_to_upload_ytrain.split("/")
         y_train_file = y_train_file[-1]
         y_train_file = y_train_file[:-4]
@@ -183,7 +183,7 @@ class TaskTraining(luigi.Task):
 
                 file_to_upload = NOMBRE_TR.format(algorithm, self.fecha)
                 path_run = path_s3 + "/" + file_to_upload
-                guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, model)
+                guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, model)
 
                 file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, algorithm,
                                                            model.best_params_,
@@ -195,7 +195,7 @@ class TaskTraining(luigi.Task):
 
             file_to_upload = NOMBRE_TR.format(self.algoritmo, self.fecha)
             path_run = path_s3 + "/" + file_to_upload
-            guardar_pkl_en_s3(s3, BUCKET_NAME, path_run, dummy)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, dummy)
 
             file_output.write("{0};{1};{2};{3};{4}\n".format(self.fecha, self.algoritmo,
                                                              "strategy:most_frequent",

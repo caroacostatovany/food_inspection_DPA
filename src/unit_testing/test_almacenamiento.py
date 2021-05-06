@@ -8,7 +8,7 @@ import json
 from unittest.mock import patch, Mock
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.utils.general import read_pkl_from_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME
 
 
 class TestAlmacenamiento(marbles.core.TestCase):
@@ -23,7 +23,7 @@ class TestAlmacenamiento(marbles.core.TestCase):
                 return False
             return True
 
-        s3 = get_s3_resource(CREDENCIALES)
+        #s3 = get_s3_resource(CREDENCIALES)
         file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
         # Realmente esta definido como un diccionario y por eso usamos dumps, en vez de loads
         self.assertTrue(is_json(file))

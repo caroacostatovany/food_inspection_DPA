@@ -30,8 +30,8 @@ class TaskJson2RDS(CopyToTable):
     start_time = time.time()
     # Por ahora vamos a borrar el esquema raw y volverlo a crear desde cero e insertar un pkl por pkl..
     # No es lo ideal, pero por simplicidad del ejercicio
-    s3 = get_s3_resource(CREDENCIALES)
-    objects = s3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
+    #s3 = get_s3_resource(CREDENCIALES)
+    objects = S3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
     # Establecer conexión con la base de datos
     conn = get_db_conn_psycopg(CREDENCIALES)
@@ -54,7 +54,7 @@ class TaskJson2RDS(CopyToTable):
         for file in objects:
             filename = file['Key']
             logging.info("Leyendo {}...".format(filename))
-            json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+            json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
             df_temp = pd.DataFrame(json_file)
             df = pd.concat([df, df_temp], axis=0)
 

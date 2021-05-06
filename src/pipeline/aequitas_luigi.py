@@ -14,7 +14,7 @@ from aequitas.fairness import Fairness
 
 from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
-from src.utils.constants import CREDENCIALES, BUCKET_NAME, REF_GROUPS_DICT, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_ytest
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, REF_GROUPS_DICT, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_ytest
 from src.pipeline.model_select_luigi import TaskModelSelectionMetadata
 from src.etl.metricas import get_metrics_matrix
 from src.utils.general import get_db_conn_psycopg
