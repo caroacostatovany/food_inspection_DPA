@@ -1,6 +1,17 @@
 import pandas as pd
 import numpy as np
 import re
+from matplotlib.ticker import FuncFormatter
+
+
+def number_formatter(number, pos=None):
+    """Convert a number into a human readable format."""
+    magnitude = 0
+    while abs(number) >= 1000:
+        magnitude += 1
+        number /= 1000.0
+    return '%.1f%s' % (number, ['', 'K', 'M', 'B', 'T', 'Q'][magnitude])
+
 
 def cuenta_tipo_de_dato(df,tipo):
     """

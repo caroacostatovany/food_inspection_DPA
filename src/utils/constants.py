@@ -41,3 +41,23 @@ NOMBRE_MS = "best_model_{}.pkl"
 
 # Definimos la lista de lo que queremos para nuestro feature engineering
 L = ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter']
+
+
+# Define las variables protegidas y la referencia
+REF_GROUPS_DICT = {'facility_type': 'restaurant',
+                   'zip': '60634',
+                   'inspection_type': 'canvass'}
+
+# Lista de métricas de interés
+METRICAS_SESGO_INEQUIDAD = ['attribute_name',
+                            'attribute_value',
+                            'ppr_disparity',
+                            'pprev_disparity',
+                            'precision_disparity',
+                            'fdr_disparity',
+                            'for_disparity',
+                            'fpr_disparity',
+                            'fnr_disparity',
+                            'tpr_disparity',
+                            'tnr_disparity',
+                            'npv_disparity']
