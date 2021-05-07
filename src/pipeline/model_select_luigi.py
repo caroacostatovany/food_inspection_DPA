@@ -133,7 +133,7 @@ class TaskModelSelection(luigi.Task):
         objects = S3.list_objects_v2(Bucket=BUCKET_NAME)['Contents']
 
         # Selección del mejor modelo
-        self.best_model = best_model_selection(self.threshold, objects, S3)
+        self.best_model = best_model_selection(self.threshold, objects, S3, self.fecha)
 
 
         # Guardar best model

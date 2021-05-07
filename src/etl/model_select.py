@@ -6,7 +6,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
-def best_model_selection(threshold, objects, s3):
+def best_model_selection(threshold, objects, s3, fecha):
     """
     Selección del mejor modelo de acuerdo al criterio del cliente
     :param threshold: criterio del cliente
@@ -21,17 +21,18 @@ def best_model_selection(threshold, objects, s3):
     if len(objects) > 0:
         for file in objects:
             if file['Key'].find("models/") >= 0:
-                filename = file['Key']
-                logging.info("Leyendo {}...".format(filename))
-                json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
-                loaded_model = json_file
-                try:
-                    if loaded_model.best_score_ >= threshold:
-                        if loaded_model.best_score_ >= max_score:
-                            best_model = filename
-                            best_score = loaded_model.best_score_
-                            max_score = best_score
-                except:
-                   pass
+                if file['Key'].find(fecha) >= 0:
+                    filename = file['Key']
+                    logging.info("Leyendo {}...".format(filename))
+                    json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+                    loaded_model = json_file
+                    try:
+                        if loaded_model.best_score_ >= threshold:
+                            if loaded_model.best_score_ >= max_score:
+                                best_model = filename
+                                best_score = loaded_model.best_score_
+                                max_score = best_score
+                    except:
+                       pass
 
     return best_model
