@@ -23,6 +23,6 @@ class TestAlmacenamiento(marbles.core.TestCase):
             return True
 
         #s3 = get_s3_resource(CREDENCIALES)
-        file = read_pkl_from_s3(s3, BUCKET_NAME, filename)
+        file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
         # Realmente esta definido como un diccionario y por eso usamos dumps, en vez de loads
         self.assertTrue(is_json(file))

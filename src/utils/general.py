@@ -5,6 +5,7 @@ import yaml
 import logging
 import pickle
 import psycopg2
+import boto3
 
 logging.basicConfig(level=logging.INFO)
 
