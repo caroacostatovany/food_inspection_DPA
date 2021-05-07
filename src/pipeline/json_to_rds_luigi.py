@@ -13,8 +13,7 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamiento
 from src.utils.constants import BUCKET_NAME, CREDENCIALES, PATH_LUIGI_TMP
-from src.utils.general import get_db, read_pkl_from_s3, get_db_conn_psycopg
-from src.etl.ingesta_almacenamiento import get_s3_resource
+from src.utils.general import get_db, read_pkl_from_s3, get_db_conn_psycopg, get_s3_resource
 
 #["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 

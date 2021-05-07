@@ -6,8 +6,7 @@ import marbles.core
 import json
 
 from unittest.mock import patch, Mock
-from src.etl.ingesta_almacenamiento import get_s3_resource
-from src.utils.general import read_pkl_from_s3
+from src.utils.general import read_pkl_from_s3, get_s3_resource
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME
 
 

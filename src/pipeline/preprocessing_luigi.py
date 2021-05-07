@@ -8,10 +8,10 @@ from datetime import date, timedelta
 
 from luigi.contrib.postgres import CopyToTable
 
-from src.etl.ingesta_almacenamiento import guardar_ingesta, get_s3_resource
+from src.etl.ingesta_almacenamiento import guardar_ingesta
 from src.etl.preprocessing import preprocessing
 from src.pipeline.almacenamiento_luigi import TaskAlmacenamientoMetadata
-from src.utils.general import get_db, read_pkl_from_s3
+from src.utils.general import get_db, read_pkl_from_s3, get_s3_resource
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_LUIGI_TMP, PATH_PREPROCESS, NOMBRE_PREPROCESS
 from src.unit_testing.test_preprocessing import TestPreprocessing
 

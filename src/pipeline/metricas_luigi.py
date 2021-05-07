@@ -6,8 +6,7 @@ from datetime import date
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
-from src.etl.ingesta_almacenamiento import get_s3_resource
-from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_ytest
 from src.pipeline.model_select_luigi import TaskModelSelectionMetadata
 from src.etl.metricas import get_metrics_matrix

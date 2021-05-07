@@ -135,3 +135,24 @@ def guardar_pkl_en_s3(s3, bucket_name, file_to_upload, data):
     # Guardar los datos (pickle) en el bucket y ruta específica
     s3.put_object(Bucket=bucket_name, Key=file_to_upload, Body=pickle_dump)
     logging.info("pkl guardado exitosamente.")
+
+
+def get_s3_resource(credenciales):
+    """
+    Crear un resource de S3 para poder guardar los datos en el bucket
+    Inputs:
+    credenciales: credenciales para poder acceder al bucket
+    """
+
+    # Obtener las credenciales del archivo .yaml
+    s3_creds = get_s3_credentials(credenciales)
+
+    # Conectarse al bucket
+    logging.info("Abriendo sesión s3")
+    session = boto3.Session(aws_access_key_id=s3_creds['aws_access_key_id'],
+                            aws_secret_access_key=s3_creds['aws_secret_access_key'])
+
+    # Obtener el bucket
+    s3 = session.client('s3')
+
+    return s3

@@ -7,10 +7,9 @@ from datetime import date, timedelta
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
-from src.etl.ingesta_almacenamiento import get_s3_resource
 from src.etl.feature_engineering import feature_generation, guardar_feature_engineering, feature_selection
 from src.etl.training import fit_training_food
-from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineeringMetadata
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineering

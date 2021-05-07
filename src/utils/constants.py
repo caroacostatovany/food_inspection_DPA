@@ -1,7 +1,7 @@
 """
 Módulo para constantes
 """
-from src.etl.ingesta_almacenamiento import get_s3_resource
+from src.utils.general import get_s3_resource
 
 # PATH de las credenciales
 CREDENCIALES = "conf/local/credentials.yaml"
