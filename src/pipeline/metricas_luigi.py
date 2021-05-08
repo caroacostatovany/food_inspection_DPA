@@ -11,7 +11,7 @@ from luigi.contrib.postgres import CopyToTable
 
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, \
-    NOMBRE_FE_ytest, REF_GROUPS_DICT, PATH_PREPROCESS, NOMBRE_PREPROCESS, NOMBRE_FE_full
+    NOMBRE_FE_ytest, REF_GROUPS_DICT, PATH_PREPROCESS, NOMBRE_PREPROCESS, NOMBRE_FE_full, PATH_METRICAS, NOMBRE_METRICAS
 from src.pipeline.model_select_luigi import TaskModelSelectionMetadata
 from src.etl.metricas import get_metrics_matrix
 
@@ -92,11 +92,16 @@ class TaskMetricas(CopyToTable):
 
         metricas = get_metrics_matrix(y_test, predicted_scores)
 
+        # Guardar métricas
+        path_s3 = PATH_METRICAS.format(self.fecha.year, self.fecha.month)
+        path_run = "{}/{}".format(path_s3, NOMBRE_METRICAS.format(self.fecha))
+        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, metricas)
+
         metrica = self.metrica.lower()
         punto_corte = metricas[metricas[metrica] <= self.kpi].threshold.values[0]
-        loogging.info("El punto de corte de acuerdo a la métrica {} <= {} es: {}".format(metrica,
-                                                                                         self.kpi,
-                                                                                         punto_corte))
+        logging.info("El punto de corte de acuerdo a la métrica {} <= {} es: {}".format(metrica,
+                                                                                        self.kpi,
+                                                                                        punto_corte))
 
         new_labels = [0 if score < punto_corte else 1 for score in predicted_scores[:, 1]]
 

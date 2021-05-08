@@ -43,8 +43,9 @@ NOMBRE_TR = "models_{}_{}.pkl"
 PATH_MS = "best_model/YEAR={}/MONTH={}"
 NOMBRE_MS = "best_model_{}.pkl"
 
-# Definimos la lista de lo que queremos para nuestro feature engineering
-L = ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter']
+# Metricas:
+PATH_METRICAS = "resultados/YEAR={}/MONTH={}"
+NOMBRE_METRICAS = "reporte_metricas_{}.pkl"
 
 
 # Define las variables protegidas y la referencia
