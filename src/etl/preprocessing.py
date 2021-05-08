@@ -191,6 +191,7 @@ def preprocessing(df):
     food_df = change_misspelled_chicago_city_names(food_df)
     food_df = convert_nan(food_df)
     food_df = transform_label(food_df)
+    food_df = food_df.dropna()
 
     return food_df
 
