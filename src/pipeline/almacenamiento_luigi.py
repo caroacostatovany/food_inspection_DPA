@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 import luigi
 
 from luigi.contrib.postgres import CopyToTable
@@ -31,7 +31,8 @@ class TaskAlmacenamientoUnitTesting(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
         return [TaskAlmacenamiento(self.ingesta_inicial, self.ingesta_consecutiva, self.fecha)]
@@ -48,7 +49,7 @@ class TaskAlmacenamientoUnitTesting(CopyToTable):
         unit_testing = TestAlmacenamiento()
         unit_testing.test_almacenamiento_json(path)
 
-        r = [(self.user, "almacenamiento", "test_almacenamiento_json")]
+        r = [(self.user, "almacenamiento", "test_almacenamiento_json", datetime.now())]
         for element in r:
             yield element
 

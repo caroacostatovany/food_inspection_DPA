@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import luigi
-from datetime import date
+from datetime import date, datetime
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
@@ -41,7 +41,8 @@ class TaskModelSelectUnitTesting(CopyToTable):
     table = "test.unit_testing"
     columns = [("user_id", "varchar"),
                ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
         return [TaskModelSelection(self.ingesta, self.fecha, self.threshold, self.algoritmo)]
@@ -59,7 +60,7 @@ class TaskModelSelectUnitTesting(CopyToTable):
         unit_testing = TestModelSelect()
         unit_testing.test_model_select(best_model)
 
-        r = [(self.user, "model_selection", "test_model_select")]
+        r = [(self.user, "model_selection", "test_model_select", datetime.now())]
         for element in r:
             yield element
 

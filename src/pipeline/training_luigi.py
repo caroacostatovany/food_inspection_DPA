@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import luigi
 import time
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
@@ -48,7 +48,8 @@ class TaskTrainingUnitTesting(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
         return [TaskTraining(self.ingesta, self.fecha, self.algoritmo)]
@@ -73,7 +74,7 @@ class TaskTrainingUnitTesting(CopyToTable):
             pkl_file = read_pkl_from_s3(S3, BUCKET_NAME, path_name)
             unit_testing.test_training_gs(pkl_file)
 
-        r = [(self.user, "training", "test_training_gs")]
+        r = [(self.user, "training", "test_training_gs", datetime.now())]
         for element in r:
             yield element
 

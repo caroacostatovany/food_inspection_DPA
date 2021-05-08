@@ -1,5 +1,5 @@
 
-from datetime import date
+from datetime import date, datetime
 import luigi
 import logging
 
@@ -31,7 +31,8 @@ class TaskIngestaUnitTesting(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
 
 
     def requires(self):
@@ -43,7 +44,7 @@ class TaskIngestaUnitTesting(CopyToTable):
         path = "{}/{}".format(PATH_LUIGI_TMP, self.file_to_upload)
         unit_testing.test_ingesta(path)
         # param = "{0}; {1}; {2}".format(self.inicial, self.fecha, self.file_to_upload)
-        r = [(self.user, "ingesta", "test_ingesta")]
+        r = [(self.user, "ingesta", "test_ingesta", datetime.now())]
         for element in r:
             yield element
 

@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import luigi
 import time
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
@@ -38,7 +38,8 @@ class TaskFeatureEngineeringUnitTesting(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
         return [TaskFeatureEngineering(self.ingesta, self.fecha)]
@@ -53,7 +54,7 @@ class TaskFeatureEngineeringUnitTesting(CopyToTable):
 
         df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
         unit_testing.test_feature_engineering_month(df)
-        r = [(self.user, "feature_engineering", "test_feature_engineering_month")]
+        r = [(self.user, "feature_engineering", "test_feature_engineering_month", datetime.now())]
         for element in r:
             yield element
 

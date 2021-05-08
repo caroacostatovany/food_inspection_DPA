@@ -4,7 +4,7 @@ import luigi
 import time
 
 from luigi.contrib.s3 import S3Target
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from luigi.contrib.postgres import CopyToTable
 
@@ -37,7 +37,8 @@ class TaskPreprocessingUnitTesting(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("modulo", "varchar"),
-               ("prueba", "varchar")]
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
         return [TaskPreprocessing(self.ingesta, self.fecha)]
@@ -54,7 +55,7 @@ class TaskPreprocessingUnitTesting(CopyToTable):
         df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
         unit_testing.test_preprocessing_label(df)
 
-        r = [(self.user, "preprocessing", "test_preprocessing_label")]
+        r = [(self.user, "preprocessing", "test_preprocessing_label", datetime.now())]
         for element in r:
             yield element
 
