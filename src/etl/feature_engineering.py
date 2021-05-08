@@ -21,9 +21,8 @@ logging.basicConfig(level=logging.INFO)
 
 def transformate_and_aggregate_dates(df):
     """
-    Cambia a tipo correcto fecha y separa el inspection date y
-    calcula de acuerdo a la lista declara en L
-    ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter']
+    Cambia a tipo correcto fecha y separa el inspection date en
+    ['year', 'month', 'day', 'dayofweek', 'dayofyear', 'week']
     ==========
     * Args:
          - df
@@ -33,22 +32,13 @@ def transformate_and_aggregate_dates(df):
     Ejemplo:
         >> food_inspection_df = transformate_and_aggregate_dates(L, food_inspection_df)
     """
-    print("###############################################clean_transform_dates",df)
     df['inspection_date'] = pd.to_datetime(df['inspection_date'])
 
-    #date_gen = (getattr(df['inspection_date'].dt, i).rename(i) for i in L)
     df['year'] = df.inspection_date.map(lambda s: s.year)
     df['month'] = df.inspection_date.map(lambda s: s.month)
     df['day'] = df.inspection_date.map(lambda s: s.day)
     df['dayofweek'] = df.inspection_date.map(lambda s: s.weekday())
     df['week'] = df.inspection_date.map(lambda s: s.isocalendar()[1])
-
-    #print(df.year)
-
-    # concatenamos
-    #print("############################################## before concatenate", date_gen)
-    #df = pd.concat([df,date_gen], axis=1)
-    #print("############################################## after concatenate", df)
 
     return df
 
@@ -90,26 +80,6 @@ def remove_non_useful_columns(df):
 
     df = df.drop(non_useful_cols, axis=1)
 
-    # quitamos los renglones que tienen datos vacíos en cualquier columna
-    #df = remove_nan_rows(df)
-
-    return df
-
-
-def remove_nan_rows(df):
-    """
-    Eliminar renglones con nan
-    ==========
-    * Args:
-         - df: dataframe con nan's
-    * Return:
-         - df: dataframe sin nan's
-    ==========
-    Ejemplo:
-        >> food_inspection_df = remove_nan_rows(food_inspection_df)
-    """
-
-    df = df.dropna()
     return df
 
 
@@ -125,13 +95,9 @@ def feature_generation(df):
     Ejemplo:
         >> food_inspection_df = feature_generation(food_inspection_df)
     """
-    print("################################################################entry", df.shape)
     df = transformate_and_aggregate_dates(df)
-    print("################################################################transform_aggregate", df.shape)
     df = aggregate_num_violations(df)
-    print("################################################################num_violations", df.shape)
     df = remove_non_useful_columns(df)
-    print("###############################################################remove_nonusefulcolumns", df.shape)
 
     # Aplicamos OneHot Encoder para las categóricas
     transformers = [('one_hot', OneHotEncoder(), ['facility_type', 'risk',
@@ -147,13 +113,10 @@ def feature_generation(df):
     logging.info("Successfully transformation of the discrete variables.'")
 
     logging.info("Converting to dataframe...")
-    del df
     X = X.todense()
     df = pd.DataFrame(X, columns=col_trans.get_feature_names())
     del X
     df['label'] = y
-
-    print("#############################################################################last", df.shape)
 
     logging.info("Feature engineering succesfully...")
     return df

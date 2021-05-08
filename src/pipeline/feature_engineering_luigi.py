@@ -124,6 +124,7 @@ class TaskFeatureEngineering(luigi.Task):
         if len(objects) > 0:
             for file in objects:
                 if file['Key'].find("preprocessing/") >= 0:
+                    # Agregar la fecha
                     filename = file['Key']
                     logging.info("Leyendo {}...".format(filename))
                     json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)

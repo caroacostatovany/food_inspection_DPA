@@ -1,7 +1,9 @@
 notebooks/eda/.ipynb_checkpoints/
+notebooks/Sesgo_e_inequidad/.ipynb_checkpoints/
 .idea/
 data/*.csv
 venv/
 conf/local/**
 *.pyc
-tmp/luigi/*.pkl
+tmp/luigi/eq3/*.pkl
+tmp/luigi/eq3/*.csvs

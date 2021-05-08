@@ -170,6 +170,23 @@ def convert_nan(df):
     return df
 
 
+def remove_nan_rows(df):
+    """
+    Eliminar renglones con nan
+    ==========
+    * Args:
+         - df: dataframe con nan's
+    * Return:
+         - df: dataframe sin nan's
+    ==========
+    Ejemplo:
+        >> food_inspection_df = remove_nan_rows(food_inspection_df)
+    """
+
+    df = df.dropna()
+    return df
+
+
 def preprocessing(df):
     """
     Hace todo el preprocesamiento y limpieza de datos:
@@ -191,7 +208,6 @@ def preprocessing(df):
     food_df = change_misspelled_chicago_city_names(food_df)
     food_df = convert_nan(food_df)
     food_df = transform_label(food_df)
-    food_df = food_df.dropna()
+    food_df = remove_nan_rows(food_df)
 
     return food_df
-

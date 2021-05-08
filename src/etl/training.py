@@ -30,7 +30,6 @@ def fit_training_food(X_train, y_train, algorithm):
     gs = GridSearchCV(estimator, grid_params, scoring='precision', cv=tscv, n_jobs=3)
 
     # train
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", y_train.shape)
-    gs.fit(X_train, y_train)
+    gs.fit(X_train, y_train.values.ravel())
 
     return gs
