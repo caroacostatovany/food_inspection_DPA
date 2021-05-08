@@ -21,7 +21,7 @@ def best_model_selection(threshold, objects, s3, fecha):
     if len(objects) > 0:
         for file in objects:
             if file['Key'].find("models/") >= 0:
-                if file['Key'].find(fecha) >= 0:
+                if file['Key'].find(str(fecha)) >= 0:
                     filename = file['Key']
                     logging.info("Leyendo {}...".format(filename))
                     json_file = read_pkl_from_s3(s3, BUCKET_NAME, filename)

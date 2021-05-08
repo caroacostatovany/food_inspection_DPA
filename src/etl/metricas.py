@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 from sklearn.metrics import precision_recall_curve, roc_curve, roc_auc_score
 
 
@@ -22,6 +24,7 @@ def get_metrics_matrix(y_test, predicted_scores):
     """
 
     """
+
     fpr, tpr, thresholds = roc_curve(y_test, predicted_scores[:, 1], pos_label=1)
     precision, recall, thresholds_2 = precision_recall_curve(y_test, predicted_scores[:, 1], pos_label=1)
     thresholds_2 = np.append(thresholds_2, 1)
