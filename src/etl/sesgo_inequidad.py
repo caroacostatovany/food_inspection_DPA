@@ -1,1 +1,19 @@
-from src.utils.general import get_s3_credentials, read_pkl_from_s3
+import pandas as pd
+from aequitas.preprocessing import preprocess_input_df
+
+from src.utils.general import get_db_conn_psycopg
+from src.utils.constants import CREDENCIALES
+
+
+def obtain_aequitas_dataframe():
+    query = """
+                select * 
+                from semantic.aequitas;
+            """
+
+    conn = get_db_conn_psycopg(CREDENCIALES)
+    aequitas_df = pd.read_sql(query, conn)
+
+    aequitas_df, _ = preprocess_input_df(aequitas_df)
+
+    return aequitas_df

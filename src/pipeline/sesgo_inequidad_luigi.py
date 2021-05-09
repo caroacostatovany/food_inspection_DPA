@@ -7,18 +7,76 @@ from datetime import date
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
-from aequitas.preprocessing import preprocess_input_df
 from aequitas.group import Group
 from aequitas.bias import Bias
 from aequitas.fairness import Fairness
 
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
-from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, REF_GROUPS_DICT, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_ytest
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, REF_GROUPS_DICT, PATH_MS, NOMBRE_MS, PATH_FE, \
+    NOMBRE_FE_xtest, NOMBRE_FE_ytest
 from src.pipeline.metricas_luigi import TaskMetricas
 from src.etl.metricas import get_metrics_matrix
-from src.utils.general import get_db_conn_psycopg
+from src.etl.sesgo_inequidad import obtain_aequitas_dataframe
+from src.unit_testing.test_sesgo_inequidad import TestSesgoInequidad
 
 logging.basicConfig(level=logging.INFO)
+
+
+class TaskSesgoInequidadUnitTesting(CopyToTable):
+    ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
+                                                        "'inicial': Para correr una ingesta inicial."
+                                                        "'consecutiva': Para correr una ingesta consecutiva")
+
+    fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
+                                                                  "Formato 'año-mes-día'")
+
+    threshold = luigi.FloatParameter(default=0.80, description="Umbral del desempeño para escoger el mejor modelo")
+
+    algoritmo = luigi.Parameter(default="gridsearch",
+                                description="gridsearch: Si quieres que cree el modelo dadas las constantes de GridSearch."
+                                            "randomclassifier: Si quieres que cree un modelo random classifier."
+                                            "decisiontree: Si quieres que cree un modelo con decision tree.")
+
+    metrica = luigi.Parameter(default="fpr",
+                              description="threshold:"
+                                          "precision:"
+                                          "recall:"
+                                          "f1_score:"
+                                          "tpr:"
+                                          "fpr:"
+                                          "tnr:"
+                                          "fnr:")
+
+    kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
+
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "test.unit_testing"
+
+    columns = [("user_id", "varchar"),
+               ("modulo", "varchar"),
+               ("prueba", "varchar"),
+               ("dia_ejecucion", "timestamp without time zone")]
+
+    def requires(self):
+        return [TaskSesgoInequidad(self.ingesta, self.fecha, self.threshold, self.algoritmo, self.metrica, self.kpi)]
+
+    def rows(self):
+        aequitas_df = obtain_aequitas_dataframe()
+
+        unit_testing = TestSesgoInequidad()
+        unit_testing.test_sesgo_score(aequitas_df)
+        unit_testing.test_sesgo_label_value(aequitas_df)
+
+        r = [(self.user, "sesgo_inequidad", "test_sesgo_score", datetime.now()),
+             (self.user, "sesgo_inequidad", "test_sesgo_label_value", datetime.now())]
+        for element in r:
+            yield element
 
 
 class TaskSesgoInequidad(CopyToTable):
@@ -59,32 +117,22 @@ class TaskSesgoInequidad(CopyToTable):
     table = "results.sesgo"
     columns = [('attribute_name', 'varchar'),
                ('attribute_value', 'varchar'),
-               ('ppr_disparity','float'),
-               ('pprev_disparity','float'),
-               ('precision_disparity','float'),
-               ('fdr_disparity','float'),
-               ('for_disparity','float'),
-               ('fpr_disparity','float'),
-               ('fnr_disparity','float'),
-               ('tpr_disparity','float'),
-               ('tnr_disparity','float'),
-               ('npv_disparity','float')]
-
-    conn = get_db_conn_psycopg(CREDENCIALES)
+               ('ppr_disparity', 'float'),
+               ('pprev_disparity', 'float'),
+               ('precision_disparity', 'float'),
+               ('fdr_disparity', 'float'),
+               ('for_disparity', 'float'),
+               ('fpr_disparity', 'float'),
+               ('fnr_disparity', 'float'),
+               ('tpr_disparity', 'float'),
+               ('tnr_disparity', 'float'),
+               ('npv_disparity', 'float')]
 
     def requires(self):
         return [TaskMetricas(self.ingesta, self.fecha, self.threshold, self.algoritmo, self.metrica, self.kpi)]
 
     def rows(self):
-
-        query = """
-            select * 
-            from semantic.aequitas;
-        """
-
-        aequitas_df = pd.read_sql(query, self.conn)
-
-        aequitas_df, _ = preprocess_input_df(aequitas_df)
+        aequitas_df = obtain_aequitas_dataframe()
 
         g = Group()
         #xtab es la matriz que explica el comportamiento

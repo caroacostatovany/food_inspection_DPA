@@ -12,6 +12,7 @@ from src.utils.constants import CREDENCIALES, BUCKET_NAME
 import sklearn
 from sklearn.model_selection import GridSearchCV
 
+
 class TestTraining(marbles.core.TestCase):
 
     def test_training_gs(self, file):
