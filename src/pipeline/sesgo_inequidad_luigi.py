@@ -3,7 +3,7 @@ import pandas as pd
 import luigi
 import aequitas
 
-from datetime import date
+from datetime import date, datetime
 
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable

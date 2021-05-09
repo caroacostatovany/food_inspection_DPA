@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import VarianceThreshold
 from sklearn import metrics
 
-from src.utils.constants import L, S3
+from src.utils.constants import S3
 from src.utils.general import get_s3_resource
 
 logging.basicConfig(level=logging.INFO)
