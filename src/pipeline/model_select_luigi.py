@@ -93,14 +93,14 @@ class TaskModelSelectionMetadata(CopyToTable):
 
     columns = [("user_id", "varchar"),
                ("parametros", "varchar"),
-               ("dia_ejecucion", "varchar")]
+               ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
         return [TaskModelSelectUnitTesting(self.ingesta, self.fecha, self.threshold, self.algoritmo)]
 
     def rows(self):
         param = "{0}; {1}".format(self.ingesta, self.fecha)
-        r = [(self.user, param, date.today())]
+        r = [(self.user, param, datetime.now())]
         for element in r:
             yield element
 
