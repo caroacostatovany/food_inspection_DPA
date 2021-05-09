@@ -49,7 +49,7 @@ class TaskSesgoInequidadUnitTesting(CopyToTable):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
-    permite_nulos = luigi.BoolParameter(default=True, description="Permite nulos en métricas de sesgo e inequidad")
+    permite_nulos = luigi.BoolParameter(default=False, description="Permite nulos en métricas de sesgo e inequidad")
 
     cred = get_db(CREDENCIALES)
     user = cred['user']

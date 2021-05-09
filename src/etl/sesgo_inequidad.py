@@ -28,6 +28,4 @@ def obtain_metricas_sesgo_dataframe():
     conn = get_db_conn_psycopg(CREDENCIALES)
     df = pd.read_sql(query, conn)
 
-    df, _ = preprocess_input_df(df)
-
     return df

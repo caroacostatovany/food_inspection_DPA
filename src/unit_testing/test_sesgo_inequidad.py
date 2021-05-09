@@ -25,4 +25,5 @@ class TestSesgoInequidad(marbles.core.TestCase, mixins.CategoricalMixins):
 
     def test_sesgo_not_nan(self, df):
         """Revisa que el dataframe no tenga nulos"""
-        self.assertTrue(df.isnull().values.any(), note="Las métricas de sesgo e inequidad contienen nulos")
+        print(df)
+        self.assertFalse(df.isnull().values.any(), note="Las métricas de sesgo e inequidad contienen nulos")
