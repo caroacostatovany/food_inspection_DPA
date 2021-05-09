@@ -16,7 +16,7 @@ from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, REF_GROUPS_DICT, 
     NOMBRE_FE_xtest, NOMBRE_FE_ytest
 from src.pipeline.metricas_luigi import TaskMetricas
 from src.etl.metricas import get_metrics_matrix
-from src.etl.sesgo_inequidad import obtain_aequitas_dataframe
+from src.etl.sesgo_inequidad import obtain_aequitas_dataframe, obtain_metricas_sesgo_dataframe
 from src.unit_testing.test_sesgo_inequidad import TestSesgoInequidad
 
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +49,8 @@ class TaskSesgoInequidadUnitTesting(CopyToTable):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
+    permite_nulos = luigi.BoolParameter(default=True, description="Permite nulos en métricas de sesgo e inequidad")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -72,6 +74,9 @@ class TaskSesgoInequidadUnitTesting(CopyToTable):
         unit_testing = TestSesgoInequidad()
         unit_testing.test_sesgo_score(aequitas_df)
         unit_testing.test_sesgo_label_value(aequitas_df)
+        if not self.permite_nulos:
+            metricas = obtain_metricas_sesgo_dataframe()
+            unit_testing.test_sesgo_not_nan(metricas)
 
         r = [(self.user, "sesgo_inequidad", "test_sesgo_score", datetime.now()),
              (self.user, "sesgo_inequidad", "test_sesgo_label_value", datetime.now())]

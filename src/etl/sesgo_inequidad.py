@@ -17,3 +17,17 @@ def obtain_aequitas_dataframe():
     aequitas_df, _ = preprocess_input_df(aequitas_df)
 
     return aequitas_df
+
+
+def obtain_metricas_sesgo_dataframe():
+    query = """
+                select * 
+                from results.sesgo;
+            """
+
+    conn = get_db_conn_psycopg(CREDENCIALES)
+    df = pd.read_sql(query, conn)
+
+    df, _ = preprocess_input_df(df)
+
+    return df
