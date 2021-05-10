@@ -195,3 +195,18 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe este entre 1 y 12 |
 | Entrenamiento | test_training_gs | Revisa que el archivo es un objeto GridSearchCV |
 | Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacia que indica que no hubo mejor modelo |
+| Sesgo e inequidades | test_sesgo_inequidad | Revisa que tanto el score como la etiqueta sea 0 o 1, y permite valores nulos |
+
+## Análisis de sesgo e inequidad
+
+### ¿Cuáles son los atributos protegidos?
+**R:** Respuesta.
+
+### ¿Qué grupos de referencia tiene cada atributo protegido?
+**R:** Respuesta.
+
+### ¿El modelo es punitivo o asistivo?
+**R:** Respuesta.
+
+### ¿Qué métricas se evaluarán para analizar el sesgo e inequidad?
+**R:** Respuesta.
