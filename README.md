@@ -72,19 +72,25 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 2. En la terminal, posiciónate en la raíz del repositorio y ejecuta:
 >  `export PYTHONPATH=$PWD`
 
-**Notas:** en `src/utils/constants.py` mantenemos las constantes de nuestro proyecto, donde tenemos referenciado el nombre de nuestro bucket: ` "data-product-architecture-equipo-3"`  y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
-Si quieres acceder a diferentes buckets con otras credenciales esto se deberá cambiar en el archivo de las constantes. También hay un **FAQ** al último de este archivo, donde podrás encontrar más respuestas sobre las constantes.
+**Notas:** en `src/utils/constants.py` mantenemos las constantes de nuestro proyecto, donde tenemos referenciado el 
+nombre de nuestro bucket: ` "data-product-architecture-equipo-3"`  y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
+Si quieres acceder a diferentes buckets con otras credenciales esto se deberá cambiar en el archivo de las constantes. 
+También hay un **FAQ** al último de este archivo, donde podrás encontrar más respuestas sobre las constantes.
 
 ### Con Luigi
 
 Después de correr las instrucciones generales, escribimos algunos ejemplos de cómo correr tareas en Luigi.
 
 
-**Nota:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata` y `test`. O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql" y "create_unittesting_tables.sql".
+**Nota:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`, `test`, `results` y `semantic`.
+O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql", "create_unittesting_tables.sql", "create_semantic_tables.sql" y "create_results_tables.sql".
 
 Algunos ejemplos para correr:
 
-Para análisis de sesgo e inequidad: Existen los parámetros --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva", --fecha con la que se quiere correr el pipeline, --threshold que indica el score deseado para seleccionar el mejor modelo, --metrica para indicar la métrica a enfocarse, --kpi para seleccionar el límite para dicha métrica, y --permite_nulos si se permitirán o no nulos en el análisis.
+Para análisis de sesgo e inequidad: Existen los parámetros --ingesta, que puede tener los valores de "no", "inicial" y 
+"consecutiva", --fecha con la que se quiere correr el pipeline, --threshold que indica el score deseado para seleccionar 
+el mejor modelo, --metrica para indicar la métrica a enfocarse, --kpi para seleccionar el límite para dicha métrica y 
+así seleccionar el punto de corte, y --permite_nulos si se permitirán o no nulos en el análisis.
 > PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.sesgo_inequidad_luigi TaskSesgoInequidadMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha 2021-05-08 --permite-nulos
 
 ### De Notebooks
@@ -128,27 +134,33 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 ### ¿Qué hace el proceso de ingestión consecutiva?
 **R:** La función de `ingesta_consecutiva` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, y una fecha para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 1,000 y desde 7 días antes a la fecha especificada hasta la fecha especificada en la variable `fecha`. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/consecutive` bajo el nombre de `consecutive-inspections-{fecha_hoy}.pkl`.
 
-### ¿Qué contiene el preprocessing?
+### ¿Qué hace el preprocesamiento?
 **R:** La función de `preprocessing` cambia todas las columnas de tipo string a minúsculas, renombra la ciudad de chicago a los que fueron mal escritos, se imputan valores nulos con ciertas características (ver función `convert_nan`) y transforma la etiqueta en 0 y 1 (1 para los resultados en "Pass" y "Pass w/ conditions", 0 para el resto). 
 
 ### ¿Qué contiene el feature engineering?
 **R:** La función de `feature generation` transforma las fechas a su tipo date, quita renglones donde tenga algún nulo que no se pudo limpiar en el preprocessing y agrega nuevas variables como: 'year', 'month', 'day', 'dayofweek', 'dayofyear', 'week', 'quarter', 'num_violations' y por último hace la transformación de features categóricos con OneHotEncoder. 
 
-### ¿Qué contiene el entrenamiento?
+### ¿Qué hace el entrenamiento?
 **R:** La función de `fit_training_food` entrena con un GridSearchCV de acuerdo con el algoritmo dado; y los parámetros los toma de una constante definida en `src.utils.model_constants.py`. Regresa el mejor modelo de ese algoritmo.
 
-### ¿Qué contiene el model selection?
-**R:** La función de `best_model_selection` selecciona el mejor modelo (que se encuentran en el bucket de dentro de la carpeta models) que tenga mejor score y cumpla con el threshold dado por el cliente, si no hay regresa vacío. 
+### ¿Qué hace la selección del modelo?
+**R:** La función de `best_model_selection` selecciona el mejor modelo (que se encuentran en el bucket de dentro de la carpeta models) que tenga mejor score y cumpla con el threshold dado por el cliente, si no hay regresa vacío.
+
+### ¿Qué hace el proceso de sesgo e inequidad?
+**R:** El proceso de sesgo e inequidad utiliza [`aequitas`](https://github.com/dssg/aequitas) para medir el sesgo que tiene nuestro modelo para ciertos grupos protegidos. Para leer más sobre este análisis puedes ir a la sección de abajo llamada "Análisis de sesgo e inequidad".
 
 ### ¿Qué debo cambiar si quiero adaptarlo a mi bucket y PATHS?
 **R:** Si deseas cambiar algunos paths debes hacerlo en el archivo de `constants.py` que se encuentra en `src.utils`. 
 Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. Si quieres modificar los nombres de los archivos, modifica los que dicen NOMBRES.
 
 Si deseas cambiar los modelos a probar en el GridSearch, modifica `src.utils.model_constants.py`.
+Si deseas cambiar los grupos protegidos en sesgo e inquidad y sus referencias, puedes modificarlos en `src.utils.constants.py`. Sólo recuerda eliminar o limpiar la tabla `results.sesgo`.
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien todas las tareas, se debe ver así:
-![Luigi](./images/DAG_Luigi_Checkpoint_5_042721.png)
+![Luigi](./images/DAG_Checkpoint_6_01.jpeg)
+![Luigi2](./images/DAG_Checkpoint_6_02.jpeg)
+![Luigi3](./images/DAG_Checkpoint_6_03.jpeg)
 
 
 ## Arquitectura
@@ -190,7 +202,9 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe este entre 1 y 12 |
 | Entrenamiento | test_training_gs | Revisa que el archivo es un objeto GridSearchCV |
 | Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacia que indica que no hubo mejor modelo |
-| Sesgo e inequidades | test_sesgo_inequidad | Revisa que tanto el score como el label sea 0 o 1, y permite valores nulos |
+| Sesgo e inequidades | test_sesgo_score | Revisa que la columna score sea 0 ó 1 |
+| Sesgo e inequidades | test_sesgo_label_value | Revisa que la columna label_value sea 0 ó 1 |
+| Sesgo e inequidades | test_sesgo_not_nan | Revisa que no existan nulos en todo el dataframe |
 
 ## Análisis de sesgo e inequidad
 
@@ -198,12 +212,19 @@ Por ahora las pruebas unitarias con las que contamos son:
 **R:** Estaremos trabajando con tres atributos protegidos: Tipo de establecimiento, código postal (ZIP), y tipo de inspección.
 
 ### ¿Qué grupos de referencia tiene cada atributo protegido?
-**R:** El grupo de referencia de cada atributo protegido es el de mayor tamaño (tipo de establecimiento: restaurante, código postal: 60647, tipo de inspección: canvass).  Esto es debido a que no sabemos con claridad cuál es el grupo que históricamente ha sido favorecido.
+**R:** El grupo de referencia de cada atributo protegido es el de mayor tamaño (tipo de establecimiento: restaurante, 
+código postal: 60634, tipo de inspección: canvass).  Esto es debido a que no sabemos con claridad cuál es el grupo que 
+históricamente ha sido favorecido.
 
 ### ¿El modelo es punitivo o asistivo?
-**R:** El modelo es asistivo.  Esto es porque el modelo será usado por el establecimiento, y el establecimiento utilizará la etiqueta positiva (1), para estar consciente de que tentativamente sí pasará la inspección. 
+**R:** El modelo es asistivo.  Esto es porque el modelo será usado por el establecimiento, y 
+el establecimiento utilizará la etiqueta positiva (1) y la etiqueta negativa(0), para estar consciente de que 
+tentativamente sí pasará o no la inspección, correspondientemente. 
 
 ### ¿Qué métricas se cuantificarán en sesgo e inequidad?
-**R:** Dado que se trata de un modelo asistivo, las métricas que se cuantificarán son las propias de un modelo asistivo (FN/GS Parity, FOR Parity, FNR Parity).
+**R:** Dado que se trata de un modelo asistivo, nos interesa conocer si hay un sesgo hacia algún grupo de no ser
+seleccionado como etiqueta positiva. Las métricas que se cuantificarán son las 
+propias de un modelo asistivo (FN/GS Parity, FOR Parity, FNR Parity).
 
-*Nota:* Para facilitar un posible análisis futuro, en el modelo actual estamos guardando todas las métricas que se generan a través del framework de Aequitas. 
+*Nota:* Para facilitar un posible análisis futuro, en el modelo actual estamos guardando 
+todas las métricas que se generan a través del framework de Aequitas. 

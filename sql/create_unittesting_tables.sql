@@ -9,5 +9,6 @@ DROP TABLE IF EXISTS test.unit_testing;
 CREATE TABLE test.unit_testing(
     user_id varchar DEFAULT NULL,
     modulo varchar DEFAULT NULL,
-    prueba varchar DEFAULT NULL
+    prueba varchar DEFAULT NULL,
+    dia_ejecucion timestamp without time zone
 );
