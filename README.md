@@ -203,12 +203,12 @@ Por ahora las pruebas unitarias con las que contamos son:
 **R:** Estaremos trabajando con tres atributos protegidos: Tipo de establecimiento, código postal (ZIP), y tipo de inspección.
 
 ### ¿Qué grupos de referencia tiene cada atributo protegido?
-**R:** El grupo de referencia de cada atributo protegido es el de mayor tamaño (tipo de establecimiento: restaurante, código postal: 60647, tipo de inspección: canvas).  Esto es debido a que no sabemos con claridad cuál es el grupo que históricamente ha sido favorecido.
+**R:** El grupo de referencia de cada atributo protegido es el de mayor tamaño (tipo de establecimiento: restaurante, código postal: 60647, tipo de inspección: canvass).  Esto es debido a que no sabemos con claridad cuál es el grupo que históricamente ha sido favorecido.
 
 ### ¿El modelo es punitivo o asistivo?
 **R:** El modelo es asistivo.  Esto es porque el modelo será usado por el establecimiento, y el establecimiento utilizará la etiqueta positiva (1), para estar consciente de que tentativamente sí pasará la inspección. 
 
 ### ¿Qué métricas se cuantificarán en sesgo e inequidad?
-**R:** Dado que se trata de un modelo asistivo, las métricas que se cuantificarán son las propias de un modelo asistivo (Recall Parity, FN/GS Parity, FOR Parity, FNR Parity).
+**R:** Dado que se trata de un modelo asistivo, las métricas que se cuantificarán son las propias de un modelo asistivo (FN/GS Parity, FOR Parity, FNR Parity).
 
 *Nota:* Para facilitar un posible análisis futuro, en el modelo actual estamos guardando todas las métricas que se generan a través del framework de Aequitas. 
