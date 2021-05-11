@@ -195,18 +195,20 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe este entre 1 y 12 |
 | Entrenamiento | test_training_gs | Revisa que el archivo es un objeto GridSearchCV |
 | Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacia que indica que no hubo mejor modelo |
-| Sesgo e inequidades | test_sesgo_inequidad | Revisa que tanto el score como la etiqueta sea 0 o 1, y permite valores nulos |
+| Sesgo e inequidades | test_sesgo_inequidad | Revisa que tanto el score como el label sea 0 o 1, y permite valores nulos |
 
 ## Análisis de sesgo e inequidad
 
 ### ¿Cuáles son los atributos protegidos?
-**R:** Respuesta.
+**R:** Estaremos trabajando con tres atributos protegidos: Tipo de establecimiento, código postal (ZIP), y tipo de inspección.
 
 ### ¿Qué grupos de referencia tiene cada atributo protegido?
-**R:** Respuesta.
+**R:** El grupo de referencia de cada atributo protegido es el de mayor tamaño (tipo de establecimiento: restaurante, código postal: 60647, tipo de inspección: canvas).  Esto es debido a que no sabemos con claridad cuál es el grupo que históricamente ha sido favorecido.
 
 ### ¿El modelo es punitivo o asistivo?
-**R:** Respuesta.
+**R:** El modelo es asistivo.  Esto es porque el modelo será usado por el establecimiento, y el establecimiento utilizará la etiqueta positiva (1), para estar consciente de que tentativamente sí pasará la inspección. 
 
-### ¿Qué métricas se evaluarán para analizar el sesgo e inequidad?
-**R:** Respuesta.
+### ¿Qué métricas se cuantificarán en sesgo e inequidad?
+**R:** Dado que se trata de un modelo asistivo, las métricas que se cuantificarán son las propias de un modelo asistivo (Recall Parity, FN/GS Parity, FOR Parity, FNR Parity).
+
+*Nota:* Para facilitar un posible análisis futuro, en el modelo actual estamos guardando todas las métricas que se generan a través del framework de Aequitas. 
