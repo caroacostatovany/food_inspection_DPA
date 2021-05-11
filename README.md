@@ -84,13 +84,8 @@ Después de correr las instrucciones generales, escribimos algunos ejemplos de c
 
 Algunos ejemplos para correr:
 
-Para entrenamiento:
-Existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", --fecha con la que se quiere correr el pipeline y --algoritmo donde el default es "gridsearch" y toma los algoritmos declarados en nuestras constantes, la etiqueta de --algoritmo también funciona con "dummyclassifier" por el momento.
-> PYTHONPATH=$PWD AWS_PROFILE=<tu_profile_en_aws_config> luigi --module src.pipeline.training_luigi TaskTrainingMetadata --fecha "2021-04-19" --algoritmo gridsearch
-
-Para la selección de modelo:
-Sólo existen los parámetros --ingesta , que puede tener los valores de "no", "inicial" y "consecutiva", --fecha con la que se quiere correr el pipeline,  --algoritmo donde el default es "gridsearch" y toma los algoritmos declarados en nuestras constantes y --threshold que indica el score deseado para seleccionar el mejor modelo. La etiqueta de --algoritmo también funciona con "dummyclassifier" por el momento.
-> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.model_select_luigi TaskModelSelectionMetadata --fecha "2021-04-19" --threshold 0.8
+Para análisis de sesgo e inequidad: Existen los parámetros --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva", --fecha con la que se quiere correr el pipeline, --threshold que indica el score deseado para seleccionar el mejor modelo, --metrica para indicar la métrica a enfocarse, --kpi para seleccionar el límite para dicha métrica, y --permite_nulos si se permitirán o no nulos en el análisis.
+> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.sesgo_inequidad_luigi TaskSesgoInequidadMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha 2021-05-08 --permite-nulos
 
 ### De Notebooks
 
