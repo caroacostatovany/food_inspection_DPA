@@ -34,6 +34,7 @@ NOMBRE_FE_xtrain = "feature_engineering_inspections_x_train_{}.pkl"
 NOMBRE_FE_xtest = "feature_engineering_inspections_x_test_{}.pkl"
 NOMBRE_FE_ytrain = "feature_engineering_inspections_y_train_{}.pkl"
 NOMBRE_FE_ytest = "feature_engineering_inspections_y_test_{}.pkl"
+NOMBRE_FE_predict = "feature_engineering_inspections_predict_{}.pkl"
 
 # Training:
 PATH_TR = "models/YEAR={}/MONTH={}"
@@ -46,6 +47,11 @@ NOMBRE_MS = "best_model_{}.pkl"
 # Metricas:
 PATH_METRICAS = "resultados/YEAR={}/MONTH={}"
 NOMBRE_METRICAS = "reporte_metricas_{}.pkl"
+
+
+# Predicciones:
+PATH_PREDICT = "predicciones/YEAR={}/MONTH={}"
+NOMBRE_PREDICT = "resultados_{}.pkl"
 
 
 # Define las variables protegidas y la referencia

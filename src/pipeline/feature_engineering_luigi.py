@@ -11,7 +11,7 @@ from src.etl.feature_engineering import feature_generation, guardar_feature_engi
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
 from src.pipeline.preprocessing_luigi import TaskPreprocessingMetadata
 from src.utils.constants import S3, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_xtrain, NOMBRE_FE_ytest, NOMBRE_FE_ytrain, \
-    NOMBRE_FE_full, PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME
+    NOMBRE_FE_full, PATH_LUIGI_TMP, CREDENCIALES, BUCKET_NAME, NOMBRE_FE_predict
 from src.unit_testing.test_feature_engineering import TestFeatureEngineering
 
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +26,9 @@ class TaskFeatureEngineeringUnitTesting(CopyToTable):
 
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
+
+    from_predict = luigi.BoolParameter(default=False, description="Si la instrucción viene de predict, para separarlo"
+                                                                  "en train y test o no.")
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
@@ -42,12 +45,14 @@ class TaskFeatureEngineeringUnitTesting(CopyToTable):
                ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
-        return [TaskFeatureEngineering(self.ingesta, self.fecha)]
+        return [TaskFeatureEngineering(self.ingesta, self.fecha, self.from_predict)]
 
     def rows(self):
         #s3 = get_s3_resource(CREDENCIALES)
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_xtrain = NOMBRE_FE_xtrain.format(self.fecha)
+        if self.from_predict:
+            file_to_upload_xtrain = NOMBRE_FE_predict.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_to_upload_xtrain)
 
         unit_testing = TestFeatureEngineering()
@@ -69,6 +74,9 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
 
+    from_predict = luigi.BoolParameter(default=False, description="Si la instrucción viene de predict, para separarlo"
+                                                                  "en train y test o no.")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -85,7 +93,7 @@ class TaskFeatureEngineeringMetadata(CopyToTable):
                ("num_registros", "integer")]
 
     def requires(self):
-        return [TaskFeatureEngineeringUnitTesting(self.ingesta, self.fecha)]
+        return [TaskFeatureEngineeringUnitTesting(self.ingesta, self.fecha, self.from_predict)]
 
     def rows(self):
         path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
@@ -103,6 +111,9 @@ class TaskFeatureEngineering(luigi.Task):
 
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
+
+    from_predict = luigi.BoolParameter(default=False, description="Si la instrucción viene de predict, para separarlo"
+                                                                  "en train y test o no.")
 
     def requires(self):
         dia = self.fecha
@@ -124,12 +135,12 @@ class TaskFeatureEngineering(luigi.Task):
         if len(objects) > 0:
             for file in objects:
                 if file['Key'].find("preprocessing/") >= 0:
-                    # Agregar la fecha
-                    filename = file['Key']
-                    logging.info("Leyendo {}...".format(filename))
-                    json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-                    df_temp = pd.DataFrame(json_file)
-                    df = pd.concat([df, df_temp], axis=0)
+                    if file['Key'].find(str(fecha)) >= 0:
+                        filename = file['Key']
+                        logging.info("Leyendo {}...".format(filename))
+                        json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+                        df_temp = pd.DataFrame(json_file)
+                        df = pd.concat([df, df_temp], axis=0)
 
 
         # Contamos los registros
@@ -139,63 +150,55 @@ class TaskFeatureEngineering(luigi.Task):
         logging.info("Realizando feature generation")
         food_df = feature_generation(df)
 
-        # Feature selection
-        logging.info("Realizando feature selection")
-        X_train, X_test, y_train, y_test = feature_selection(food_df)
+        # Guardar food_df
+        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
+
+        if not self.from_predict:
+
+            logging.info("Realizando feature selection")
+            X_train, X_test, y_train, y_test = feature_selection(food_df)
+
+            file_to_upload = NOMBRE_FE_full.format(self.fecha)
+            path_run = "{}/{}".format(path_s3, file_to_upload)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, food_df)
+
+            # Guardar X_train
+            file_to_upload = NOMBRE_FE_xtrain.format(self.fecha)
+            path_run = "{}/{}".format(path_s3, file_to_upload)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, X_train)
+
+            # Guardar X_test
+            file_to_upload = NOMBRE_FE_xtest.format(self.fecha)
+            path_run = "{}/{}".format(path_s3, file_to_upload)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, X_test)
+
+            # Guardar y_train
+            file_to_upload = NOMBRE_FE_ytrain.format(self.fecha)
+            path_run = "{}/{}".format(path_s3, file_to_upload)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, y_train)
+
+            # Guardar y_test
+            file_to_upload = NOMBRE_FE_ytest.format(self.fecha)
+            path_run = "{}/{}".format(path_s3, file_to_upload)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, y_test)
+        else:
+            # Guardar predict
+            file_to_upload = NOMBRE_FE_predict.format(self.fecha)
+            path_run = "{}/{}".format(path_s3, file_to_upload)
+            guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, food_df)
+
 
         # Fin de tiempo para feature engineering
         end_time = time.time() - start_time
 
         # Path para guardar
-        #path = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
-
-        # Debe estar creado el path tmp/luigi/eq3
-        #file_output = open(path, 'w')
-        #file_output.write("parametros,dia_ejecucion,tiempo,num_registros\n")
-        #file_output.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
-        #                                           date.today(),
-        #                                           end_time,
-        #                                           num_registros))
-        #file_output.close()
-
         with self.output()[-1].open('w') as output_file:
-            #output_file.write("test,luigi,s3")
             output_file.write("parametros,dia_ejecucion,tiempo,num_registros\n")
-            output_file.write("{0};{1},{2},{3},{4}".format(self.ingesta, self.fecha,
+            output_file.write("{0};{1};{2},{3},{4},{5}".format(self.ingesta, self.fecha, self.from_predict,
                                                    date.today(),
                                                    end_time,
                                                    num_registros))
 
-        # Guardar food_df
-        path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
-        file_to_upload = NOMBRE_FE_full.format(self.fecha)
-        path_run = path_s3 + "/" + file_to_upload
-        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, food_df)
-        #guardar_feature_engineering(BUCKET_NAME, path_run, food_df, CREDENCIALES)
-
-        # Guardar X_train
-        file_to_upload = NOMBRE_FE_xtrain.format(self.fecha)
-        path_run = path_s3 + "/" + file_to_upload
-        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, X_train)
-        #guardar_feature_engineering(BUCKET_NAME, path_run, X_train, CREDENCIALES)
-
-        # Guardar X_test
-        file_to_upload = NOMBRE_FE_xtest.format(self.fecha)
-        path_run = path_s3 + "/" + file_to_upload
-        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, X_test)
-        #guardar_feature_engineering(BUCKET_NAME, path_run, X_test, CREDENCIALES)
-
-        # Guardar y_train
-        file_to_upload = NOMBRE_FE_ytrain.format(self.fecha)
-        path_run = path_s3 + "/" + file_to_upload
-        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, y_train)
-        #guardar_feature_engineering(BUCKET_NAME, path_run, y_train, CREDENCIALES)
-
-        # Guardar y_test
-        file_to_upload = NOMBRE_FE_ytest.format(self.fecha)
-        path_run = path_s3 + "/" + file_to_upload
-        guardar_pkl_en_s3(S3, BUCKET_NAME, path_run, y_test)
-        #guardar_feature_engineering(BUCKET_NAME, path_run, y_test, CREDENCIALES)
 
     def output(self):
         # Full
