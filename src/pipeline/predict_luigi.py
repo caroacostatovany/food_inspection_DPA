@@ -75,20 +75,23 @@ class TaskPredict(luigi.Task):
         file_xtest = NOMBRE_FE_predict.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_xtest)
         predictions_df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        predictions_y = predictions_df['label']
+        predictions_df = predictions_df.drop('label',axis=1)
 
         metrica = self.metrica.lower()
         punto_corte = metricas[metricas[metrica] <= self.kpi].threshold.values[0]
 
-        print(len(predictions_df.columns))
-        print(len(X_test.columns))
-        col_iter = 0
+        #print(predictions_df.columns)
+        #print("###############################################")
+        #print(X_test.columns)
+        #col_iter = 0
         for col in X_test.columns:
             if col in predictions_df.columns:
                 pass
             else:
-                col_iter+=1
-        print(col_iter)
-        assert predictions_df.columns == X_test.columns
+                predictions_df[col] = 0
+        #print(col_iter)
+        #assert predictions_df.columns.all() == X_test.columns.all()
 
         predicted_scores = model.predict_proba(predictions_df)
         labels = [0 if score < punto_corte else 1 for score in predicted_scores[:, 1]]
