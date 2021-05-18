@@ -9,7 +9,7 @@ from unittest.mock import patch, Mock
 from src.etl.feature_engineering import feature_generation
 
 
-class TestPredict(marbles.core.TestCase, mixins.BetweenMixins):
+class TestPredict(marbles.core.TestCase, mixins.BetweenMixins, mixins.CategoricalMixins):
 
     labels = [0, 1]
 

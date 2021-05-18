@@ -142,14 +142,14 @@ class TaskPredictMetadata(CopyToTable):
                                       self.metrica, self.kpi)
 
     def rows(self):
-        param = "{0}; {1}; {2}; {3}; {4}; {5}; {6}; {7}".format(self.ingesta,
-                                                                self.fecha,
-                                                                self.fecha_modelo,
-                                                                self.threshold,
-                                                                self.algoritmo,
-                                                                self.metrica,
-                                                                self.kpi,
-                                                                self.permite_nulos)
+        param = "{0}; {1}; {2}; {3}; {4}; {5}; {6}".format(self.ingesta,
+                                                           self.fecha,
+                                                           self.fecha_modelo,
+                                                           self.threshold,
+                                                           self.algoritmo,
+                                                           self.metrica,
+                                                           self.kpi)
+
         r = [(self.user, param, datetime.now())]
         for element in r:
             yield element
@@ -213,7 +213,6 @@ class TaskPredict(luigi.Task):
         file_predict = NOMBRE_FE_predict.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_predict)
         predictions_df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-        predictions_df = predictions_df.drop('label', axis=1)
 
         metrica = self.metrica.lower()
         punto_corte = metricas[metricas[metrica] <= self.kpi].threshold.values[0]
