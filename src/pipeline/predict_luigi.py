@@ -49,9 +49,8 @@ class TaskPredictUnitTesting(CopyToTable):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
-    self.strict_probas = luigi.BoolParameter(default=False,
-                                             description="Revisa que las probabilidades sean estrictamente "
-                                                         "debajo de 1 y arriba de 0")
+    strict_probas = luigi.BoolParameter(default=False, description="Revisa que las probabilidades sean estrictamente "
+                                                                   "debajo de 1 y arriba de 0")
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
@@ -127,9 +126,8 @@ class TaskPredictMetadata(CopyToTable):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
-    self.strict_probas = luigi.BoolParameter(default=False,
-                                             description="Revisa que las probabilidades sean estrictamente "
-                                                         "debajo de 1 y arriba de 0")
+    strict_probas = luigi.BoolParameter(default=False, description="Revisa que las probabilidades sean estrictamente "
+                                                                   "debajo de 1 y arriba de 0")
 
     cred = get_db(CREDENCIALES)
     user = cred['user']
