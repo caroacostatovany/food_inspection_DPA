@@ -7,8 +7,9 @@ from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
-from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS
+from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, NOMBRE_FE_predict, PATH_PREDICT, NOMBRE_PREDICT, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_predict, PATH_METRICAS, NOMBRE_METRICAS
 from src.pipeline.training_luigi import TaskTrainingMetadata
+from src.pipeline.metricas_luigi import TaskMetricas
 from src.unit_testing.test_model_select import TestModelSelect
 from src.pipeline.feature_engineering_luigi import TaskFeatureEngineeringMetadata
 from src.etl.model_select import best_model_selection
@@ -66,7 +67,7 @@ class TaskPredict(luigi.Task):
 
         # Leer métricas
         path_s3 = PATH_METRICAS.format(self.fecha_modelo.year, self.fecha_modelo.month)
-        filename = "{}/{}".format(path_s3, NOMBRE_METRICAS.format(self.fecha))
+        filename = "{}/{}".format(path_s3, NOMBRE_METRICAS.format(self.fecha_modelo))
         metricas = read_pkl_from_s3(S3, BUCKET_NAME, filename)
 
         # Leemos predict
@@ -78,6 +79,15 @@ class TaskPredict(luigi.Task):
         metrica = self.metrica.lower()
         punto_corte = metricas[metricas[metrica] <= self.kpi].threshold.values[0]
 
+        print(len(predictions_df.columns))
+        print(len(X_test.columns))
+        col_iter = 0
+        for col in X_test.columns:
+            if col in predictions_df.columns:
+                pass
+            else:
+                col_iter+=1
+        print(col_iter)
         assert predictions_df.columns == X_test.columns
 
         predicted_scores = model.predict_proba(predictions_df)

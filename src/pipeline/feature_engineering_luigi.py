@@ -116,8 +116,7 @@ class TaskFeatureEngineering(luigi.Task):
                                                                   "en train y test o no.")
 
     def requires(self):
-        dia = self.fecha
-        return [TaskPreprocessingMetadata(self.ingesta, dia)]
+        return [TaskPreprocessingMetadata(self.ingesta, self.fecha, self.from_predict)]
 
     def run(self):
         start_time = time.time()
@@ -135,7 +134,14 @@ class TaskFeatureEngineering(luigi.Task):
         if len(objects) > 0:
             for file in objects:
                 if file['Key'].find("preprocessing/") >= 0:
-                    if file['Key'].find(str(fecha)) >= 0:
+                    if self.from_predict:
+                        if file['Key'].find(str(self.fecha)) >= 0:
+                            filename = file['Key']
+                            logging.info("Leyendo {}...".format(filename))
+                            json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+                            df_temp = pd.DataFrame(json_file)
+                            df = pd.concat([df, df_temp], axis=0)
+                    else:
                         filename = file['Key']
                         logging.info("Leyendo {}...".format(filename))
                         json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
@@ -199,44 +205,55 @@ class TaskFeatureEngineering(luigi.Task):
                                                    end_time,
                                                    num_registros))
 
-
     def output(self):
-        # Full
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
-        file_to_upload_full = NOMBRE_FE_full.format(self.fecha)
-        output_path_full = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                             path_s3,
-                                             file_to_upload_full)
-
-        # X_train
-        file_to_upload_xtrain = NOMBRE_FE_xtrain.format(self.fecha)
-        output_path_xtrain = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                  path_s3,
-                                                  file_to_upload_xtrain)
-
-        # X_test
-        file_to_upload_xtest = NOMBRE_FE_xtest.format(self.fecha)
-        output_path_xtest = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                    path_s3,
-                                                    file_to_upload_xtest)
-
-        # y_train
-        file_to_upload_ytrain = NOMBRE_FE_ytrain.format(self.fecha)
-        output_path_ytrain = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                    path_s3,
-                                                    file_to_upload_ytrain)
-
-        # y_test
-        file_to_upload_ytest = NOMBRE_FE_ytest.format(self.fecha)
-        output_path_ytest = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                   path_s3,
-                                                   file_to_upload_ytest)
 
         path_csv = "{}/feature_engineering_created.csv".format(PATH_LUIGI_TMP)
 
-        return luigi.contrib.s3.S3Target(path=output_path_full), \
-               luigi.contrib.s3.S3Target(path=output_path_xtrain), \
-               luigi.contrib.s3.S3Target(path=output_path_xtest), \
-               luigi.contrib.s3.S3Target(path=output_path_ytrain), \
-               luigi.contrib.s3.S3Target(path=output_path_ytest), \
-               luigi.local_target.LocalTarget(path_csv)
+        if not self.from_predict:
+            # Full
+            file_to_upload_full = NOMBRE_FE_full.format(self.fecha)
+            output_path_full = "s3://{}/{}/{}".format(BUCKET_NAME,
+                                                 path_s3,
+                                                 file_to_upload_full)
+
+            # X_train
+            file_to_upload_xtrain = NOMBRE_FE_xtrain.format(self.fecha)
+            output_path_xtrain = "s3://{}/{}/{}".format(BUCKET_NAME,
+                                                      path_s3,
+                                                      file_to_upload_xtrain)
+
+            # X_test
+            file_to_upload_xtest = NOMBRE_FE_xtest.format(self.fecha)
+            output_path_xtest = "s3://{}/{}/{}".format(BUCKET_NAME,
+                                                        path_s3,
+                                                        file_to_upload_xtest)
+
+            # y_train
+            file_to_upload_ytrain = NOMBRE_FE_ytrain.format(self.fecha)
+            output_path_ytrain = "s3://{}/{}/{}".format(BUCKET_NAME,
+                                                        path_s3,
+                                                        file_to_upload_ytrain)
+
+            # y_test
+            file_to_upload_ytest = NOMBRE_FE_ytest.format(self.fecha)
+            output_path_ytest = "s3://{}/{}/{}".format(BUCKET_NAME,
+                                                       path_s3,
+                                                       file_to_upload_ytest)
+
+            return luigi.contrib.s3.S3Target(path=output_path_full), \
+                   luigi.contrib.s3.S3Target(path=output_path_xtrain), \
+                   luigi.contrib.s3.S3Target(path=output_path_xtest), \
+                   luigi.contrib.s3.S3Target(path=output_path_ytrain), \
+                   luigi.contrib.s3.S3Target(path=output_path_ytest), \
+                   luigi.local_target.LocalTarget(path_csv)
+        else:
+
+            # predict
+            file_to_upload_predict = NOMBRE_FE_predict.format(self.fecha)
+            output_path_predict = "s3://{}/{}/{}".format(BUCKET_NAME,
+                                                       path_s3,
+                                                       file_to_upload_predict)
+
+            return luigi.contrib.s3.S3Target(path=output_path_predict), \
+                   luigi.local_target.LocalTarget(path_csv)

@@ -157,15 +157,19 @@ def convert_nan(df):
 
     # creating bool series True for NaN values
     bool_series = pd.isnull(df['zip']) & pd.notnull(df['location'])
-    zip_notnull_df = df[bool_series]
 
-    geolocator = Nominatim(user_agent='http')
+    if len(bool_series) > 0:
+        zip_notnull_df = df[bool_series]
 
-    zipcodes = zip_notnull_df.apply(get_zipcode, axis=1,
+        geolocator = Nominatim(user_agent='http')
+
+        zipcodes = zip_notnull_df.apply(get_zipcode, axis=1,
                                     geolocator=geolocator,
                                     lat_field='latitude', lon_field='longitude')
 
-    df.loc[bool_series, 'zip'] = zipcodes
+        #print(zipcodes)
+        if len(zipcodes) == len(bool_series):
+            df.loc[bool_series, 'zip'] = zipcodes
 
     return df
 
@@ -205,8 +209,11 @@ def preprocessing(df):
         >> food_inspection_df = preprocessing(food_inspection_df)
     """
     food_df = df_to_lower_case(df)
+    print(food_df.shape)
     food_df = change_misspelled_chicago_city_names(food_df)
+    print(food_df.shape)
     food_df = convert_nan(food_df)
+    print(food_df.shape)
     food_df = transform_label(food_df)
     food_df = remove_nan_rows(food_df)
 

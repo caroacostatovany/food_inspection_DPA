@@ -113,7 +113,9 @@ def feature_generation(df):
     logging.info("Successfully transformation of the discrete variables.'")
 
     logging.info("Converting to dataframe...")
-    X = X.todense()
+    print("##########################################################################################",type(X).__name__)
+    if type(X).__name__ != "ndarray":
+        X = X.todense()
     df = pd.DataFrame(X, columns=col_trans.get_feature_names())
     del X
     df['label'] = y

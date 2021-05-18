@@ -26,6 +26,10 @@ class TaskPreprocessingUnitTesting(CopyToTable):
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
 
+    from_predict = luigi.BoolParameter(default=False, description="Si la instrucción viene de predict, para separarlo"
+                                                                  "en train y test o no.")
+
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -41,7 +45,7 @@ class TaskPreprocessingUnitTesting(CopyToTable):
                ("dia_ejecucion", "timestamp without time zone")]
 
     def requires(self):
-        return [TaskPreprocessing(self.ingesta, self.fecha)]
+        return [TaskPreprocessing(self.ingesta, self.fecha, self.from_predict)]
 
     def rows(self):
         #s3 = get_s3_resource(CREDENCIALES)
@@ -69,6 +73,10 @@ class TaskPreprocessingMetadata(CopyToTable):
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
 
+    from_predict = luigi.BoolParameter(default=False, description="Si la instrucción viene de predict, para separarlo"
+                                                                  "en train y test o no.")
+
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -85,7 +93,7 @@ class TaskPreprocessingMetadata(CopyToTable):
                ("num_registros", "integer")]
 
     def requires(self):
-        return [TaskPreprocessingUnitTesting(self.ingesta, self.fecha)]
+        return [TaskPreprocessingUnitTesting(self.ingesta, self.fecha, self.from_predict)]
 
     def rows(self):
 
@@ -104,6 +112,10 @@ class TaskPreprocessing(luigi.Task):
 
     fecha = luigi.DateParameter(default=date.today(), description="Fecha en que se ejecuta la acción. "
                                                                   "Formato 'año-mes-día'")
+
+    from_predict = luigi.BoolParameter(default=False, description="Si la instrucción viene de predict, para separarlo"
+                                                                  "en train y test o no.")
+
 
     def requires(self):
 
@@ -131,16 +143,26 @@ class TaskPreprocessing(luigi.Task):
 
             for file in objects:
                 if file['Key'].find("ingestion/") >= 0 :
-                    filename = file['Key']
-                    logging.info("Leyendo {}...".format(filename))
-                    json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-                    df_temp = pd.DataFrame(json_file)
-                    df = pd.concat([df, df_temp], axis=0)
+                    if self.from_predict:
+                        if file['Key'].find(str(self.fecha)) >= 0:
+                            filename = file['Key']
+                            logging.info("Leyendo {}...".format(filename))
+                            json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+                            df_temp = pd.DataFrame(json_file)
+                            df = pd.concat([df, df_temp], axis=0)
+
+                    else:
+                        filename = file['Key']
+                        logging.info("Leyendo {}...".format(filename))
+                        json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+                        df_temp = pd.DataFrame(json_file)
+                        df = pd.concat([df, df_temp], axis=0)
 
         # Contamos los registros
         num_registros = len(df)
 
         logging.info("Empecemos el preprocesamiento y limpieza de datos...")
+        print(df)
         food_df = preprocessing(df)
 
         end_time = time.time() - start_time
