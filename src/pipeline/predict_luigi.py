@@ -84,7 +84,7 @@ class TaskPredictUnitTesting(CopyToTable):
         unit_testing.test_predict_new_labels(predict_df)
         unit_testing.test_predict_probas(predicted_probas)
 
-        if self.strict:
+        if self.strict_probas:
             unit_testing.test_predict_probas_strict(predicted_probas)
 
         r = [(self.user, "predict", "test_predict_month", datetime.now()),
@@ -147,13 +147,14 @@ class TaskPredictMetadata(CopyToTable):
                                       self.metrica, self.kpi, self.strict_probas)
 
     def rows(self):
-        param = "{0}; {1}; {2}; {3}; {4}; {5}; {6}".format(self.ingesta,
+        param = "{0}; {1}; {2}; {3}; {4}; {5}; {6}; {7}".format(self.ingesta,
                                                            self.fecha,
                                                            self.fecha_modelo,
                                                            self.threshold,
                                                            self.algoritmo,
                                                            self.metrica,
-                                                           self.kpi)
+                                                           self.kpi,
+                                                           self.strict_probas)
 
         r = [(self.user, param, datetime.now())]
         for element in r:
