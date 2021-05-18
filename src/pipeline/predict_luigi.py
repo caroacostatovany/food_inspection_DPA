@@ -49,6 +49,10 @@ class TaskPredictUnitTesting(CopyToTable):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
+    self.strict_probas = luigi.BoolParameter(default=False,
+                                             description="Revisa que las probabilidades sean estrictamente "
+                                                         "debajo de 1 y arriba de 0")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -81,9 +85,8 @@ class TaskPredictUnitTesting(CopyToTable):
         unit_testing.test_predict_new_labels(predict_df)
         unit_testing.test_predict_probas(predicted_probas)
 
-        #if not self.permite_nulos:
-        #    metricas = obtain_metricas_sesgo_dataframe()
-        #    unit_testing.test_sesgo_not_nan(metricas)
+        if self.strict:
+            unit_testing.test_predict_probas_strict(predicted_probas)
 
         r = [(self.user, "predict", "test_predict_month", datetime.now()),
              (self.user, "predict", "test_predict_new_labels", datetime.now()),
@@ -124,6 +127,10 @@ class TaskPredictMetadata(CopyToTable):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
+    self.strict_probas = luigi.BoolParameter(default=False,
+                                             description="Revisa que las probabilidades sean estrictamente "
+                                                         "debajo de 1 y arriba de 0")
+
     cred = get_db(CREDENCIALES)
     user = cred['user']
     password = cred['pass']
@@ -139,7 +146,7 @@ class TaskPredictMetadata(CopyToTable):
 
     def requires(self):
         return TaskPredictUnitTesting(self.ingesta, self.fecha, self.fecha_modelo, self.threshold, self.algoritmo,
-                                      self.metrica, self.kpi)
+                                      self.metrica, self.kpi, self.strict_probas)
 
     def rows(self):
         param = "{0}; {1}; {2}; {3}; {4}; {5}; {6}".format(self.ingesta,
