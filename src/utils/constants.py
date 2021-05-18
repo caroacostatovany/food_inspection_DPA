@@ -52,6 +52,7 @@ NOMBRE_METRICAS = "reporte_metricas_{}.pkl"
 # Predicciones:
 PATH_PREDICT = "predicciones/YEAR={}/MONTH={}"
 NOMBRE_PREDICT = "resultados_{}.pkl"
+NOMBRE_PREDICT_PROBAS = "predicted_probas_{}.pkl"
 
 
 # Define las variables protegidas y la referencia
