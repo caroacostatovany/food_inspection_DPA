@@ -53,11 +53,10 @@ class TaskPreprocessingUnitTesting(CopyToTable):
         path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
         file_to_upload = NOMBRE_PREPROCESS.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_to_upload)
-
         unit_testing = TestPreprocessing()
 
         df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-        unit_testing.test_preprocessing_label(df)
+        unit_testing.test_preprocessing_label(df.reset_index())
 
         r = [(self.user, "preprocessing", "test_preprocessing_label", datetime.now())]
         for element in r:
@@ -162,7 +161,6 @@ class TaskPreprocessing(luigi.Task):
         num_registros = len(df)
 
         logging.info("Empecemos el preprocesamiento y limpieza de datos...")
-        print(df)
         food_df = preprocessing(df)
 
         end_time = time.time() - start_time

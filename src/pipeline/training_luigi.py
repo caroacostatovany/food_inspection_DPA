@@ -155,6 +155,7 @@ class TaskTraining(luigi.Task):
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)
         file_to_upload_xtrain = '{}/{}'.format(path_s3, NOMBRE_FE_xtrain.format(self.fecha))
         X_train = read_pkl_from_s3(S3, BUCKET_NAME, file_to_upload_xtrain)
+        X_train = X_train.drop('inspection_id', axis=1)
         X_train_file = file_to_upload_xtrain.split("/")
         X_train_file = X_train_file[-1]
         X_train_file = X_train_file[:-4]

@@ -202,6 +202,7 @@ class TaskPredict(luigi.Task):
         file_xtest = NOMBRE_FE_xtest.format(self.fecha_modelo)
         filename = "{}/{}".format(path_s3, file_xtest)
         X_test = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        X_test = X_test.drop('inspection_id', axis=1)
 
         # Leer el mejor modelo
         path_s3 = PATH_MS.format(self.fecha_modelo.year, self.fecha_modelo.month)
@@ -222,16 +223,20 @@ class TaskPredict(luigi.Task):
 
         metrica = self.metrica.lower()
         punto_corte = metricas[metricas[metrica] <= self.kpi].threshold.values[0]
-
+        index_insert = 0
         for col in X_test.columns:
             if col in predictions_df.columns:
                 pass
             else:
-                predictions_df[col] = 0
+                predictions_df.insert(loc=index_insert, column=col, value=0, allow_duplicates=True)
+            index_insert += 1
 
-        predicted_scores = model.predict_proba(predictions_df.drop('label', axis=1))
+        predicted_scores = model.predict_proba(predictions_df.drop(['label', 'inspection_id'], axis=1))
         labels = [0 if score < punto_corte else 1 for score in predicted_scores[:, 1]]
         predictions_df['predicted_labels'] = labels
+        predictions_df['predicted_score_0'] = predicted_scores[:, 0]
+        predictions_df['predicted_score_1'] = predicted_scores[:, 1]
+        predictions_df['model'] = best_model
 
         path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
         filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))

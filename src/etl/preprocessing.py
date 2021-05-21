@@ -167,7 +167,7 @@ def convert_nan(df):
                                     geolocator=geolocator,
                                     lat_field='latitude', lon_field='longitude')
 
-        #print(zipcodes)
+
         if len(zipcodes) == len(bool_series):
             df.loc[bool_series, 'zip'] = zipcodes
 
@@ -209,12 +209,10 @@ def preprocessing(df):
         >> food_inspection_df = preprocessing(food_inspection_df)
     """
     food_df = df_to_lower_case(df)
-    print(food_df.shape)
     food_df = change_misspelled_chicago_city_names(food_df)
-    print(food_df.shape)
     food_df = convert_nan(food_df)
-    print(food_df.shape)
     food_df = transform_label(food_df)
     food_df = remove_nan_rows(food_df)
+    food_df = food_df.drop_duplicates('inspection_id', keep='first')
 
     return food_df

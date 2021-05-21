@@ -1,13 +1,13 @@
 set time zone  'America/Mexico_City';
 
---schema api
-DROP SCHEMA IF EXISTS api CASCADE;
-CREATE SCHEMA api;
+--schema monitoring
+DROP SCHEMA IF EXISTS monitoring CASCADE;
+CREATE SCHEMA monitoring;
 
 --scores
-DROP TABLE IF EXISTS api.scores;
+DROP TABLE IF EXISTS monitoring.scores;
 
-CREATE TABLE api.scores(
+CREATE TABLE monitoring.scores(
     inspection_id varchar DEFAULT NULL,
     dba_name varchar DEFAULT NULL,
     aka_name varchar DEFAULT NULL,

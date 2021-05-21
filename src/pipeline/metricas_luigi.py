@@ -73,6 +73,8 @@ class TaskMetricas(CopyToTable):
         file_xtest = NOMBRE_FE_xtest.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_xtest)
         X_test = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        X_test['inspection_id'] = X_test.inspection_id.astype(int)
+        X_test = X_test.set_index('inspection_id')
 
         file_ytest = NOMBRE_FE_ytest.format(self.fecha)
         filename = "{}/{}".format(path_s3, file_ytest)
@@ -89,6 +91,7 @@ class TaskMetricas(CopyToTable):
         path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
         preprocess_file = "{}/{}".format(path_s3, NOMBRE_PREPROCESS.format(self.fecha))
         clean_data = read_pkl_from_s3(S3, BUCKET_NAME, preprocess_file)
+        clean_data = clean_data.set_index('inspection_id')
 
         metricas = get_metrics_matrix(y_test, predicted_scores)
 
@@ -105,7 +108,7 @@ class TaskMetricas(CopyToTable):
 
         new_labels = [0 if score < punto_corte else 1 for score in predicted_scores[:, 1]]
 
-        aequitas_df = clean_data.iloc[X_test.index, ]
+        aequitas_df = clean_data.loc[X_test.index.astype(str)]
 
         aequitas_df = pd.concat([aequitas_df[list(REF_GROUPS_DICT.keys())], aequitas_df['label']], axis=1)
         aequitas_df = aequitas_df.rename(columns={'label': 'label_value'})

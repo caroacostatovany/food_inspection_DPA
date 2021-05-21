@@ -155,6 +155,8 @@ class TaskFeatureEngineering(luigi.Task):
         # Feature generation
         logging.info("Realizando feature generation")
         food_df = feature_generation(df)
+        food_df = food_df.drop_duplicates('inspection_id', keep='first')
+
 
         # Guardar food_df
         path_s3 = PATH_FE.format(self.fecha.year, self.fecha.month)

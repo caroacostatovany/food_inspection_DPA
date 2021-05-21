@@ -75,7 +75,7 @@ def remove_non_useful_columns(df):
         >> food_inspection_df = remove_non_useful_columns(food_inspection_df)
     """
     # Vamos a quitar address para evitar un onehotencoder muy largo
-    non_useful_cols = ['location', 'inspection_date', 'inspection_id', 'dba_name', 'aka_name', 'violations',
+    non_useful_cols = ['location', 'inspection_date', 'dba_name', 'aka_name', 'violations',
                        'address', 'results', 'license_']
 
     df = df.drop(non_useful_cols, axis=1)

@@ -1,6 +1,7 @@
 """
 Módulo para pruebas unitarias de preprocessing
 """
+import numpy as np
 import unittest
 import marbles.core
 from marbles.mixins import mixins
