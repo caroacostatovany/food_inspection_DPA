@@ -157,3 +157,13 @@ def get_s3_resource(credenciales):
     s3 = session.client('s3')
 
     return s3
+
+
+def get_db_conn_sql_alchemy(credenciales):
+    """Get credentials for db connection"""
+    creds = read_yaml_file(credenciales)['db']
+
+    connection = "postgresql://{}:{}@{}:{}/{}".format(creds['user'], creds['pass'], creds['host'], creds['port'],
+                                                      creds['db'])
+
+    return connection

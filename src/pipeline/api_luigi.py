@@ -56,7 +56,7 @@ class TaskAPI(CopyToTable):
 
     table = "api.scores"
 
-    columns = [('inspection_id','varchar'),
+    columns = [('inspection_id','integer'),
                ('dba_name', 'varchar'),
                ('aka_name', 'varchar'),
                ('license_', 'varchar'),
@@ -101,6 +101,7 @@ class TaskAPI(CopyToTable):
         join_df = pd.concat([predict_clean.loc[resultados.index.astype(str)],
                              resultados[['predicted_labels','predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
         join_df = join_df.reset_index()
+        join_df['inspection_id'] = join_df.inspection_id.astype(int)
         join_df['created_at'] = datetime.now()
         r = join_df.to_records(index=False)
 
