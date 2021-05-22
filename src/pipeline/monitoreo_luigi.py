@@ -78,7 +78,7 @@ class TaskMonitoreo(CopyToTable):
                ('predicted_score_0', 'float'),
                ('predicted_score_1', 'float'),
                ('model', 'varchar'),
-               ('created_at', 'timestamp without time zone')]
+               ('created_at', 'date')]
 
     def requires(self):
         return [TaskAPI(self.ingesta, self.fecha, self.fecha_modelo, self.threshold, self.algoritmo,
@@ -102,7 +102,7 @@ class TaskMonitoreo(CopyToTable):
                              resultados[['predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
         join_df = join_df.reset_index()
         join_df['inspection_id'] = join_df.inspection_id.astype(int)
-        join_df['created_at'] = datetime.now()
+        join_df['created_at'] = date.today()
         r = join_df.to_records(index=False)
 
         for element in r:
