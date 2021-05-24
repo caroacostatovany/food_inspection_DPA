@@ -29,5 +29,5 @@ CREATE TABLE api.scores(
     predicted_score_0 float DEFAULT NULL,
     predicted_score_1 float DEFAULT NULL,
     model varchar DEFAULT NULL,
-    created_at timestamp without time zone DEFAULT NULL
+    created_at date DEFAULT NULL
 );
