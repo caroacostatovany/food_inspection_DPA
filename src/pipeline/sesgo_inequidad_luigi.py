@@ -14,7 +14,7 @@ from aequitas.fairness import Fairness
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, REF_GROUPS_DICT, PATH_MS, NOMBRE_MS, PATH_FE, \
     NOMBRE_FE_xtest, NOMBRE_FE_ytest
-from src.pipeline.metricas_luigi import TaskMetricas
+from src.pipeline.pre_sesgo_inequidad_luigi import TaskMetricasAequitas
 from src.etl.metricas import get_metrics_matrix
 from src.etl.sesgo_inequidad import obtain_aequitas_dataframe, obtain_metricas_sesgo_dataframe
 from src.unit_testing.test_sesgo_inequidad import TestSesgoInequidad
@@ -193,7 +193,7 @@ class TaskSesgoInequidad(CopyToTable):
                ('npv_disparity', 'float')]
 
     def requires(self):
-        return [TaskMetricas(self.ingesta, self.fecha, self.threshold, self.algoritmo, self.metrica, self.kpi)]
+        return [TaskMetricasAequitas(self.ingesta, self.fecha, self.threshold, self.algoritmo, self.metrica, self.kpi)]
 
     def rows(self):
         aequitas_df = obtain_aequitas_dataframe()

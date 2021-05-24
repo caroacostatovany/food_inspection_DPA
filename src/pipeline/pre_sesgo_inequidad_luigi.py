@@ -12,13 +12,13 @@ from luigi.contrib.postgres import CopyToTable
 from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, PATH_FE, NOMBRE_FE_xtest, \
     NOMBRE_FE_ytest, REF_GROUPS_DICT, PATH_PREPROCESS, NOMBRE_PREPROCESS, NOMBRE_FE_full, PATH_METRICAS, NOMBRE_METRICAS
-from src.pipeline.model_select_luigi import TaskModelSelectionMetadata
+from src.pipeline.metricas_luigi import TaskMetricas
 from src.etl.metricas import get_metrics_matrix
 
 logging.basicConfig(level=logging.INFO)
 
 
-class TaskMetricas(CopyToTable):
+class TaskMetricasAequitas(CopyToTable):
 
     ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
                                                         "'inicial': Para correr una ingesta inicial."
@@ -53,21 +53,18 @@ class TaskMetricas(CopyToTable):
     host = cred['host']
     port = cred['port']
 
-    table = "results.validation"
+    table = "semantic.aequitas"
 
-    columns = [('inspection_id', 'integer'),
-               ('label', 'integer'),
-               ('predicted_labels', 'integer'),
-               ('predicted_score_0', 'float'),
-               ('predicted_score_1', 'float'),
-               ('model', 'varchar'),
-               ('created_at', 'date')]
-    #for key in list(REF_GROUPS_DICT.keys()):
-    #    tupla = (key, "varchar")
-    #    columns.append(tupla)
+    columns = []
+    for key in list(REF_GROUPS_DICT.keys()):
+        tupla = (key, "varchar")
+        columns.append(tupla)
+
+    columns.append(("label_value", "integer"))
+    columns.append(("score", "integer"))
 
     def requires(self):
-        return [TaskModelSelectionMetadata(self.ingesta, self.fecha, self.threshold, self.algoritmo)]
+        return [TaskMetricas(self.ingesta, self.fecha, self.threshold, self.algoritmo, self.algoritmo, self.kpi)]
 
     def rows(self):
 
@@ -112,17 +109,11 @@ class TaskMetricas(CopyToTable):
         new_labels = [0 if score < punto_corte else 1 for score in predicted_scores[:, 1]]
 
         aequitas_df = clean_data.loc[X_test.index.astype(str)]
-        aequitas_df = aequitas_df.reset_index()
 
-        aequitas_df = aequitas_df[['inspection_id', 'label']]
-        #aequitas_df = pd.concat([aequitas_df[list(REF_GROUPS_DICT.keys())], aequitas_df['label']], axis=1)
-        #aequitas_df = aequitas_df.rename(columns={'label': 'label_value'})
+        aequitas_df = pd.concat([aequitas_df[list(REF_GROUPS_DICT.keys())], aequitas_df['label']], axis=1)
+        aequitas_df = aequitas_df.rename(columns={'label': 'label_value'})
 
-        aequitas_df['predicted_labels'] = new_labels
-        aequitas_df['predicted_score_0'] = predicted_scores[:, 0]
-        aequitas_df['predicted_score_1'] = predicted_scores[:, 1]
-        aequitas_df['model'] = best_model
-        aequitas_df['created_at'] = self.fecha
+        aequitas_df['score'] = new_labels
 
         tuplas = aequitas_df.to_records(index=False)
         for element in tuplas:

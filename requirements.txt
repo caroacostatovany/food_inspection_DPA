@@ -10,6 +10,7 @@ backcall==0.2.0
 bleach==3.2.1
 boto3==1.17.12
 botocore==1.20.13
+Brotli==1.0.9
 certifi==2020.12.5
 cffi==1.14.4
 chardet==4.0.0
@@ -18,6 +19,11 @@ click-plugins==1.1.1
 cligj==0.7.1
 colorama==0.4.3
 cycler==0.10.0
+dash==1.20.0
+dash-core-components==1.16.0
+dash-html-components==1.1.3
+dash-renderer==1.9.1
+dash-table==4.11.3
 datatable==0.11.1
 decorator==4.4.2
 defusedxml==0.6.0
@@ -26,10 +32,12 @@ docutils==0.15.2
 dominate==2.6.0
 entrypoints==0.3
 Fiona==1.8.18
-Flask==0.12.2
+Flask==2.0.1
 Flask-Bootstrap==3.3.7.1
+Flask-Compress==1.9.0
 flask-restplus==0.13.0
 Flask-SQLAlchemy==2.5.1
+future==0.18.2
 geographiclib==1.50
 geopandas==0.8.1
 geopy==2.1.0
@@ -42,9 +50,9 @@ ipykernel==5.4.3
 ipython==7.19.0
 ipython-genutils==0.2.0
 ipywidgets==7.6.3
-itsdangerous==1.1.0
+itsdangerous==2.0.1
 jedi==0.18.0
-Jinja2==2.11.2
+Jinja2==3.0.1
 jmespath==0.10.0
 joblib==1.0.1
 jsonschema==3.2.0
@@ -61,7 +69,7 @@ marbles==0.12.1
 marbles.core==0.12.1
 marbles.mixins==0.12.1
 markdown2==2.3.5
-MarkupSafe==1.1.1
+MarkupSafe==2.0.1
 matplotlib==3.3.3
 millify==0.1.1
 mistune==0.8.4
@@ -126,7 +134,7 @@ urllib3==1.26.3
 visitor==0.1.3
 wcwidth==0.2.5
 webencodings==0.5.1
-Werkzeug==0.16.1
+Werkzeug==2.0.1
 widgetsnbextension==3.5.1
 xhtml2pdf==0.2.2
 zipp==3.4.0
