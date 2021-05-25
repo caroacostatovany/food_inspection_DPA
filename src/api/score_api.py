@@ -56,7 +56,7 @@ class ShowMatch(Resource):
         for element in match:
             establecimiento.append({'predicted_labels': element.predicted_labels,
                                     'predicted_score_1': element.predicted_score_1})
-        return {'inspection_id': inspection_id_input, 'establecimientos': match}
+        return {'inspection_id': inspection_id_input, 'establecimientos': establecimiento}
 
 if __name__ == '__main__':
     app.run(debug=True)
