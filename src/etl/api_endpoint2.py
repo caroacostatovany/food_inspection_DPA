@@ -22,7 +22,7 @@ class Match(db.Model):
 
     inspection_id = db.Column(db.Integer, primary_key=True)
     predicted_labels = db.Column(db.Integer)
-    predicted_score_1 = db.Column(db.Integer)
+    predicted_score_1 = db.Column(db.Float)
     created_at = db.Column(db.Date)
 
     def __repr__(self):
@@ -32,7 +32,7 @@ class Match(db.Model):
 model = api.model('fecha_match_table', {
     'inspection_id': fields.Integer,
     'predicted_labels': fields.Integer,
-    'predicted_score_1': fields.Integer})
+    'predicted_score_1': fields.Float})
 
 # Final output
 model_list = api.model('fecha_match_output', {
