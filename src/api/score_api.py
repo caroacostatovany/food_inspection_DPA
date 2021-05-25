@@ -21,7 +21,7 @@ class Match(db.Model):
     __table_args__ = {'schema': 'api'}
     __tablename__ = 'scores'
 
-    # Output
+
     inspection_id = db.Column(db.Integer, primary_key=True)
     predicted_labels = db.Column(db.Integer)
     predicted_score_1 = db.Column(db.Float)
@@ -48,16 +48,17 @@ class HelloWorld(Resource):
         return {'Hello': 'Hello World'}
 
 # id inspeccion
-@api.route('/id_inspeccion/<inspection_id>')
+@api.route('/inspection_id/<inspection_id>')
 class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
     def get(self, inspection_id):
         match = Match.query.filter_by(inspection_id=inspection_id).all()
         establecimiento = []
         for element in match:
-            establecimiento.append({'predicted_labels': element.predicted_labels,
+            establecimiento.append({'inspection_id':element.inspection_id,
+                                    'predicted_labels': element.predicted_labels,
                                     'predicted_score_1': element.predicted_score_1})
-        return {'inspection_id': inspection_id, 'establecimientos': match}
+        return {'inspection_id': inspection_id, 'establecimientos': establecimiento}
 
 if __name__ == '__main__':
     app.run(debug=True)
