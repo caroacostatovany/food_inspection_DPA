@@ -26,7 +26,7 @@ class Match(db.Model):
     created_at = db.Column(db.Date)
 
     def __repr__(self):
-        return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
+        return (u'<{self.__class__.__name__}: {self.inspection_id}>'.format(self=self))
 
 # Swagger por id
 model_id = api.model('inspection_id_table', {
@@ -50,15 +50,10 @@ model_list = api.model('fecha_match_output', {
     'establecimientos': fields.Nested(model)
 })
 
-
-
-@api.route('/')
-class HelloWorld(Resource):
-    def get(self):
-        return {'Hello': 'Hello World'}
+# endpoints
 
 @api.route('/fecha_prediccion/<created_at>')
-class ShowMatch(Resource):
+class ShowMatchFecha(Resource):
     @api.marshal_with(model_list, as_list=True)
     def get(self, created_at):
         match = Match.query.filter_by(created_at=cast(created_at, Date)).all()
