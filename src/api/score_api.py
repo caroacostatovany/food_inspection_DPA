@@ -31,13 +31,11 @@ class Match(db.Model):
 # Swagger
 # Input: id_establecimiento
 model = api.model('inspection_id_table', {
-    'inspection_id':fields.Integer,
     'predicted_labels': fields.Integer,
     'predicted_score_1': fields.Float})
 
 # Final output
 model_list = api.model('inspection_id_output', {
-    'inspection_id': fields.Integer,
     'establecimiento': fields.Nested(model)
 })
 
