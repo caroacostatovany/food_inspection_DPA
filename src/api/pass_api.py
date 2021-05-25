@@ -28,17 +28,29 @@ class Match(db.Model):
     def __repr__(self):
         return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
 
-# Swagger
+# Swagger por id
+model_id = api.model('inspection_id_table', {
+    'predicted_labels': fields.Integer,
+    'predicted_score_1': fields.Float})
+# Final output
+model_list_id = api.model('inspection_id_output', {
+    'inspection_id':fields.Integer,
+    'establecimiento': fields.Nested(model_id)
+})
+
+
+# Swagger por fecha
 model = api.model('fecha_match_table', {
     'inspection_id': fields.Integer,
     'predicted_labels': fields.Integer,
     'predicted_score_1': fields.Float})
-
 # Final output
 model_list = api.model('fecha_match_output', {
     'created_at': fields.Date,
     'establecimientos': fields.Nested(model)
 })
+
+
 
 @api.route('/')
 class HelloWorld(Resource):
@@ -61,7 +73,7 @@ class ShowMatch(Resource):
 # id inspeccion
 @api.route('/inspection_id/<inspection_id>')
 class ShowMatch(Resource):
-    @api.marshal_with(model_list, as_list=True)
+    @api.marshal_with(model_list_id, as_list=True)
     def get(self, inspection_id):
         match = Match.query.filter_by(inspection_id=inspection_id).all()
         establecimiento = []
