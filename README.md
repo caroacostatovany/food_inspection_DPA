@@ -101,7 +101,7 @@ Existen los parámetros:
 * --metrica para indicar la métrica a enfocarse,
 * --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
 * --strict-probas, que fallará la prueba unitaria porque busca que los scores esten estrictamente debajo de 1 y arriba de 0.
-> PYTHONPATH=$PWD AWS_PROFILE=tovany luigi --module src.pipeline.predict_luigi TaskPredictMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
+> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.predict_luigi TaskPredictMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 **Para API**
 
@@ -112,7 +112,7 @@ Existen los parámetros:
 * --threshold que indica el score deseado para seleccionar el mejor modelo,
 * --metrica para indicar la métrica a enfocarse,
 * --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
-> PYTHONPATH=$PWD AWS_PROFILE=tovany luigi --module src.pipeline.api_luigi TaskAPI --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
+> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.api_luigi TaskAPI --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 
 **Para Monitoring**
@@ -124,7 +124,7 @@ Existen los parámetros:
 * --threshold que indica el score deseado para seleccionar el mejor modelo,
 * --metrica para indicar la métrica a enfocarse,
 * --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
-> PYTHONPATH=$PWD AWS_PROFILE=tovany luigi --module src.pipeline.monitoreo_luigi TaskMonitoreo --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
+> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.monitoreo_luigi TaskMonitoreo --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 ### De Notebooks
 
@@ -259,7 +259,7 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Preprocesamiento | test_preprocessing_label | Revisa la etiqueta del dataframe sea 0 ó 1 |
 | Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe este entre 1 y 12 |
 | Entrenamiento | test_training_gs | Revisa que el archivo es un objeto GridSearchCV |
-| Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacia que indica que no hubo mejor modelo |
+| Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacía que indica que no hubo mejor modelo |
 | Sesgo e inequidades | test_sesgo_score | Revisa que la columna score sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_label_value | Revisa que la columna label_value sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_not_nan | Revisa que no existan nulos en todo el dataframe |
@@ -305,6 +305,8 @@ Para lanzar la API se necesita posicionarse en la raíz del repo y ejecutar las 
 > `export PYTHONPATH=$PWD`
 
 > `export FLASK_APP=src/api/pass_api.py`
+
+> `flask run` 
 
 La API se habilitará en el puerto `5000`  
 
