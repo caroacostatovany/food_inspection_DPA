@@ -3,7 +3,7 @@ from flask_restplus import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
 from src.utils.general import get_db_conn_sql_alchemy
 from src.utils.constants import CREDENCIALES
-from sqlalchemy import cast
+from sqlalchemy import cast, Date
 
 # Connecting to db string
 db_conn_str = get_db_conn_sql_alchemy(CREDENCIALES)
