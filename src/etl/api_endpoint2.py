@@ -3,6 +3,7 @@ from flask_restplus import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
 from src.utils.general import get_db_conn_sql_alchemy
 from src.utils.constants import CREDENCIALES
+from sqlalchemy import cast, Date
 
 # Connecting to db string
 db_conn_str = get_db_conn_sql_alchemy(CREDENCIALES)
@@ -19,10 +20,10 @@ class Match(db.Model):
     __table_args__ = {'schema': 'api'}
     __tablename__ = 'scores'
 
-    inspection_id = db.Column(db.Integer)
+    inspection_id = db.Column(db.Integer, primary_key=True)
     predicted_labels = db.Column(db.Integer)
     predicted_score_1 = db.Column(db.Integer)
-    created_at = db.Column(db.Date, primary_key=True)
+    created_at = db.Column(db.Date)
 
     def __repr__(self):
         return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
@@ -44,17 +45,17 @@ class HelloWorld(Resource):
     def get(self):
         return {'Hello': 'Hello World'}
 
-@api.route('/fecha_prediccion/<Date:created_at>')
+@api.route('/fecha_prediccion/<created_at>')
 class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
     def get(self, created_at):
-        match = Match.query.filter_by(created_at=created_at).order_by(Match.inspection_id()).all()
+        match = Match.query.filter_by(created_at=cast(created_at, Date)).all()
         establecimientos = []
         for element in match:
             establecimientos.append({'inspection_id': element.inspection_id,
                                     'predicted_labels': element.predicted_labels,
                                     'predicted_score_1': element.predicted_score_1})
-        return {'created_at': created_at, 'establecimientos':establecimientos}
+        return {'created_at': created_at, 'establecimientos': establecimientos}
 
 if __name__ == '__main__':
     app.run(debug=True)
