@@ -32,3 +32,15 @@ CREATE TABLE results.validation(
     model varchar DEFAULT NULL,
     created_at date DEFAULT NULL
 );
+
+DROP TABLE IF EXISTS results.scores;
+
+CREATE TABLE results.scores(
+    inspection_id varchar DEFAULT NULL,
+    label integer DEFAULT NULL,
+    predicted_labels integer DEFAULT NULL,
+    predicted_score_0 float DEFAULT NULL,
+    predicted_score_1 float DEFAULT NULL,
+    model varchar DEFAULT NULL,
+    created_at date DEFAULT NULL
+);

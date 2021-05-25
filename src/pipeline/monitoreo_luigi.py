@@ -56,23 +56,8 @@ class TaskMonitoreo(CopyToTable):
 
     table = "monitoring.scores"
 
-    columns = [('inspection_id','integer'),
+    columns = [('inspection_id', 'integer'),
                ('dba_name', 'varchar'),
-               ('aka_name', 'varchar'),
-               ('license_', 'varchar'),
-               ('facility_type', 'varchar'),
-               ('address', 'varchar'),
-               ('city', 'varchar'),
-               ('state', 'varchar'),
-               ('zip', 'varchar'),
-               ('inspection_date', 'varchar'),
-               ('inspection_type', 'varchar'),
-               ('results', 'varchar'),
-               ('latitude', 'varchar'),
-               ('longitude', 'varchar'),
-               ('location', 'varchar'),
-               ('risk', 'varchar'),
-               ('violations', 'varchar'),
                ('label', 'integer'),
                ('predicted_labels', 'integer'),
                ('predicted_score_0', 'float'),
@@ -102,6 +87,7 @@ class TaskMonitoreo(CopyToTable):
                              resultados[['predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
         join_df = join_df.reset_index()
         join_df['inspection_id'] = join_df.inspection_id.astype(int)
+        join_df = join_df[['inspection_id', 'dba_name', 'label', 'predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]
         join_df['created_at'] = date.today()
         r = join_df.to_records(index=False)
 

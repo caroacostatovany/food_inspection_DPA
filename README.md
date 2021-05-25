@@ -81,17 +81,50 @@ También hay un **FAQ** al último de este archivo, donde podrás encontrar más
 
 Después de correr las instrucciones generales, escribimos algunos ejemplos de cómo correr tareas en Luigi.
 
+**Nota 1:** Recuerda antes ejecutar `luigid` en tu terminal y que se habilite el puerto `8082` para ver el DAG.
 
-**Nota:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`, `test`, `results` y `semantic`.
-O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql", "create_unittesting_tables.sql", "create_semantic_tables.sql" y "create_results_tables.sql".
+**Nota 2:** Antes de correr algunos ejemplos, asegura que en tu **RDS** tengas creado el schema `metadata`, `test`, 
+`results`, `semantic`, `api` y `monitoring`
+O puedes correr el sql que se encuentra en la carpeta `sql` bajo el nombre de "create_metadata_tables.sql", 
+"create_unittesting_tables.sql", "create_semantic_tables.sql", "create_results_tables.sql", "create_api_tables.sql" y
+"create_monitoring_tables.sql"
 
 Algunos ejemplos para correr:
 
-Para análisis de sesgo e inequidad: Existen los parámetros --ingesta, que puede tener los valores de "no", "inicial" y 
-"consecutiva", --fecha con la que se quiere correr el pipeline, --threshold que indica el score deseado para seleccionar 
-el mejor modelo, --metrica para indicar la métrica a enfocarse, --kpi para seleccionar el límite para dicha métrica y 
-así seleccionar el punto de corte, y --permite_nulos si se permitirán o no nulos en el análisis.
-> PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.sesgo_inequidad_luigi TaskSesgoInequidadMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha 2021-05-08 --permite-nulos
+**Para predicciones**
+
+Existen los parámetros:
+* --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva",
+* --fecha-modelo, fecha para escoger el modelo corrido y utilizarlo para las predicciones,
+* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones
+* --threshold que indica el score deseado para seleccionar el mejor modelo,
+* --metrica para indicar la métrica a enfocarse,
+* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
+* --strict-probas, que fallará la prueba unitaria porque busca que los scores esten estrictamente debajo de 1 y arriba de 0.
+> PYTHONPATH=$PWD AWS_PROFILE=tovany luigi --module src.pipeline.predict_luigi TaskPredictMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
+
+**Para API**
+
+Existen los parámetros:
+* --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva",
+* --fecha-modelo, fecha para escoger el modelo corrido y utilizarlo para las predicciones,
+* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones
+* --threshold que indica el score deseado para seleccionar el mejor modelo,
+* --metrica para indicar la métrica a enfocarse,
+* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
+> PYTHONPATH=$PWD AWS_PROFILE=tovany luigi --module src.pipeline.api_luigi TaskAPI --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
+
+
+**Para Monitoring**
+
+Existen los parámetros:
+* --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva",
+* --fecha-modelo, fecha para escoger el modelo corrido y utilizarlo para las predicciones,
+* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones
+* --threshold que indica el score deseado para seleccionar el mejor modelo,
+* --metrica para indicar la métrica a enfocarse,
+* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
+> PYTHONPATH=$PWD AWS_PROFILE=tovany luigi --module src.pipeline.monitoreo_luigi TaskMonitoreo --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 ### De Notebooks
 
@@ -127,6 +160,19 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
     region = tu-region
 ```
 
+Para poder conectarte a la base de datos en RDS de manera rápida deberás tener un archivo `.pg_service.conf` en /home/user/ y deberá tener la siguiente estructura:
+```
+[food]
+user="tu_username"
+password="tu_contraseña"
+host="tu_host"
+port=5432
+dbname="nombre_de_tu_bd"
+```
+
+Una vez que tengas ese archivo, podrás acceder a la base de datos con el siguiente comando:
+> psql service=food
+
 ## FAQ
 ### ¿Qué hace el proceso de ingestión inicial?
 **R:** La función de `ingesta_inicial` utiliza el cliente, que se conectó previamente a **data.cityofchicago.org** a través de *Socrata* y un *token*, para obtener datos del dataset: **Food inspections (ID: 4ijn-s7e5)** con un límite de *data points* por *default* de 300,000. Una vez obtenidos, se guardan en un bucket de AWS especificado en `constants.py`, en el path: `ingestion/inital` bajo el nombre de `historic-inspections-{dia_de_hoy}.pkl`.
@@ -146,8 +192,20 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 ### ¿Qué hace la selección del modelo?
 **R:** La función de `best_model_selection` selecciona el mejor modelo (que se encuentran en el bucket de dentro de la carpeta models) que tenga mejor score y cumpla con el threshold dado por el cliente, si no hay regresa vacío.
 
+### ¿Qué hace el proceso de métricas?
+**R:** El proceso de `métricas` establece un punto de corte de acuerdo a la `métrica` a observar con su respecto `kpi` y hace una predicción sobre los datos de prueba y los guarda en RDS, en la tabla `results.validation`.
+
 ### ¿Qué hace el proceso de sesgo e inequidad?
 **R:** El proceso de sesgo e inequidad utiliza [`aequitas`](https://github.com/dssg/aequitas) para medir el sesgo que tiene nuestro modelo para ciertos grupos protegidos. Para leer más sobre este análisis puedes ir a la sección de abajo llamada "Análisis de sesgo e inequidad".
+
+### ¿Qué hace la tarea de predicción?
+**R:** El proceso de `predicción` realiza la predicción de las nuevas observaciones a ingestar dada por la bandera de `fecha` y de acuerdo al punto de corte establecido por la `métrica` a optimizar con su respectivo `kpi`. Los resultados son guardados en S3.
+
+### ¿Qué hace la tarea de API?
+**R:** La tarea de `API`, pasa los resultados obtenidos de la tarea de predicción a RDS, a la tabla `api.scores`.
+
+### ¿Qué hace la tarea de Monitoreo?
+**R:** La tarea de `monitoreo`, pasa los resultados obtenidos de la tarea de predicción a RDS, a la tabla `monitoring.scores`.
 
 ### ¿Qué debo cambiar si quiero adaptarlo a mi bucket y PATHS?
 **R:** Si deseas cambiar algunos paths debes hacerlo en el archivo de `constants.py` que se encuentra en `src.utils`. 
@@ -205,6 +263,10 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Sesgo e inequidades | test_sesgo_score | Revisa que la columna score sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_label_value | Revisa que la columna label_value sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_not_nan | Revisa que no existan nulos en todo el dataframe |
+| Predicción | test_predict_month | Revisa que la columna month del dataframe este entre 1 y 12 |
+| Predicción | test_predict_new_labels | Revisa la etiquetas predichas del dataframe sean 0 ó 1 |
+| Predicción | test_predict_probas | Revisa que los scores predichos estén entre 0 y 1 |
+| Predicción | test_predict_probas_strict | Revisa que los scores predichos estén entre 0 y 1 estrictamente |
 
 ## Análisis de sesgo e inequidad
 
@@ -228,3 +290,39 @@ propias de un modelo asistivo (FN/GS Parity, FOR Parity, FNR Parity).
 
 *Nota:* Para facilitar un posible análisis futuro, en el modelo actual estamos guardando 
 todas las métricas que se generan a través del framework de Aequitas. 
+
+
+## API
+
+Se cuenta con 2 endpoints:
+* **Endpoint 1**:
+  * Input: id establecimiento.
+  * Output: JSON con score de predicción, etiqueta predicha y fecha de predicción.
+* **Endpoint 2**:
+  * Input: fecha predicción
+  * Output: JSON con una lista que contienen para cada establecimiento que tiene una predicción para ese día: id establecimiento, score de predicción, etiqueta predicha
+
+Para lanzar la API se necesita posicionarse en la raíz del repo y ejecutar las siguientes líneas:
+> `export PYTHONPATH=$PWD`
+
+> `export FLASK_APP=src/api/pass_api.py`
+
+La API se habilitará en el puerto `5000`  
+
+## Dashboard
+
+Lo que se puede observar en el dashboard son dos gráficas: una con la distribución de score para la etiqueta positiva 
+del modelo seleccionado en el último punto en el tiempo con el que fue validado y otra con la distribución obtenida para 
+la última predicción.
+
+Para correr el dashboard se necesita posicionarse en la raíz del repo y ejecutar las siguientes líneas:
+> `export PYTHONPATH=$PWD`
+
+> `python src/dashboard/dashboard.py`
+
+El dashboard se habilitará en el puerto `8050`  
+
+## Otros comandos que podrían interesarte:
+
+Para ejecutar un script en sql (Asegúrate de tener tu `.pg_service.conf`)
+> psql -f path/nombre_script.sql service=food

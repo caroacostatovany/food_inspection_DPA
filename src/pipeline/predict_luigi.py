@@ -161,7 +161,7 @@ class TaskPredictMetadata(CopyToTable):
             yield element
 
 
-class TaskPredict(luigi.Task):
+class TaskPredict(CopyToTable):
 
     ingesta = luigi.Parameter(default="No", description="'No': si no quieres que corra ingesta. "
                                                         "'inicial': Para correr una ingesta inicial."
@@ -192,11 +192,28 @@ class TaskPredict(luigi.Task):
 
     kpi = luigi.FloatParameter(default=0.2, description="KPI para la métrica seleccionada")
 
+    cred = get_db(CREDENCIALES)
+    user = cred['user']
+    password = cred['pass']
+    database = cred['db']
+    host = cred['host']
+    port = cred['port']
+
+    table = "results.scores"
+
+    columns = [('inspection_id', 'integer'),
+               ('label', 'integer'),
+               ('predicted_labels', 'integer'),
+               ('predicted_score_0', 'float'),
+               ('predicted_score_1', 'float'),
+               ('model', 'varchar'),
+               ('created_at', 'date')]
+
     def requires(self):
         return [TaskMetricas(self.ingesta, self.fecha_modelo, self.threshold, self.algoritmo, self.metrica, self.kpi),
                 TaskFeatureEngineeringMetadata(self.ingesta, self.fecha, True)]  # True porque viene de predict
 
-    def run(self):
+    def rows(self):
         # Leemos x_test
         path_s3 = PATH_FE.format(self.fecha_modelo.year, self.fecha_modelo.month)
         file_xtest = NOMBRE_FE_xtest.format(self.fecha_modelo)
@@ -233,30 +250,37 @@ class TaskPredict(luigi.Task):
 
         predicted_scores = model.predict_proba(predictions_df.drop(['label', 'inspection_id'], axis=1))
         labels = [0 if score < punto_corte else 1 for score in predicted_scores[:, 1]]
+        predictions_df = predictions_df[['inspection_id', 'label']]
         predictions_df['predicted_labels'] = labels
         predictions_df['predicted_score_0'] = predicted_scores[:, 0]
         predictions_df['predicted_score_1'] = predicted_scores[:, 1]
         predictions_df['model'] = best_model
+        predictions_df['created_at'] = date.today()
 
-        path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
-        filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
-        guardar_pkl_en_s3(S3, BUCKET_NAME, filename, predictions_df)
+        r = predictions_df.to_records(index=False)
 
-        filename = "{}/{}".format(path_s3, NOMBRE_PREDICT_PROBAS.format(self.fecha))
-        guardar_pkl_en_s3(S3, BUCKET_NAME, filename, predicted_scores)
+        for element in r:
+            yield element
 
-    def output(self):
+        #path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
+        #filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
+        #guardar_pkl_en_s3(S3, BUCKET_NAME, filename, predictions_df)
+
+        #filename = "{}/{}".format(path_s3, NOMBRE_PREDICT_PROBAS.format(self.fecha))
+        #guardar_pkl_en_s3(S3, BUCKET_NAME, filename, predicted_scores)
+
+    #def output(self):
         #
-        path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
-        file_to_upload_predict = NOMBRE_PREDICT.format(self.fecha)
-        output_path_predict = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                     path_s3,
-                                                     file_to_upload_predict)
+    #    path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
+    #    file_to_upload_predict = NOMBRE_PREDICT.format(self.fecha)
+    #    output_path_predict = "s3://{}/{}/{}".format(BUCKET_NAME,
+    #                                                 path_s3,
+    #                                                 file_to_upload_predict)
 
-        file_to_upload_predict_probas = NOMBRE_PREDICT_PROBAS.format(self.fecha)
-        output_path_predict_probas = "s3://{}/{}/{}".format(BUCKET_NAME,
-                                                            path_s3,
-                                                            file_to_upload_predict_probas)
+    #    file_to_upload_predict_probas = NOMBRE_PREDICT_PROBAS.format(self.fecha)
+    #    output_path_predict_probas = "s3://{}/{}/{}".format(BUCKET_NAME,
+    #                                                        path_s3,
+    #                                                        file_to_upload_predict_probas)
 
-        return [luigi.contrib.s3.S3Target(path=output_path_predict),
-                luigi.contrib.s3.S3Target(path=output_path_predict_probas)]
+    #    return [luigi.contrib.s3.S3Target(path=output_path_predict),
+    #            luigi.contrib.s3.S3Target(path=output_path_predict_probas)]
