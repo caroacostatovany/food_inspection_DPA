@@ -52,7 +52,7 @@ fig_2 = px.histogram(dashboard_historial, x="predicted_score_1", marginal="rug",
 dashboard_historial['metrics'] = dashboard_historial.apply(lambda s: metrica(s.label, s.predicted_labels), axis=1)
 
 metricas = dashboard_historial.groupby('metrics', as_index=False).count()[['metrics', 'inspection_id']].\
-    rename(columns={'inspection_id':'counts'}).\
+    rename(columns={'inspection_id': 'counts'}).\
     sort_values('counts', ascending=False)
 
 metricas['prop'] = metricas['counts'] / sum(metricas['counts'])
@@ -78,7 +78,7 @@ app.layout = html.Div(children=[
     html.H1(children='Food inspection dashboard'),
 
     html.Div(children='''
-        Distribución de scores de predicciones
+        Distribución de scores para predicción positiva de predicciones
     '''),
 
     dcc.Graph(
@@ -87,7 +87,7 @@ app.layout = html.Div(children=[
     ),
 
     html.Div(children='''
-        Distribución de scores de historial
+        Distribución de scores para predicción positiva de historial
     '''),
 
     dcc.Graph(
@@ -97,7 +97,7 @@ app.layout = html.Div(children=[
 
 
     html.Div(children='''
-    Conteo por TP, FP, TN, FN
+    Proporción de TP, FP, TN, FN de historial validado
     '''),
 
     dcc.Graph(
