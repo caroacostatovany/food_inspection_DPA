@@ -6,7 +6,7 @@ from datetime import date, datetime
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
-from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource, get_db_conn_psycopg
 from src.utils.constants import S3, CREDENCIALES, BUCKET_NAME, PATH_MS, NOMBRE_MS, NOMBRE_FE_predict, PATH_PREDICT, \
     NOMBRE_PREDICT, PATH_FE, NOMBRE_FE_xtest, NOMBRE_FE_predict, PATH_METRICAS, NOMBRE_METRICAS, NOMBRE_PREDICT_PROBAS
 from src.pipeline.training_luigi import TaskTrainingMetadata
@@ -71,24 +71,29 @@ class TaskPredictUnitTesting(CopyToTable):
                             self.kpi)]
 
     def rows(self):
+        conn = get_db_conn_psycopg(CREDENCIALES)
 
-        path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
-        filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
-        predict_df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        query = """ select * 
+                      from results.scores;
+                  """
 
-        filename = "{}/{}".format(path_s3, NOMBRE_PREDICT_PROBAS.format(self.fecha))
-        predicted_probas = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        predict_df = pd.read_sql(query, conn)
+
+        #path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
+        #filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
+        #predict_df = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+
+        #filename = "{}/{}".format(path_s3, NOMBRE_PREDICT_PROBAS.format(self.fecha))
+        #predicted_probas = read_pkl_from_s3(S3, BUCKET_NAME, filename)
 
         unit_testing = TestPredict()
-        unit_testing.test_predict_month(predict_df)
         unit_testing.test_predict_new_labels(predict_df)
-        unit_testing.test_predict_probas(predicted_probas)
+        unit_testing.test_predict_probas(predict_df[['predicted_score_0', 'predicted_score_1']].to_numpy())
 
         if self.strict_probas:
-            unit_testing.test_predict_probas_strict(predicted_probas)
+            unit_testing.test_predict_probas_strict(predict_df[['predicted_score_0', 'predicted_score_1']].to_numpy())
 
-        r = [(self.user, "predict", "test_predict_month", datetime.now()),
-             (self.user, "predict", "test_predict_new_labels", datetime.now()),
+        r = [(self.user, "predict", "test_predict_new_labels", datetime.now()),
              (self.user, "predict", "test_predict_probas", datetime.now())]
 
         for element in r:

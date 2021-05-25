@@ -6,7 +6,7 @@ from datetime import date, datetime
 from luigi.contrib.s3 import S3Target
 from luigi.contrib.postgres import CopyToTable
 
-from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource
+from src.utils.general import get_db, read_pkl_from_s3, guardar_pkl_en_s3, get_s3_resource, get_db_conn_psycopg
 from src.utils.constants import S3, BUCKET_NAME, CREDENCIALES, PATH_PREPROCESS, NOMBRE_PREPROCESS, NOMBRE_PREDICT, PATH_PREDICT
 from src.pipeline.api_luigi import TaskAPI
 
@@ -71,23 +71,31 @@ class TaskMonitoreo(CopyToTable):
 
     def rows(self):
         # Guardar predict
-        path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
-        filename = "{}/{}".format(path_s3, NOMBRE_PREPROCESS.format(self.fecha))
-        json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-        predict_clean = pd.DataFrame(json_file)
-        predict_clean = predict_clean.set_index('inspection_id')
+        #path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
+        #filename = "{}/{}".format(path_s3, NOMBRE_PREPROCESS.format(self.fecha))
+        #json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        #predict_clean = pd.DataFrame(json_file)
+        #predict_clean = predict_clean.set_index('inspection_id')
 
-        path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
-        filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
-        resultados = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-        resultados = resultados.set_index('inspection_id')
+        #path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
+        #filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
+        #resultados = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        #resultados = resultados.set_index('inspection_id')
 
         #Unir dataframes por inspection id
-        join_df = pd.concat([predict_clean.loc[resultados.index.astype(str)],
-                             resultados[['predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
-        join_df = join_df.reset_index()
+        #join_df = pd.concat([predict_clean.loc[resultados.index.astype(str)],
+        #                     resultados[['predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
+        #join_df = join_df.reset_index()
+
+        conn = get_db_conn_psycopg(CREDENCIALES)
+
+        query = """ select * 
+                      from results.scores;
+                  """
+
+        join_df = pd.read_sql(query, conn)
+
         join_df['inspection_id'] = join_df.inspection_id.astype(int)
-        join_df = join_df[['inspection_id', 'dba_name', 'label', 'predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]
         join_df['created_at'] = date.today()
         r = join_df.to_records(index=False)
 
