@@ -39,8 +39,7 @@ model = api.model('inspection_id', {
 # Final output
 model_list = api.model('inspection_id', {
     'inspection_id': fields.Integer,
-    'predicted_labels': fields.Integer,
-    'predicted_score_1': fields.Float
+    'establecimientos':fields.Nested(model)
 })
 
 @api.route('/')
