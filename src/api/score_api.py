@@ -54,11 +54,11 @@ class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
     def get(self, inspection_id):
         match = Match.query.filter_by(inspection_id=inspection_id).all()
-        establecimiento = []
-        for element in match:
-            establecimiento.append({'predicted_labels': element.predicted_labels,
-                                    'predicted_score_1': element.predicted_score_1})
-        return {'inspection_id': inspection_id, 'establecimientos': establecimiento}
+        #establecimiento = []
+        #for element in match:
+        #    establecimiento.append({'predicted_labels': element.predicted_labels,
+        #                            'predicted_score_1': element.predicted_score_1})
+        return {'inspection_id': inspection_id, 'establecimientos': match}
 
 if __name__ == '__main__':
     app.run(debug=True)
