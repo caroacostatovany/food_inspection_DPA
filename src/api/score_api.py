@@ -21,7 +21,6 @@ class Match(db.Model):
     __table_args__ = {'schema': 'api'}
     __tablename__ = 'scores'
 
-
     inspection_id = db.Column(db.Integer, primary_key=True)
     predicted_labels = db.Column(db.Integer)
     predicted_score_1 = db.Column(db.Float)
@@ -31,7 +30,8 @@ class Match(db.Model):
 
 # Swagger
 # Input: id_establecimiento
-model = api.model('inspection_id', {
+model = api.model('inspection_id_table', {
+    'inspection_id':fields.Integer,
     'predicted_labels': fields.Integer,
     'predicted_score_1': fields.Float})
 
@@ -50,8 +50,8 @@ class HelloWorld(Resource):
 @api.route('/inspection_id/<inspection_id>')
 class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
-    def get(self, inspection_id_input):
-        match = Match.query.filter_by(inspection_id=inspection_id_input).all()
+    def get(self, inspection_id):
+        match = Match.query.filter_by(inspection_id=inspection_id).all()
         establecimiento = []
         for element in match:
             establecimiento.append({'inspection_id':element.inspection_id,
