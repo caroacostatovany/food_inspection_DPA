@@ -35,8 +35,8 @@ También se puede encontrar en nuestro [_Kaggle_](https://www.kaggle.com/carotov
 |Risk| Tipo de Riesgo |categórico (numérico-texto) | 5 |
 |Address| Dirección del establecimiento |texto | 18,522 |
 |City| Ciudad en la que se encuentra el establecimiento |categórico(texto) | 71 |
-|State| Estado en el que se encuentra el establecimiento |categrico(texto) | 5 |
-|Zip| Código Postal del establecimiento |categorico(numérico) | 112 |
+|State| Estado en el que se encuentra el establecimiento |categórico(texto) | 5 |
+|Zip| Código Postal del establecimiento |categórico(numérico) | 112 |
 |Inspection Date| Fecha en la que se realizó la inspección |fecha | 2,796 |
 |Inspection Type| Tipo de inspección que se realizó |categórico (texto)| 111 |
 |Results* | Resultado de la inspección |categórico(texto) | 7 |
@@ -73,7 +73,7 @@ Podrás encontrar nuestro notebook del Análisis Exploratorio en la siguiente ru
 >  `export PYTHONPATH=$PWD`
 
 **Notas:** en `src/utils/constants.py` mantenemos las constantes de nuestro proyecto, donde tenemos referenciado el 
-nombre de nuestro bucket: ` "data-product-architecture-equipo-3"`  y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
+nombre de nuestro bucket: ` "data-product-architecture-equipo-3"` y la ruta de las credenciales para acceder al bucket (`"../conf/local/credentials.yaml"`).   
 Si quieres acceder a diferentes buckets con otras credenciales esto se deberá cambiar en el archivo de las constantes. 
 También hay un **FAQ** al último de este archivo, donde podrás encontrar más respuestas sobre las constantes.
 
@@ -96,11 +96,11 @@ Algunos ejemplos para correr:
 Existen los parámetros:
 * --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva",
 * --fecha-modelo, fecha para escoger el modelo corrido y utilizarlo para las predicciones,
-* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones
+* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones,
 * --threshold que indica el score deseado para seleccionar el mejor modelo,
 * --metrica para indicar la métrica a enfocarse,
-* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
-* --strict-probas, que fallará la prueba unitaria porque busca que los scores esten estrictamente debajo de 1 y arriba de 0.
+* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte, 
+* --strict-probas, que fallará la prueba unitaria porque busca que los scores estén estrictamente debajo de 1 y arriba de 0.
 > PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.predict_luigi TaskPredictMetadata --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 **Para API**
@@ -108,10 +108,10 @@ Existen los parámetros:
 Existen los parámetros:
 * --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva",
 * --fecha-modelo, fecha para escoger el modelo corrido y utilizarlo para las predicciones,
-* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones
+* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones,
 * --threshold que indica el score deseado para seleccionar el mejor modelo,
 * --metrica para indicar la métrica a enfocarse,
-* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
+* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte. 
 > PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.api_luigi TaskAPI --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 
@@ -120,16 +120,16 @@ Existen los parámetros:
 Existen los parámetros:
 * --ingesta, que puede tener los valores de "no", "inicial" y "consecutiva",
 * --fecha-modelo, fecha para escoger el modelo corrido y utilizarlo para las predicciones,
-* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones
+* --fecha con la que se quiere correr el pipeline y hacer la nueva ingesta para predicciones,
 * --threshold que indica el score deseado para seleccionar el mejor modelo,
 * --metrica para indicar la métrica a enfocarse,
-* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte 
+* --kpi para seleccionar el límite para dicha métrica y así seleccionar el punto de corte. 
 > PYTHONPATH=$PWD AWS_PROFILE=default luigi --module src.pipeline.monitoreo_luigi TaskMonitoreo --threshold 0.8 --ingesta consecutiva --metrica fpr --kpi 0.2 --fecha-modelo 2021-05-17 --fecha 2021-05-24
 
 ### De Notebooks
 
 1. En la carpeta `data`, coloca el archivo `Food_Inspections.csv`.
-2. En la terminal, (una vez que hayas hecho todo lo anterior, instalar requirements y cargar la raíz como parte del PYTHONPATH) posiciónate en la raíz y ejecuta:
+2. Una vez que hayas hecho lo anterior (instalar requirements y cargar la raíz como parte del PYTHONPATH), en la terminal posiciónate en la raíz del repositorio y ejecuta:
 > `jupyter notebook`
 
 
@@ -163,11 +163,11 @@ Para poder ejecutar Luigi, se deberá modificar el archivo de credenciales de AW
 Para poder conectarte a la base de datos en RDS de manera rápida deberás tener un archivo `.pg_service.conf` en /home/user/ y deberá tener la siguiente estructura:
 ```
 [food]
-user="tu_username"
-password="tu_contraseña"
-host="tu_host"
-port=5432
-dbname="nombre_de_tu_bd"
+    user="tu_username"
+    password="tu_contraseña"
+    host="tu_host"
+    port=5432
+    dbname="nombre_de_tu_bd"
 ```
 
 Una vez que tengas ese archivo, podrás acceder a la base de datos con el siguiente comando:
@@ -212,7 +212,7 @@ Una vez que tengas ese archivo, podrás acceder a la base de datos con el siguie
 Si deseas cambiar algún path de cómo se guarda, modifica los que dicen PATHS. Si quieres modificar los nombres de los archivos, modifica los que dicen NOMBRES.
 
 Si deseas cambiar los modelos a probar en el GridSearch, modifica `src.utils.model_constants.py`.
-Si deseas cambiar los grupos protegidos en sesgo e inquidad y sus referencias, puedes modificarlos en `src.utils.constants.py`. Sólo recuerda eliminar o limpiar la tabla `results.sesgo`.
+Si deseas cambiar los grupos protegidos en sesgo e inequidad y sus referencias, puedes modificarlos en `src.utils.constants.py`. Sólo recuerda eliminar o limpiar la tabla `results.sesgo`.
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien todas las tareas, se debe ver así:
@@ -257,13 +257,13 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Ingesta | test_ingesta | Revisa que el archivo creado en ingesta pese más de 1KB |
 | Almacenamiento | test_almacenamiento_json | Revisa que el archivo guardado sea un json |
 | Preprocesamiento | test_preprocessing_label | Revisa la etiqueta del dataframe sea 0 ó 1 |
-| Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe este entre 1 y 12 |
+| Feature Engineering | test_feature_engineering_month | Revisa que la columna month del dataframe esté entre 1 y 12 |
 | Entrenamiento | test_training_gs | Revisa que el archivo es un objeto GridSearchCV |
 | Selección de modelos | test_model_select | Revisa que el modelo sea distinto a la cadena vacía que indica que no hubo mejor modelo |
 | Sesgo e inequidades | test_sesgo_score | Revisa que la columna score sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_label_value | Revisa que la columna label_value sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_not_nan | Revisa que no existan nulos en todo el dataframe |
-| Predicción | test_predict_new_labels | Revisa la etiquetas predichas del dataframe sean 0 ó 1 |
+| Predicción | test_predict_new_labels | Revisa que las etiquetas predichas del dataframe sean 0 ó 1 |
 | Predicción | test_predict_probas | Revisa que los scores predichos estén entre 0 y 1 |
 | Predicción | test_predict_probas_strict | Revisa que los scores predichos estén entre 0 y 1 estrictamente |
 
@@ -279,7 +279,7 @@ históricamente ha sido favorecido.
 
 ### ¿El modelo es punitivo o asistivo?
 **R:** El modelo es asistivo.  Esto es porque el modelo será usado por el establecimiento, y 
-el establecimiento utilizará la etiqueta positiva (1) y la etiqueta negativa(0), para estar consciente de que 
+el establecimiento utilizará la etiqueta positiva (1) y la etiqueta negativa (0), para estar consciente de que 
 tentativamente sí pasará o no la inspección, correspondientemente. 
 
 ### ¿Qué métricas se cuantificarán en sesgo e inequidad?
@@ -293,13 +293,13 @@ todas las métricas que se generan a través del framework de Aequitas.
 
 ## API
 
-Se cuenta con 2 endpoints:
+Se cuentan con 2 endpoints:
 * **Endpoint 1**:
   * Input: id inspección.
   * Output: JSON con score de predicción, etiqueta predicha y fecha de predicción.
 * **Endpoint 2**:
   * Input: fecha predicción
-  * Output: JSON con una lista que contienen para cada establecimiento que tiene una predicción para ese día: id inspección, score de predicción, etiqueta predicha
+  * Output: JSON con una lista que contienen para cada establecimiento que tiene una predicción para ese día: id inspección, score de predicción, etiqueta predicha.
 
 Para lanzar la API se necesita posicionarse en la raíz del repo y ejecutar las siguientes líneas:
 > `export PYTHONPATH=$PWD`
@@ -308,7 +308,7 @@ Para lanzar la API se necesita posicionarse en la raíz del repo y ejecutar las 
 
 > `flask run` 
 
-La API se habilitará en el puerto `5000`  
+La API se habilitará en el puerto `5000`.  
 
 ## Dashboard
 
@@ -321,7 +321,7 @@ Para correr el dashboard se necesita posicionarse en la raíz del repo y ejecuta
 
 > `python src/dashboard/dashboard.py`
 
-El dashboard se habilitará en el puerto `8050`  
+El dashboard se habilitará en el puerto `8050`.  
 
 ## Otros comandos que podrían interesarte:
 
