@@ -9,7 +9,6 @@ DROP TABLE IF EXISTS api.scores;
 
 CREATE TABLE api.scores(
     inspection_id varchar DEFAULT NULL,
-    dba_name varchar DEFAULT NULL,
     label integer DEFAULT NULL,
     predicted_labels integer DEFAULT NULL,
     predicted_score_0 float DEFAULT NULL,

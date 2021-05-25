@@ -216,9 +216,9 @@ Si deseas cambiar los grupos protegidos en sesgo e inquidad y sus referencias, p
 
 ### ¿Cómo se debe ver mi DAG en Luigi?
 **R** Si Luigi corrió bien todas las tareas, se debe ver así:
-![Luigi](./images/DAG_Checkpoint_6_01.jpeg)
-![Luigi2](./images/DAG_Checkpoint_6_02.jpeg)
-![Luigi3](./images/DAG_Checkpoint_6_03.jpeg)
+![Luigi](./images/DAG_Checkpoint_7_01.jpeg)
+![Luigi2](./images/DAG_Checkpoint_7_02.jpeg)
+![Luigi3](./images/DAG_Checkpoint_7_03.jpeg)
 
 
 ## Arquitectura

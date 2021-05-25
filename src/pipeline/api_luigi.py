@@ -94,11 +94,9 @@ class TaskAPI(CopyToTable):
                   """
 
         join_df = pd.read_sql(query, conn)
-        #scores = scores.set_index('inspection_id')
 
         print(join_df)
         #join_df = pd.concat([predict_clean.loc[scores.index.astype(str)], scores[['predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
-        #print(join_df)
         #join_df = join_df.reset_index()
         join_df['inspection_id'] = join_df.inspection_id.astype(int)
         join_df['created_at'] = date.today()
