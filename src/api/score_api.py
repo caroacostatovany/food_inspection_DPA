@@ -49,13 +49,13 @@ class HelloWorld(Resource):
 @api.route('/inspection_id/<inspection_id>')
 class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
-    def get(self, inspection_id_input):
-        match = Match.query.filter_by(inspection_id=inspection_id_input).all()
+    def get(self, inspection_id):
+        match = Match.query.filter_by(inspection_id=inspection_id).all()
         establecimiento = []
         for element in match:
             establecimiento.append({'predicted_labels': element.predicted_labels,
                                     'predicted_score_1': element.predicted_score_1})
-        return {'inspection_id': inspection_id_input, 'establecimiento': establecimiento}
+        return {'inspection_id': inspection_id, 'establecimiento': establecimiento}
 
 if __name__ == '__main__':
     app.run(debug=True)
