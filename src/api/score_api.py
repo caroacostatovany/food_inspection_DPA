@@ -3,7 +3,7 @@ from flask_restplus import Api, Resource, fields
 from flask_sqlalchemy import SQLAlchemy
 from src.utils.general import get_db_conn_sql_alchemy
 from src.utils.constants import CREDENCIALES
-from sqlalchemy import cast
+from sqlalchemy import cast, inspection_id_input
 
 # Connecting to db string
 db_conn_str = get_db_conn_sql_alchemy(CREDENCIALES)
@@ -53,11 +53,11 @@ class HelloWorld(Resource):
 class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
     def get(self, inspection_id):
-        match = Match.query.filter_by(inspection_id=inspection_id).all()
-        #establecimiento = []
-        #for element in match:
-        #    establecimiento.append({'predicted_labels': element.predicted_labels,
-        #                            'predicted_score_1': element.predicted_score_1})
+        match = Match.query.filter_by(inspection_id=cast(inspection_id, inspection_id_input)).all()
+        establecimiento = []
+        for element in match:
+            establecimiento.append({'predicted_labels': element.predicted_labels,
+                                    'predicted_score_1': element.predicted_score_1})
         return {'inspection_id': inspection_id, 'establecimientos': match}
 
 if __name__ == '__main__':
