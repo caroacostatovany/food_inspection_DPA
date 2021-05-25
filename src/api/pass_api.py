@@ -40,31 +40,6 @@ model_list = api.model('fecha_match_output', {
     'establecimientos': fields.Nested(model)
 })
 
-# Tabla api.scores
-class Match_id_inspection(db.Model):
-    __table_args__ = {'schema': 'api'}
-    __tablename__ = 'scores'
-
-    inspection_id = db.Column(db.Integer, primary_key=True)
-    predicted_labels = db.Column(db.Integer)
-    predicted_score_1 = db.Column(db.Float)
-
-    def __repr__(self):
-        return (u'<{self.__class__.__name__}: {self.id}>'.format(self=self))
-
-# Swagger
-# Input: id_establecimiento
-model = api.model('inspection_id_table', {
-    'predicted_labels': fields.Integer,
-    'predicted_score_1': fields.Float})
-
-# Final output
-model_list = api.model('inspection_id_output', {
-    'inspection_id':fields.Integer,
-    'establecimiento': fields.Nested(model)
-})
-
-
 @api.route('/')
 class HelloWorld(Resource):
     def get(self):
@@ -88,7 +63,7 @@ class ShowMatch(Resource):
 class ShowMatch(Resource):
     @api.marshal_with(model_list, as_list=True)
     def get(self, inspection_id):
-        match = Match_id_inspection.query.filter_by(inspection_id=inspection_id).all()
+        match = Match.query.filter_by(inspection_id=inspection_id).all()
         establecimiento = []
         for element in match:
             establecimiento.append({'predicted_labels': element.predicted_labels,
