@@ -38,8 +38,8 @@ model = api.model('inspection_id', {
 
 # Final output
 model_list = api.model('inspection_id', {
-    'predicted_labels': fields.Integer,
-    'predicted_score_1': fields.Float
+    'inspection_id': fields.Integer,
+    'establecimiento': fields.Nested(model)
 })
 
 @api.route('/')
@@ -58,7 +58,7 @@ class ShowMatch(Resource):
             establecimiento.append({'inspection_id':element.inspection_id,
                                     'predicted_labels': element.predicted_labels,
                                     'predicted_score_1': element.predicted_score_1})
-        return {'inspection_id': inspection_id, 'establecimientos': match}
+        return {'inspection_id': inspection_id, 'establecimientos': establecimiento}
 
 if __name__ == '__main__':
     app.run(debug=True)
