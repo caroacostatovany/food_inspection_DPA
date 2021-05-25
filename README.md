@@ -263,7 +263,6 @@ Por ahora las pruebas unitarias con las que contamos son:
 | Sesgo e inequidades | test_sesgo_score | Revisa que la columna score sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_label_value | Revisa que la columna label_value sea 0 ó 1 |
 | Sesgo e inequidades | test_sesgo_not_nan | Revisa que no existan nulos en todo el dataframe |
-| Predicción | test_predict_month | Revisa que la columna month del dataframe este entre 1 y 12 |
 | Predicción | test_predict_new_labels | Revisa la etiquetas predichas del dataframe sean 0 ó 1 |
 | Predicción | test_predict_probas | Revisa que los scores predichos estén entre 0 y 1 |
 | Predicción | test_predict_probas_strict | Revisa que los scores predichos estén entre 0 y 1 estrictamente |
@@ -296,11 +295,11 @@ todas las métricas que se generan a través del framework de Aequitas.
 
 Se cuenta con 2 endpoints:
 * **Endpoint 1**:
-  * Input: id establecimiento.
+  * Input: id inspección.
   * Output: JSON con score de predicción, etiqueta predicha y fecha de predicción.
 * **Endpoint 2**:
   * Input: fecha predicción
-  * Output: JSON con una lista que contienen para cada establecimiento que tiene una predicción para ese día: id establecimiento, score de predicción, etiqueta predicha
+  * Output: JSON con una lista que contienen para cada establecimiento que tiene una predicción para ese día: id inspección, score de predicción, etiqueta predicha
 
 Para lanzar la API se necesita posicionarse en la raíz del repo y ejecutar las siguientes líneas:
 > `export PYTHONPATH=$PWD`
