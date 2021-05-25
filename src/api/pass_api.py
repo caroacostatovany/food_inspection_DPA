@@ -35,7 +35,7 @@ model_id = api.model('inspection_id_table', {
 # Final output
 model_list_id = api.model('inspection_id_output', {
     'inspection_id':fields.Integer,
-    'establecimiento': fields.Nested(model_id)
+    'resultado': fields.Nested(model_id)
 })
 
 
@@ -80,7 +80,7 @@ class ShowMatch(Resource):
         for element in match:
             establecimiento.append({'predicted_labels': element.predicted_labels,
                                     'predicted_score_1': element.predicted_score_1})
-        return {'inspection_id': inspection_id, 'establecimiento': establecimiento}
+        return {'inspection_id': inspection_id, 'resultado': establecimiento}
 
 
 if __name__ == '__main__':
