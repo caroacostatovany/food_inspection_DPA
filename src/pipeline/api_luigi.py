@@ -57,7 +57,7 @@ class TaskAPI(CopyToTable):
     table = "api.scores"
 
     columns = [('inspection_id','integer'),
-               ('dba_name', 'varchar'),
+               #('dba_name', 'varchar'),
                ('label', 'integer'),
                ('predicted_labels', 'integer'),
                ('predicted_score_0', 'float'),
@@ -71,11 +71,11 @@ class TaskAPI(CopyToTable):
 
     def rows(self):
         # Guardar predict
-        #path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
-        #filename = "{}/{}".format(path_s3, NOMBRE_PREPROCESS.format(self.fecha))
-        #json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
-        #predict_clean = pd.DataFrame(json_file)
-        #predict_clean = predict_clean.set_index('inspection_id')
+        path_s3 = PATH_PREPROCESS.format(self.fecha.year, self.fecha.month)
+        filename = "{}/{}".format(path_s3, NOMBRE_PREPROCESS.format(self.fecha))
+        json_file = read_pkl_from_s3(S3, BUCKET_NAME, filename)
+        predict_clean = pd.DataFrame(json_file)
+        predict_clean = predict_clean.set_index('inspection_id')
 
         #path_s3 = PATH_PREDICT.format(self.fecha.year, self.fecha.month)
         #filename = "{}/{}".format(path_s3, NOMBRE_PREDICT.format(self.fecha))
@@ -89,12 +89,17 @@ class TaskAPI(CopyToTable):
 
         conn = get_db_conn_psycopg(CREDENCIALES)
 
-        query = """ select * 
+        query = """ select *
                       from results.scores;
                   """
 
         join_df = pd.read_sql(query, conn)
+        #scores = scores.set_index('inspection_id')
 
+        print(join_df)
+        #join_df = pd.concat([predict_clean.loc[scores.index.astype(str)], scores[['predicted_labels', 'predicted_score_0', 'predicted_score_1', 'model']]], axis=1)
+        #print(join_df)
+        #join_df = join_df.reset_index()
         join_df['inspection_id'] = join_df.inspection_id.astype(int)
         join_df['created_at'] = date.today()
         r = join_df.to_records(index=False)

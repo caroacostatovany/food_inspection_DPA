@@ -57,7 +57,7 @@ class TaskMonitoreo(CopyToTable):
     table = "monitoring.scores"
 
     columns = [('inspection_id', 'integer'),
-               ('dba_name', 'varchar'),
+               #('dba_name', 'varchar'),
                ('label', 'integer'),
                ('predicted_labels', 'integer'),
                ('predicted_score_0', 'float'),
